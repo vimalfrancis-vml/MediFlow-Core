@@ -1,0 +1,281 @@
+/* ============================================================
+   ApproverDetailsPage.css
+   ============================================================ */
+
+.approver-details-page {
+  min-height: 100vh;
+  background: #0c0a1a;
+  color: #f1f0f5;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.center-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+/* Header */
+.ad-header {
+  margin-bottom: 2.5rem;
+}
+
+.ad-title-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.ad-title-row h1 {
+  font-size: 2rem;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.ad-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
+}
+
+.request-ref {
+  font-family: monospace;
+  font-size: 0.8125rem;
+  color: rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.05);
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+/* Status badge (reuse from DashboardPage pattern) */
+.request-status {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.625rem;
+  border-radius: 99px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.status-draft { background: rgba(156,163,175,0.15); color: #d1d5db; }
+.status-submitted { background: rgba(59,130,246,0.15); color: #93c5fd; }
+.status-in_review { background: rgba(245,158,11,0.15); color: #fcd34d; }
+.status-approved { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+.status-rejected { background: rgba(239,68,68,0.15); color: #fca5a5; }
+.status-returned { background: rgba(168,85,247,0.15); color: #d8b4fe; }
+.status-cancelled { background: rgba(107,114,128,0.15); color: #9ca3af; }
+
+/* Success banner */
+.success-banner {
+  padding: 0.875rem 1.25rem;
+  background: rgba(16,185,129,0.12);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 10px;
+  color: #6ee7b7;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+/* Action bar */
+.ad-action-bar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.ad-btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ad-btn:hover {
+  transform: translateY(-2px);
+}
+
+.ad-btn-approve {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.ad-btn-approve:hover { box-shadow: 0 8px 20px rgba(16,185,129,0.35); }
+
+.ad-btn-return {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.ad-btn-return:hover { box-shadow: 0 8px 20px rgba(245,158,11,0.35); }
+
+.ad-btn-reject {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  color: #fca5a5;
+}
+
+.ad-btn-reject:hover {
+  background: rgba(239,68,68,0.2);
+  box-shadow: 0 8px 20px rgba(239,68,68,0.2);
+}
+
+/* Grid */
+.ad-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+@media (max-width: 900px) {
+  .ad-grid { grid-template-columns: 1fr; }
+}
+
+/* Sections */
+.ad-section {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 1.75rem;
+  margin-bottom: 2rem;
+}
+
+.ad-section h2 {
+  font-size: 1.125rem;
+  color: #a5b4fc;
+  margin: 0 0 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.info-item { display: flex; flex-direction: column; gap: 0.25rem; }
+
+.info-label {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-value {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.empty-substate {
+  padding: 2rem;
+  text-align: center;
+  color: rgba(255,255,255,0.4);
+  font-style: italic;
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+
+/* Comments */
+.comments-list { display: flex; flex-direction: column; gap: 1rem; }
+
+.comment-card {
+  background: rgba(255,255,255,0.02);
+  border-left: 3px solid #6366f1;
+  padding: 1rem;
+  border-radius: 0 8px 8px 0;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.comment-author { font-weight: 600; color: #a5b4fc; }
+.comment-date { color: rgba(255,255,255,0.4); }
+.comment-body { margin: 0; font-size: 0.9375rem; line-height: 1.5; }
+
+/* Documents */
+.document-list { list-style: none; padding: 0; margin: 0; }
+
+.document-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.document-item svg { width: 18px; height: 18px; color: #a5b4fc; flex-shrink: 0; }
+
+.document-item a { color: #a5b4fc; text-decoration: none; }
+.document-item a:hover { text-decoration: underline; }
+
+/* Back button */
+.back-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 0.9375rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  transition: color 0.2s;
+}
+
+.back-btn:hover { color: #a5b4fc; }
+
+/* End of CSS */
+/* Loading */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(99,102,241,0.15);
+  border-top-color: #6366f1;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.state-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: 16px;
+  text-align: center;
+  color: rgba(255,255,255,0.5);
+}
+
+.error-state { border-color: rgba(239,68,68,0.2); color: #fca5a5; }
+
+.retry-btn {
+  margin-top: 1.5rem;
+  padding: 0.5rem 1.5rem;
+  background: rgba(239,68,68,0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  cursor: pointer;
+}

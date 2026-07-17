@@ -1,0 +1,254 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  ADMIN
+  DIRECTOR
+  MEDICAL_SUPERINTENDENT
+  HOD
+  HR
+  PURCHASE_OFFICER
+  MAINTENANCE_OFFICER
+  EMPLOYEE
+}
+
+enum RequestType {
+  MAINTENANCE
+  PURCHASE
+  LEAVE
+}
+
+enum RequestStatus {
+  DRAFT
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  RETURNED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+  EMERGENCY
+}
+
+enum ApprovalActionType {
+  APPROVED
+  REJECTED
+  RETURNED
+  CANCELLED
+  COMMENTED
+}
+
+model User {
+  id           String       @id @default(uuid())
+  employeeId   String       @unique
+  email        String       @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         UserRole
+  departmentId String
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+
+  // Developer Note: When implementing department deletion in the future,
+  // ensure the service catches Prisma's foreign key constraint error (code P2003)
+  // and returns a user-friendly error instead of exposing raw DB exceptions.
+  department   Department   @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  requests     Request[]    @relation("RequestedBy")
+  departmentHods Department[] @relation("HodDepartment")
+}
+
+model Department {
+  id        String    @id @default(uuid())
+  name      String
+  code      String    @unique
+  hodId     String?
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  hod       User?     @relation("HodDepartment", fields: [hodId], references: [id])
+  users     User[]
+  requests  Request[]
+}
+
+model Request {
+  id                 String        @id @default(uuid())
+  referenceNumber    String        @unique
+  title              String
+  type               RequestType
+  priority           Priority      @default(NORMAL)
+  status             RequestStatus @default(DRAFT)
+  requestedById      String
+  departmentId       String
+  workflowTemplateId String
+  currentStepId      String?
+  submittedAt        DateTime?
+  completedAt        DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  deletedAt          DateTime?
+
+  requestedBy        User             @relation("RequestedBy", fields: [requestedById], references: [id])
+  department         Department       @relation(fields: [departmentId], references: [id])
+  workflowTemplate   WorkflowTemplate @relation(fields: [workflowTemplateId], references: [id])
+  currentStep        WorkflowStep?    @relation("CurrentStep", fields: [currentStepId], references: [id])
+
+  maintenanceDetail  MaintenanceDetail?
+  purchaseDetail     PurchaseDetail?
+  leaveDetail        LeaveDetail?
+  approvalActions    ApprovalAction[]
+  comments           Comment[]
+  attachments        Attachment[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
+
+  @@index([requestedById])
+  @@index([status])
+  @@index([type])
+  @@index([currentStepId])
+  @@index([departmentId, status])
+  @@index([createdAt(sort: Desc)])
+}
+
+model MaintenanceDetail {
+  id               String  @id @default(uuid())
+  requestId        String  @unique
+  location         String
+  equipmentName    String
+  issueDescription String
+  urgencyLevel     String
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model PurchaseDetail {
+  id              String  @id @default(uuid())
+  requestId       String  @unique
+  vendorName      String?
+  itemDescription String
+  quantity        Int
+  estimatedCost   Decimal @db.Decimal(10, 2)
+  budgetCode      String?
+  justification   String
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model LeaveDetail {
+  id            String  @id @default(uuid())
+  requestId     String  @unique
+  leaveType     String
+  startDate     DateTime
+  endDate       DateTime
+  totalDays     Int
+  reason        String
+  coveringStaff String?
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model WorkflowTemplate {
+  id          String        @id @default(uuid())
+  name        String
+  requestType RequestType
+  isActive    Boolean       @default(true)
+  description String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  steps    WorkflowStep[]
+  requests Request[]
+}
+
+model WorkflowStep {
+  id           String   @id @default(uuid())
+  templateId   String
+  stepName     String
+  order        Int
+  approverRole UserRole
+  isFinal      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  template       WorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  activeRequests Request[]        @relation("CurrentStep")
+
+  @@index([templateId, order])
+}
+
+model ApprovalAction {
+  id        String             @id @default(uuid())
+  requestId String
+  stepId    String
+  actorId   String
+  action    ApprovalActionType
+  comment   String?
+  takenAt   DateTime           @default(now())
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+  @@index([actorId])
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  requestId String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model Attachment {
+  id           String   @id @default(uuid())
+  requestId    String
+  uploadedById String
+  originalName String
+  storagePath  String
+  mimeType     String
+  sizeBytes    Int
+  createdAt    DateTime @default(now())
+
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id          String   @id @default(uuid())
+  recipientId String
+  requestId   String?
+  message     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  request Request? @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, isRead])
+  @@index([createdAt(sort: Desc)])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  actorId     String?
+  requestId   String?
+  action      String
+  description String
+  timestamp   DateTime @default(now())
+
+  request Request? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+}
