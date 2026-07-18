@@ -67,7 +67,11 @@ export default function DashboardPage() {
             <div className="lg:col-span-2">
               <DataFilterBar onFilterChange={(f) => { setFilters(f); setPage(1); }} />
               {requests.length === 0 && !isLoading ? (
-                <EmptyState message="No requests found matching your criteria." />
+                <EmptyState
+                  message="No requests found matching your criteria."
+                  actionLabel="Create New Request"
+                  onAction={() => navigate('/new-request')}
+                />
               ) : (
                 <RequestTable 
                   requests={requests}

@@ -46,10 +46,10 @@ export function WorkflowProgress({ request }: WorkflowProgressProps) {
 
   const getStateStyles = (state: string) => {
     switch(state) {
-      case 'COMPLETED': return 'bg-emerald-500 text-white border-emerald-500';
-      case 'CURRENT': return 'bg-blue-600 text-white border-blue-600 ring-4 ring-blue-100';
-      case 'REJECTED': return 'bg-red-500 text-white border-red-500 ring-4 ring-red-100';
-      case 'RETURNED': return 'bg-orange-500 text-white border-orange-500 ring-4 ring-orange-100';
+      case 'COMPLETED': return 'bg-emerald-500 text-white border-emerald-500 shadow-md';
+      case 'CURRENT': return 'bg-indigo-600 text-white border-indigo-600 ring-4 ring-indigo-200 shadow-lg scale-110';
+      case 'REJECTED': return 'bg-red-500 text-white border-red-500 ring-4 ring-red-100 shadow-md';
+      case 'RETURNED': return 'bg-orange-500 text-white border-orange-500 ring-4 ring-orange-100 shadow-md';
       default: return 'bg-slate-100 text-slate-400 border-slate-200';
     }
   };
@@ -91,10 +91,10 @@ export function WorkflowProgress({ request }: WorkflowProgressProps) {
                       step.order
                     )}
                   </div>
-                  <span className={`text-xs font-medium mt-3 text-center transition-colors max-w-[100px] leading-tight ${state === 'CURRENT' ? 'text-slate-900' : 'text-slate-500'}`}>
+                  <span className={`text-xs font-semibold mt-3 text-center transition-colors max-w-[100px] leading-tight ${state === 'CURRENT' ? 'text-indigo-900' : 'text-slate-500'}`}>
                     {step.stepName}
                   </span>
-                  <span className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">
+                  <span className={`text-[10px] mt-1 uppercase tracking-wider font-medium ${state === 'CURRENT' ? 'text-indigo-600' : 'text-slate-400'}`}>
                     {step.approverRole.replace(/_/g, ' ')}
                   </span>
                   

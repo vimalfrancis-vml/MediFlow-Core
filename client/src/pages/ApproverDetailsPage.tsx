@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api, type RequestItem, type CommentItem, type DocumentItem } from '../services/api';
-import { NotificationCenter } from '../components/NotificationCenter';
+import { DashboardLayout } from '../components/DashboardLayout';
+import { LoadingState } from '../components/LoadingState';
 import { NOTIFICATIONS_REFRESH_EVENT } from '../constants/notifications';
 import ActionModal from '../components/ActionModal';
 import { WorkflowProgress } from '../components/WorkflowProgress';
@@ -77,49 +78,40 @@ export default function ApproverDetailsPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="approver-details-page center-state">
-        <div className="loading-spinner" />
-        <p>Loading request...</p>
-      </div>
-    );
-  }
-
-  if (error || !request) {
-    return (
-      <div className="approver-details-page center-state">
-        <div className="state-card error-state">
-          <p>{error || 'Request not found.'}</p>
-          <button onClick={() => navigate('/approver')} className="retry-btn">Back to Dashboard</button>
-        </div>
-      </div>
-    );
-  }
-
-  const isActionable = request.status === 'IN_REVIEW';
+  const isActionable = request?.status === 'IN_REVIEW';
 
   return (
-    <div className="approver-details-page">
-      {/* Modal */}
-      {activeModal && (
-        <ActionModal
-          action={activeModal}
-          requestTitle={request.title}
-          isLoading={isActionLoading}
-          onConfirm={handleAction}
-          onClose={() => setActiveModal(null)}
-        />
-      )}
+    <DashboardLayout title="MediFlow" brandPrefix="Approver">
+      <div className="approver-details-page">
+        {isLoading ? (
+          <LoadingState message="Loading request..." />
+        ) : error || !request ? (
+          <div className="center-state">
+            <div className="state-card error-state">
+              <p>{error || 'Request not found.'}</p>
+              <button onClick={() => navigate('/approver')} className="retry-btn">Back to Dashboard</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Modal */}
+            {activeModal && (
+              <ActionModal
+                action={activeModal}
+                requestTitle={request.title}
+                isLoading={isActionLoading}
+                onConfirm={handleAction}
+                onClose={() => setActiveModal(null)}
+              />
+            )}
 
-      {/* Header */}
-      <header className="ad-header">
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '1rem' }}>
-          <button className="back-btn" onClick={() => navigate('/approver')}>
-            &larr; Back to Pending Approvals
-          </button>
-          <NotificationCenter />
-        </div>
+            {/* Header */}
+            <header className="ad-header">
+              <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '1rem' }}>
+                <button className="back-btn" onClick={() => navigate('/approver')}>
+                  &larr; Back to Pending Approvals
+                </button>
+              </div>
         
         <div className="ad-title-row">
           <h1>{request.title}</h1>
@@ -252,6 +244,9 @@ export default function ApproverDetailsPage() {
           </section>
         </div>
       </main>
-    </div>
+    </>
+        )}
+      </div>
+    </DashboardLayout>
   );
 }

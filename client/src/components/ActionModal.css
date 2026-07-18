@@ -15,18 +15,18 @@
 }
 
 .modal-card {
-  background: #1a1625;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #1e1b4b; /* slightly lighter, richer indigo for better contrast */
+  border: 1px solid rgba(165, 180, 252, 0.2); /* use theme indigo tint */
   border-radius: 20px;
-  padding: 2rem;
+  padding: 2.5rem; /* increased padding */
   max-width: 480px;
   width: 100%;
-  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
-  animation: modalSlideIn 0.2s ease;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+  animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes modalSlideIn {
-  from { opacity: 0; transform: translateY(-16px) scale(0.98); }
+  from { opacity: 0; transform: translateY(-20px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
@@ -90,15 +90,17 @@
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-modal-cancel:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .btn-modal-confirm {
@@ -108,12 +110,13 @@
   font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-modal-confirm:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  filter: grayscale(1);
 }
 
 .btn-approve {

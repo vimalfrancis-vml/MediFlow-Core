@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api, type RequestItem, type CommentItem, type DocumentItem } from '../services/api';
 import { DashboardLayout } from '../components/DashboardLayout';
+import { LoadingState } from '../components/LoadingState';
 import { NOTIFICATIONS_REFRESH_EVENT } from '../constants/notifications';
 import { useAuth } from '../context/AuthContext';
 import { WorkflowProgress } from '../components/WorkflowProgress';
@@ -85,12 +86,16 @@ export default function RequestDetailsPage() {
 
   const handleSubmitRequest = async () => {
     if (!id) return;
+    const confirmed = window.confirm(
+      'Are you sure you want to submit this request for approval? This action cannot be undone.'
+    );
+    if (!confirmed) return;
     try {
       setIsActionLoading(true);
       setActionError(null);
       await api.submitRequest(id);
       await loadData();
-    window.dispatchEvent(new Event(NOTIFICATIONS_REFRESH_EVENT));
+      window.dispatchEvent(new Event(NOTIFICATIONS_REFRESH_EVENT));
     } catch (err: any) {
       setActionError(err.message || 'Failed to submit request.');
     } finally {
@@ -98,30 +103,21 @@ export default function RequestDetailsPage() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="details-page center-state">
-        <div className="loading-spinner" />
-        <p>Loading request details...</p>
-      </div>
-    );
-  }
-
-  if (error || !request) {
-    return (
-      <div className="details-page center-state">
-        <div className="state-card error-state">
-          <p>{error || 'Request not found'}</p>
-          <button onClick={() => navigate('/dashboard')} className="retry-btn">Back to Dashboard</button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <DashboardLayout title="Request Details">
       <div className="details-page">
-        <header className="page-header">
+        {isLoading ? (
+          <LoadingState message="Loading request details..." />
+        ) : error || !request ? (
+          <div className="center-state">
+            <div className="state-card error-state">
+              <p>{error || 'Request not found'}</p>
+              <button onClick={() => navigate('/dashboard')} className="retry-btn">Back to Dashboard</button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <header className="page-header">
           <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', marginBottom: '1rem' }}>
             <button className="back-btn" onClick={() => navigate('/dashboard')}>
               &larr; Back to Dashboard
@@ -151,7 +147,7 @@ export default function RequestDetailsPage() {
               onClick={handleSubmitRequest}
               disabled={isActionLoading}
             >
-              Submit for Approval
+              {isActionLoading ? 'Submitting…' : 'Submit for Approval'}
             </button>
           )}
           {actionError && (
@@ -220,7 +216,7 @@ export default function RequestDetailsPage() {
                   onClick={handleAddComment}
                   disabled={!newComment.trim() || isActionLoading}
                 >
-                  Post Comment
+                  {isActionLoading ? 'Posting…' : 'Post Comment'}
                 </button>
               </div>
             </section>
@@ -273,12 +269,14 @@ export default function RequestDetailsPage() {
                   disabled={!docName.trim() || !docUrl.trim() || isActionLoading}
                   style={{ opacity: (!docName.trim() || !docUrl.trim() || isActionLoading) ? 0.5 : 1, cursor: (!docName.trim() || !docUrl.trim() || isActionLoading) ? 'not-allowed' : 'pointer' }}
                 >
-                  + Upload Document
+                  {isActionLoading ? 'Uploading…' : '+ Upload Document'}
                 </button>
               </div>
             </section>
           </div>
         </main>
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

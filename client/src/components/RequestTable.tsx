@@ -60,7 +60,7 @@ export function RequestTable({
     <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-slate-600">
-          <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
+          <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200 sticky top-0 z-10">
             <tr>
               <th className="px-4 py-3">Reference</th>
               <th className="px-4 py-3">Title</th>

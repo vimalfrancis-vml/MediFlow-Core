@@ -91,10 +91,12 @@
 .form-row {
   display: flex;
   gap: 1.5rem;
+  flex-wrap: wrap; /* allow wrapping on small screens */
 }
 
 .form-row > .form-group {
   flex: 1;
+  min-width: 250px; /* force stacking when too narrow */
 }
 
 .form-group {
@@ -127,8 +129,8 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.35);
 }
 
 .form-group select option {

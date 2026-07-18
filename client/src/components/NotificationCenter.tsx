@@ -99,7 +99,16 @@ export function NotificationCenter() {
                   key={notif.id}
                   className={`notification-item ${!notif.isRead ? 'unread' : ''}`}
                   onClick={() => handleNotificationClick(notif)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleNotificationClick(notif);
+                    }
+                  }}
+                  tabIndex={0}
+                  role="button"
                   style={{ cursor: (notif.requestId ?? notif.request?.id) ? 'pointer' : 'default' }}
+                  aria-label={!notif.isRead ? 'Unread notification' : 'Notification'}
                 >
                   <div className="notification-content">
                     <p>{notif.message}</p>
@@ -107,7 +116,7 @@ export function NotificationCenter() {
                       {new Date(notif.createdAt).toLocaleString()}
                     </span>
                   </div>
-                  {!notif.isRead && <div className="unread-dot" />}
+                  {!notif.isRead && <div className="unread-dot" aria-hidden="true" />}
                 </div>
               ))
             )}

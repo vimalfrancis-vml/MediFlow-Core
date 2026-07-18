@@ -6,7 +6,19 @@ interface AuditTimelineProps {
 }
 
 export function AuditTimeline({ logs }: AuditTimelineProps) {
-  if (!logs || logs.length === 0) return null;
+  if (!logs || logs.length === 0) {
+    return (
+      <div className="section-card mt-8 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+        <h2 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-4">Audit Timeline</h2>
+        <div className="flex flex-col items-center justify-center py-6 text-center text-slate-400">
+          <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-sm font-medium">No audit activity recorded yet.</p>
+        </div>
+      </div>
+    );
+  }
 
   const getIcon = (action: string) => {
     switch(action) {

@@ -5,45 +5,67 @@
 }
 
 .notification-bell {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   position: relative;
-  color: #e2e8f0;
+  color: #475569;
   transition: all 0.2s ease;
 }
 
-.notification-bell:hover {
-  background: rgba(255, 255, 255, 0.15);
-  color: #fff;
+.notification-bell:hover,
+.notification-bell:focus-visible {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #1e293b;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.notification-bell:focus-visible {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.5);
 }
 
 .notification-bell svg {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
 }
 
 .notification-badge {
   position: absolute;
-  top: -2px;
-  right: -2px;
+  top: -4px;
+  right: -4px;
   background-color: #ef4444;
   color: white;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   border-radius: 50%;
-  min-width: 18px;
-  height: 18px;
+  min-width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid #1e293b;
+  box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+  animation: pulseBadge 2s infinite;
+}
+
+@keyframes pulseBadge {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
 }
 
 .notification-dropdown {
@@ -103,7 +125,7 @@
 }
 
 .notification-item {
-  padding: 1rem;
+  padding: 1.25rem 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   justify-content: space-between;
@@ -112,8 +134,14 @@
   transition: background 0.2s;
 }
 
-.notification-item:hover {
-  background: rgba(255, 255, 255, 0.03);
+.notification-item:hover,
+.notification-item:focus-visible {
+  background: rgba(255, 255, 255, 0.06);
+  outline: none;
+}
+
+.notification-item:focus-visible {
+  box-shadow: inset 2px 0 0 0 #6366f1;
 }
 
 .notification-item.unread {
@@ -133,10 +161,11 @@
 }
 
 .unread-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   background-color: #8b5cf6;
   border-radius: 50%;
-  margin-top: 4px;
+  margin-top: 6px;
   flex-shrink: 0;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
 }
