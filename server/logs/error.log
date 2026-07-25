@@ -3799,3 +3799,7 @@
 [2026-07-17 14:02:32:232] [[31merror[39m]: [31mError: Please sign in again to verify your identity.[39m
 [31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:62:17)[39m
 [31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-07-18 16:34:06:346] [[31merror[39m]: [31m401 - Invalid email or password. - /api/v1/auth/login - POST - ::1[39m
+[2026-07-18 16:34:06:346] [[31merror[39m]: [31mError: Invalid email or password.[39m
+[31m    at <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\routes\auth.ts:25:19)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m

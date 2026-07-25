@@ -1,6 +1,7 @@
-
 import { useNavigate } from 'react-router-dom';
 import type { RequestItem } from '../services/api';
+import { LoadingState } from './LoadingState';
+import { EmptyState } from './EmptyState';
 
 interface RequestTableProps {
   requests: RequestItem[];
@@ -27,9 +28,8 @@ export function RequestTable({
 
   if (isLoading) {
     return (
-      <div className="state-card loading-state bg-white p-10 rounded-xl shadow-sm border border-slate-100 text-center">
-        <div className="loading-spinner mx-auto mb-4" />
-        <p className="text-slate-500">Loading requests...</p>
+      <div className="state-card loading-state bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+        <LoadingState message="Loading requests..." />
       </div>
     );
   }
@@ -47,11 +47,15 @@ export function RequestTable({
 
   if (requests.length === 0) {
     return (
-      <div className="state-card empty-state bg-white p-10 rounded-xl shadow-sm border border-slate-100 text-center flex flex-col items-center justify-center">
-        <svg className="w-12 h-12 text-slate-300 mb-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-        </svg>
-        <p className="text-slate-500">No requests found matching your criteria.</p>
+      <div className="state-card empty-state bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+        <EmptyState
+          message="No requests found matching your criteria."
+          icon={
+            <svg className="w-12 h-12 text-slate-300 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+            </svg>
+          }
+        />
       </div>
     );
   }
@@ -62,12 +66,12 @@ export function RequestTable({
         <table className="w-full text-left text-sm text-slate-600">
           <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200 sticky top-0 z-10">
             <tr>
-              <th className="px-4 py-3">Reference</th>
-              <th className="px-4 py-3">Title</th>
-              <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3">Department</th>
-              <th className="px-4 py-3">Date</th>
-              <th className="px-4 py-3">Status</th>
+              <th scope="col" className="px-4 py-3">Reference</th>
+              <th scope="col" className="px-4 py-3">Title</th>
+              <th scope="col" className="px-4 py-3">Type</th>
+              <th scope="col" className="px-4 py-3">Department</th>
+              <th scope="col" className="px-4 py-3">Date</th>
+              <th scope="col" className="px-4 py-3">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">

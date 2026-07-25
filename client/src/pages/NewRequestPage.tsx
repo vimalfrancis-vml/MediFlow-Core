@@ -77,8 +77,9 @@ export default function NewRequestPage() {
               <h2>General Information</h2>
               
               <div className="form-group">
-                <label>Request Title</label>
+                <label htmlFor="title">Request Title</label>
                 <input 
+                  id="title"
                   type="text" 
                   value={title}
                   onChange={e => setTitle(e.target.value)}
@@ -90,8 +91,8 @@ export default function NewRequestPage() {
 
               <div className="form-row">
                 <div className="form-group">
-                  <label>Request Type</label>
-                  <select value={type} onChange={e => setType(e.target.value)} disabled={isSubmitting}>
+                  <label htmlFor="type">Request Type</label>
+                  <select id="type" value={type} onChange={e => setType(e.target.value)} disabled={isSubmitting}>
                     <option value="PURCHASE">Purchase Request</option>
                     <option value="MAINTENANCE">Maintenance Request</option>
                     <option value="LEAVE">Leave Application</option>
@@ -99,8 +100,8 @@ export default function NewRequestPage() {
                 </div>
 
                 <div className="form-group">
-                  <label>Priority</label>
-                  <select value={priority} onChange={e => setPriority(e.target.value)} disabled={isSubmitting}>
+                  <label htmlFor="priority">Priority</label>
+                  <select id="priority" value={priority} onChange={e => setPriority(e.target.value)} disabled={isSubmitting}>
                     <option value="LOW">Low</option>
                     <option value="NORMAL">Normal</option>
                     <option value="HIGH">High</option>
@@ -115,8 +116,9 @@ export default function NewRequestPage() {
                 <h2>Purchase Details</h2>
                 
                 <div className="form-group">
-                  <label>Item Description</label>
+                  <label htmlFor="itemDescription">Item Description</label>
                   <input 
+                    id="itemDescription"
                     type="text" 
                     value={itemDescription}
                     onChange={e => setItemDescription(e.target.value)}
@@ -128,8 +130,9 @@ export default function NewRequestPage() {
 
                 <div className="form-row">
                   <div className="form-group">
-                    <label>Quantity</label>
+                    <label htmlFor="quantity">Quantity</label>
                     <input 
+                      id="quantity"
                       type="number" 
                       min="1"
                       value={quantity}
@@ -140,8 +143,9 @@ export default function NewRequestPage() {
                   </div>
                   
                   <div className="form-group">
-                    <label>Estimated Cost ($)</label>
+                    <label htmlFor="estimatedCost">Estimated Cost ($)</label>
                     <input 
+                      id="estimatedCost"
                       type="number" 
                       min="0"
                       step="0.01"
@@ -154,8 +158,9 @@ export default function NewRequestPage() {
                 </div>
 
                 <div className="form-group">
-                  <label>Business Justification</label>
+                  <label htmlFor="justification">Business Justification</label>
                   <textarea 
+                    id="justification"
                     value={justification}
                     onChange={e => setJustification(e.target.value)}
                     placeholder="Why is this purchase necessary?"

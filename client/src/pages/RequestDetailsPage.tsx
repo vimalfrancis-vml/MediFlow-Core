@@ -206,6 +206,7 @@ export default function RequestDetailsPage() {
               <div className="add-comment-box">
                 <textarea 
                   placeholder="Add a comment..." 
+                  aria-label="Add a comment"
                   rows={3} 
                   value={newComment}
                   onChange={e => setNewComment(e.target.value)}
@@ -248,26 +249,25 @@ export default function RequestDetailsPage() {
                 <input 
                   type="text" 
                   placeholder="Document Name" 
+                  aria-label="Document Name"
                   value={docName}
                   onChange={e => setDocName(e.target.value)}
                   className="form-input"
-                  style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
                   disabled={isActionLoading}
                 />
                 <input 
                   type="url" 
                   placeholder="Document URL" 
+                  aria-label="Document URL"
                   value={docUrl}
                   onChange={e => setDocUrl(e.target.value)}
                   className="form-input"
-                  style={{ padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.05)', color: '#fff' }}
                   disabled={isActionLoading}
                 />
                 <button 
                   className="upload-btn" 
                   onClick={handleUploadDocument}
                   disabled={!docName.trim() || !docUrl.trim() || isActionLoading}
-                  style={{ opacity: (!docName.trim() || !docUrl.trim() || isActionLoading) ? 0.5 : 1, cursor: (!docName.trim() || !docUrl.trim() || isActionLoading) ? 'not-allowed' : 'pointer' }}
                 >
                   {isActionLoading ? 'Uploading…' : '+ Upload Document'}
                 </button>

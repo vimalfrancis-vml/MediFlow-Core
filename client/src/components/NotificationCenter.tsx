@@ -34,12 +34,19 @@ export function NotificationCenter() {
         setIsOpen(false);
       }
     };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
     document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
     // Listen for external notification refresh events
     const refreshHandler = () => fetchNotifications();
     window.addEventListener(NOTIFICATIONS_REFRESH_EVENT, refreshHandler);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener(NOTIFICATIONS_REFRESH_EVENT, refreshHandler);
     };
   }, []);
@@ -72,7 +79,12 @@ export function NotificationCenter() {
 
   return (
     <div className="notification-center" ref={dropdownRef}>
-      <button className="notification-bell" onClick={() => setIsOpen(!isOpen)} aria-label="Notifications">
+      <button 
+        className="notification-bell" 
+        onClick={() => setIsOpen(!isOpen)} 
+        aria-label={unreadCount > 0 ? `Notifications (${unreadCount} unread)` : 'Notifications'}
+        aria-expanded={isOpen}
+      >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
           <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>

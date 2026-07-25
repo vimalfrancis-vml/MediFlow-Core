@@ -1,4 +1,4 @@
-import { useState, useCallback, type FormEvent } from 'react';
+import { useState, useCallback, useEffect, type FormEvent } from 'react';
 import './ActionModal.css';
 
 type ActionType = 'approve' | 'reject' | 'return';
@@ -42,6 +42,16 @@ export default function ActionModal({ action, requestTitle, isLoading, onConfirm
   const [comment, setComment] = useState('');
   const config = ACTION_CONFIG[action];
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   const handleSubmit = useCallback((e: FormEvent) => {
     e.preventDefault();
     if (config.commentRequired && !comment.trim()) return;
@@ -50,8 +60,14 @@ export default function ActionModal({ action, requestTitle, isLoading, onConfirm
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" onClick={e => e.stopPropagation()}>
-        <h2 className="modal-title">{config.title}</h2>
+      <div 
+        className="modal-card" 
+        onClick={e => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-title"
+      >
+        <h2 className="modal-title" id="modal-title">{config.title}</h2>
         <p className="modal-subtitle">
           <strong>"{requestTitle}"</strong>
         </p>
@@ -59,8 +75,9 @@ export default function ActionModal({ action, requestTitle, isLoading, onConfirm
 
         <form onSubmit={handleSubmit}>
           <div className="modal-field">
-            <label>{config.commentLabel}</label>
+            <label htmlFor="modal-comment">{config.commentLabel}</label>
             <textarea
+              id="modal-comment"
               rows={4}
               value={comment}
               onChange={e => setComment(e.target.value)}

@@ -32,6 +32,7 @@ export function DataFilterBar({ onFilterChange }: DataFilterBarProps) {
         <input 
           type="text" 
           placeholder="Search by ID or Title..." 
+          aria-label="Search requests by ID or Title"
           className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -42,6 +43,7 @@ export function DataFilterBar({ onFilterChange }: DataFilterBarProps) {
         className="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         value={status}
         onChange={(e) => setStatus(e.target.value)}
+        aria-label="Filter by status"
       >
         <option value="">All Statuses</option>
         <option value="DRAFT">Draft</option>
@@ -55,6 +57,7 @@ export function DataFilterBar({ onFilterChange }: DataFilterBarProps) {
         className="w-full sm:w-auto bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         value={type}
         onChange={(e) => setType(e.target.value)}
+        aria-label="Filter by request type"
       >
         <option value="">All Types</option>
         <option value="MAINTENANCE">Maintenance</option>
