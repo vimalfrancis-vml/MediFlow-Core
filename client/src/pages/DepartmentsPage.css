@@ -1,31 +1,40 @@
+/* ============================================================
+   DepartmentsPage.css
+   ============================================================ */
+
 .departments-page-container {
-  padding: 2rem;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0;
 }
 
 .departments-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .departments-header h1 {
-  font-size: 1.5rem;
-  color: #1f2937;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: #0f172a;
   margin: 0;
+  letter-spacing: var(--tracking-tight);
 }
 
 .departments-header p {
-  color: #6b7280;
+  color: #64748b;
+  font-size: var(--text-sm);
   margin-top: 0.25rem;
 }
 
 .departments-table-container {
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
 }
 
@@ -37,51 +46,23 @@
 
 .departments-table th,
 .departments-table td {
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .departments-table th {
   background-color: #f9fafb;
-  font-weight: 500;
-  color: #374151;
+  font-weight: var(--weight-bold);
+  color: #64748b;
   text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
+  font-size: 11px;
+  letter-spacing: var(--tracking-wider);
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
 .departments-table tr:hover {
-  background-color: #f9fafb;
+  background-color: #f8fafc;
   cursor: pointer;
-}
-
-.dept-name {
-  font-weight: 500;
-  color: #111827;
-}
-
-.dept-code {
-  color: #6b7280;
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-}
-
-.count-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.25rem 0.75rem;
-  background-color: #f3f4f6;
-  color: #374151;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.count-badge.has-requests {
-  background-color: #fee2e2;
-  color: #991b1b;
 }

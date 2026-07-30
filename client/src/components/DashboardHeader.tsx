@@ -12,8 +12,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title = "MediF
   const { user, logout } = useAuth();
 
   return (
-    <header className="dashboard-header bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-40">
-      <div className="dashboard-brand flex items-center gap-3">
+    <header className="dashboard-header bg-white border-b border-slate-200 shadow-sm px-6 py-3 flex items-center justify-between sticky top-0 z-40">
+      <div className="dashboard-brand flex items-center gap-2.5">
         <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-8 h-8">
           <rect width="32" height="32" rx="8" fill="url(#dash-logo-gradient)" />
           <path d="M16 8V24M8 16H24" stroke="white" strokeWidth="2.5" strokeLinecap="round" />
@@ -24,20 +24,20 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title = "MediF
             </linearGradient>
           </defs>
         </svg>
-        <span className="brand-name font-bold text-xl text-slate-800">
+        <span className="brand-name font-bold text-lg text-slate-900 tracking-tight">
           {brandPrefix ? `${title} (${brandPrefix})` : title}
         </span>
       </div>
 
-      <div className="dashboard-user-info flex items-center gap-6">
+      <div className="dashboard-user-info flex items-center gap-5">
         <NotificationCenter />
         {children}
-        <div className="user-details flex flex-col items-end">
-          <span className="user-name text-sm font-semibold text-slate-900">{user?.firstName} {user?.lastName}</span>
-          <span className="user-role text-xs text-slate-500 font-medium uppercase tracking-wider">{user?.role.replace(/_/g, ' ')}</span>
+        <div className="user-details flex flex-col items-end gap-0.5">
+          <span className="user-name text-sm font-semibold text-slate-800">{user?.firstName} {user?.lastName}</span>
+          <span className="user-role text-[10px] text-slate-500 font-semibold uppercase tracking-wider">{user?.role.replace(/_/g, ' ')}</span>
         </div>
         <button 
-          className="logout-button text-sm font-medium text-slate-600 hover:text-slate-900 px-3 py-1.5 rounded-md hover:bg-slate-100 transition-colors" 
+          className="logout-button text-xs font-medium text-slate-500 hover:text-slate-800 px-3 py-1.5 rounded-md border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-150" 
           id="logout-button" 
           onClick={logout}
           aria-label="Sign out of MediFlow"

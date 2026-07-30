@@ -15,7 +15,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, brandPr
         {nav}
       </DashboardHeader>
 
-      <main className="dashboard-main flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+      <main className="dashboard-main flex-1 max-w-[1280px] mx-auto w-full px-6 lg:px-10 py-8">
         {children}
       </main>
     </div>

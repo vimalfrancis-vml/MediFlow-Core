@@ -44,27 +44,38 @@ export default function DashboardPage() {
 
   return (
     <DashboardLayout title="MediFlow">
-      <div className="flex justify-between items-end mb-8">
+      {/* Page heading row */}
+      <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Executive Overview</h1>
-          <p className="text-slate-500 mt-1">Manage and track the status of your internal requests.</p>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Executive Overview</h1>
+          <p className="text-sm text-slate-500 mt-1">Manage and track the status of your internal requests.</p>
         </div>
-        <button className="new-request-btn bg-indigo-600 text-white px-5 py-2.5 rounded-lg hover:bg-indigo-700 transition-colors font-medium shadow-sm" onClick={() => navigate('/new-request')}>+ New Request</button>
+        <button
+          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow-sm transition-colors duration-150"
+          onClick={() => navigate('/new-request')}
+        >
+          + New Request
+        </button>
       </div>
 
       {isLoading && !analytics && !requests.length ? (
         <LoadingState message="Loading dashboard data..." />
       ) : error && !analytics && !requests.length ? (
-        <div className="text-center p-8">
-          <p className="text-red-500 mb-4">{error}</p>
-          <button onClick={fetchRequests} className="bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg">Retry</button>
+        <div className="text-center py-12">
+          <p className="text-sm text-red-500 mb-4">{error}</p>
+          <button onClick={fetchRequests} className="px-4 py-2 bg-indigo-50 text-indigo-600 text-sm font-medium rounded-md hover:bg-indigo-100 transition-colors">Retry</button>
         </div>
       ) : (
         <>
-          <AnalyticsCards data={analytics?.kpis || null} isLoading={isLoading && !analytics} />
+          {/* KPI cards — mb-6 below to match heading rhythm */}
+          <div className="mb-6">
+            <AnalyticsCards data={analytics?.kpis || null} isLoading={isLoading && !analytics} />
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div className="lg:col-span-2">
+          {/* Main content grid — gap-6 consistent with card padding */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left: filter + table */}
+            <div className="lg:col-span-2 flex flex-col gap-4">
               <DataFilterBar onFilterChange={(f) => { setFilters(f); setPage(1); }} />
               {requests.length === 0 && !isLoading ? (
                 <EmptyState
@@ -73,7 +84,7 @@ export default function DashboardPage() {
                   onAction={() => navigate('/new-request')}
                 />
               ) : (
-                <RequestTable 
+                <RequestTable
                   requests={requests}
                   isLoading={isLoading}
                   error={error}
@@ -84,7 +95,8 @@ export default function DashboardPage() {
                 />
               )}
             </div>
-            <div className="flex flex-col gap-6">
+            {/* Right: charts — gap-4 matching left column gap */}
+            <div className="flex flex-col gap-4">
               <SimpleChart title="Requests by Status" data={analytics?.distribution.status || []} />
               <SimpleChart title="Requests by Type" data={analytics?.distribution.type || []} />
             </div>

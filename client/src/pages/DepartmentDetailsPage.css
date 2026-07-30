@@ -1,21 +1,29 @@
+/* ============================================================
+   DepartmentDetailsPage.css
+   ============================================================ */
+
 .department-details-container {
-  padding: 2rem;
+  width: 100%;
   max-width: 1000px;
   margin: 0 auto;
+  padding: 0;
 }
 
 .dept-employees-section {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-sm);
   padding: 2rem;
 }
 
 .dept-employees-section h3 {
-  margin: 0 0 1.5rem 0;
-  color: #111827;
-  font-size: 1.25rem;
+  margin: 0 0 1.25rem 0;
+  color: #1e293b;
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
 }
 
 .dept-users-table {
@@ -26,22 +34,23 @@
 
 .dept-users-table th,
 .dept-users-table td {
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 .dept-users-table th {
   background-color: #f9fafb;
-  font-weight: 500;
-  color: #374151;
+  font-weight: var(--weight-bold);
+  color: #64748b;
   text-transform: uppercase;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
+  font-size: 11px;
+  letter-spacing: var(--tracking-wider);
 }
 
 .empty-employees {
-  color: #6b7280;
+  color: #94a3b8;
   text-align: center;
   padding: 2rem;
   font-style: italic;
+  font-size: var(--text-sm);
 }

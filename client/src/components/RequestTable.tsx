@@ -61,17 +61,17 @@ export function RequestTable({
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+    <div className="bg-white rounded-lg shadow-sm border border-slate-200/80 overflow-hidden flex flex-col">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-slate-600">
-          <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200 sticky top-0 z-10">
+          <thead className="bg-slate-50/80 border-b border-slate-200">
             <tr>
-              <th scope="col" className="px-4 py-3">Reference</th>
-              <th scope="col" className="px-4 py-3">Title</th>
-              <th scope="col" className="px-4 py-3">Type</th>
-              <th scope="col" className="px-4 py-3">Department</th>
-              <th scope="col" className="px-4 py-3">Date</th>
-              <th scope="col" className="px-4 py-3">Status</th>
+              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Reference</th>
+              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Title</th>
+              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Type</th>
+              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Department</th>
+              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Date</th>
+              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -79,21 +79,21 @@ export function RequestTable({
               <tr 
                 key={request.id} 
                 onClick={() => navigate(`${baseRoute}/${request.id}`)}
-                className="hover:bg-slate-50 cursor-pointer transition-colors"
+                className="hover:bg-slate-50/60 cursor-pointer transition-colors duration-150"
               >
-                <td className="px-4 py-3 font-medium text-slate-900">{request.referenceNumber || '—'}</td>
-                <td className="px-4 py-3">{request.title || '—'}</td>
-                <td className="px-4 py-3">
-                  <span className="px-2 py-1 bg-slate-100 rounded text-xs font-medium text-slate-600">
+                <td className="px-5 py-3.5 font-mono text-[11px] font-medium text-slate-500">{request.referenceNumber || '—'}</td>
+                <td className="px-5 py-3.5 font-medium text-slate-800">{request.title || '—'}</td>
+                <td className="px-5 py-3.5">
+                  <span className="px-2 py-0.5 bg-slate-100 border border-slate-200/60 rounded-md text-xs font-medium text-slate-600">
                     {request.type || '—'}
                   </span>
                 </td>
-                <td className="px-4 py-3">{request.department?.name || '—'}</td>
-                <td className="px-4 py-3 whitespace-nowrap">
+                <td className="px-5 py-3.5 text-slate-600">{request.department?.name || '—'}</td>
+                <td className="px-5 py-3.5 whitespace-nowrap text-slate-500 text-xs">
                   {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : '—'}
                 </td>
-                <td className="px-4 py-3">
-                  <span className={`request-status status-${(request.status || '').toLowerCase()} px-2 py-1 rounded text-xs font-medium`}>
+                <td className="px-5 py-3.5">
+                  <span className={`request-status status-${(request.status || '').toLowerCase()} px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide`}>
                     {request.status || '—'}
                   </span>
                 </td>
@@ -103,22 +103,22 @@ export function RequestTable({
         </table>
       </div>
 
-      <div className="px-4 py-3 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
-        <span className="text-sm text-slate-500">
+      <div className="px-5 py-3 border-t border-slate-200 bg-slate-50/50 flex items-center justify-between">
+        <span className="text-xs font-medium text-slate-500">
           Page {page}
         </span>
         <div className="flex gap-2">
           <button 
             onClick={() => onPageChange(page - 1)} 
             disabled={page === 1}
-            className="px-3 py-1 bg-white border border-slate-200 rounded text-sm font-medium text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+            className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs font-medium text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 hover:border-slate-300 transition-all duration-150"
           >
             Previous
           </button>
           <button 
             onClick={() => onPageChange(page + 1)} 
             disabled={!hasMore}
-            className="px-3 py-1 bg-white border border-slate-200 rounded text-sm font-medium text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 transition-colors"
+            className="px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs font-medium text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-50 hover:border-slate-300 transition-all duration-150"
           >
             Next
           </button>
