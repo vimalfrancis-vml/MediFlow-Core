@@ -7,6 +7,7 @@ import { NOTIFICATIONS_REFRESH_EVENT } from '../constants/notifications';
 import { useAuth } from '../context/AuthContext';
 import { WorkflowProgress } from '../components/WorkflowProgress';
 import { AuditTimeline } from '../components/AuditTimeline';
+import { RequestTypeDetails } from '../components/RequestTypeDetails';
 import './RequestDetailsPage.css';
 
 export default function RequestDetailsPage() {
@@ -140,16 +141,27 @@ export default function RequestDetailsPage() {
             <h1>{request.title}</h1>
             <span className="request-date">Created on {new Date(request.createdAt).toLocaleDateString()}</span>
           </div>
-          {request.status === 'DRAFT' && request.requestedById === user?.id && (
-            <button
-              className="btn-submit"
-              style={{ marginTop: '1.5rem' }}
-              onClick={handleSubmitRequest}
-              disabled={isActionLoading}
-            >
-              {isActionLoading ? 'Submitting…' : 'Submit for Approval'}
-            </button>
-          )}
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+            {request.status === 'DRAFT' && request.requestedById === user?.id && (
+              <button
+                className="btn-submit"
+                onClick={handleSubmitRequest}
+                disabled={isActionLoading}
+              >
+                {isActionLoading ? 'Submitting…' : 'Submit for Approval'}
+              </button>
+            )}
+            {(request.status === 'DRAFT' || request.status === 'RETURNED') && request.requestedById === user?.id && (
+              <button
+                className="btn-secondary"
+                onClick={() => navigate(`/edit-request/${request.id}`)}
+                disabled={isActionLoading}
+                style={{ padding: '0.625rem 1.25rem', border: '1px solid #cbd5e1', borderRadius: 'var(--radius-md)', background: '#ffffff', color: '#475569', fontWeight: 'var(--weight-semibold)', cursor: 'pointer' }}
+              >
+                Edit Request
+              </button>
+            )}
+          </div>
           {actionError && (
             <div className="inline-error" role="alert" style={{ marginTop: '0.75rem', color: '#f87171', fontSize: '0.875rem' }}>
               ✕ {actionError}
@@ -180,6 +192,8 @@ export default function RequestDetailsPage() {
                 </div>
               </div>
             </section>
+
+            <RequestTypeDetails request={request} />
 
             <AuditTimeline logs={request.auditLogs || []} />
 

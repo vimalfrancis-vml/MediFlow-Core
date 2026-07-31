@@ -66,6 +66,37 @@ export interface AuditLogItem {
   } | null;
 }
 
+export interface PurchaseDetailItem {
+  id: string;
+  requestId: string;
+  vendorName?: string | null;
+  itemDescription: string;
+  quantity: number;
+  estimatedCost: number;
+  budgetCode?: string | null;
+  justification: string;
+}
+
+export interface MaintenanceDetailItem {
+  id: string;
+  requestId: string;
+  location: string;
+  equipmentName: string;
+  issueDescription: string;
+  urgencyLevel: string;
+}
+
+export interface LeaveDetailItem {
+  id: string;
+  requestId: string;
+  leaveType: string;
+  startDate: string;
+  endDate: string;
+  totalDays: number;
+  reason: string;
+  coveringStaff?: string | null;
+}
+
 export interface RequestItem {
   id: string;
   referenceNumber: string;
@@ -82,6 +113,9 @@ export interface RequestItem {
   currentStep?: { id: string; stepName: string; order: number; approverRole: string; isFinal: boolean };
   requestedById: string;
   auditLogs?: AuditLogItem[];
+  purchaseDetail?: PurchaseDetailItem | null;
+  maintenanceDetail?: MaintenanceDetailItem | null;
+  leaveDetail?: LeaveDetailItem | null;
 }
 
 export interface CommentItem {
@@ -193,6 +227,13 @@ export const api = {
   createRequest(payload: { title: string; type: string; priority: string; details?: any }) {
     return request<{ success: boolean; data: RequestItem }>('/requests', {
       method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  editRequest(id: string, payload: { title: string; type: string; priority: string; details?: any }) {
+    return request<{ success: boolean; data: RequestItem }>(`/requests/${id}`, {
+      method: 'PUT',
       body: JSON.stringify(payload),
     });
   },

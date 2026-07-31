@@ -14,8 +14,8 @@ describe('WorkflowEngine Integration Tests', () => {
 
   beforeAll(async () => {
     // Fetch seeded users for testing
-    employeeUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.EMPLOYEE } });
-    hodUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.HOD } });
+    employeeUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.EMPLOYEE, department: { code: 'CARD' } } });
+    hodUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.HOD, department: { code: 'CARD' } } });
     purchaseUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.PURCHASE_OFFICER } });
     directorUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.DIRECTOR } });
     maintenanceUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.MAINTENANCE_OFFICER } });

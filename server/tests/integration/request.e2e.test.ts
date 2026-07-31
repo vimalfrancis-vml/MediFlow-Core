@@ -27,8 +27,8 @@ describe('Request API E2E Scenarios', () => {
 
   beforeAll(async () => {
     // Fetch seeded users by role
-    const employee = await prisma.user.findFirstOrThrow({ where: { role: 'EMPLOYEE' } });
-    const hod = await prisma.user.findFirstOrThrow({ where: { role: 'HOD' } });
+    const employee = await prisma.user.findFirstOrThrow({ where: { role: 'EMPLOYEE', department: { code: 'CARD' } } });
+    const hod = await prisma.user.findFirstOrThrow({ where: { role: 'HOD', department: { code: 'CARD' } } });
     const purchase = await prisma.user.findFirstOrThrow({ where: { role: 'PURCHASE_OFFICER' } });
     const director = await prisma.user.findFirstOrThrow({ where: { role: 'DIRECTOR' } });
     employeeToken = await generateToken(employee.id);

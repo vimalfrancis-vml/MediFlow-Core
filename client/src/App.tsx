@@ -53,6 +53,7 @@ function App() {
               }
             />
             <Route path="/new-request" element={<NewRequestPage />} />
+            <Route path="/edit-request/:id" element={<NewRequestPage />} />
             <Route path="/request/:id" element={<RequestDetailsPage />} />
 
             {/* Admin-only routes */}

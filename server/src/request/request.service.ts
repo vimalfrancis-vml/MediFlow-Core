@@ -52,6 +52,76 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
             budgetCode: details.budgetCode,
         };
         requestData.purchaseDetail = { create: purchaseDetailData };
+    } else if (cleanData.type === 'MAINTENANCE') {
+        if (!details) {
+            throw new AppError('Details are required for Maintenance requests.', 400);
+        }
+        if (!details.equipmentName || !details.equipmentName.trim()) {
+            throw new AppError('Equipment name is required.', 400);
+        }
+        if (!details.location || !details.location.trim()) {
+            throw new AppError('Location is required.', 400);
+        }
+        if (!details.issueDescription || !details.issueDescription.trim()) {
+            throw new AppError('Issue description is required.', 400);
+        }
+        if (!details.urgencyLevel || !['LOW', 'NORMAL', 'HIGH', 'EMERGENCY'].includes(details.urgencyLevel)) {
+            throw new AppError('Urgency level must be Low, Normal, High, or Emergency.', 400);
+        }
+
+        const notesStr = details.notes && details.notes.trim() ? `\n\nNotes:\n${details.notes.trim()}` : '';
+        const formattedDescription = `Issue Description:\n${details.issueDescription.trim()}${notesStr}`;
+
+        requestData.maintenanceDetail = {
+            create: {
+                equipmentName: details.equipmentName.trim(),
+                location: details.location.trim(),
+                urgencyLevel: details.urgencyLevel,
+                issueDescription: formattedDescription,
+            }
+        };
+    } else if (cleanData.type === 'LEAVE') {
+        if (!details) {
+            throw new AppError('Details are required for Leave requests.', 400);
+        }
+        if (!details.leaveType || !details.leaveType.trim()) {
+            throw new AppError('Leave type is required.', 400);
+        }
+        if (!details.startDate || !details.startDate.trim()) {
+            throw new AppError('Start date is required.', 400);
+        }
+        if (!details.endDate || !details.endDate.trim()) {
+            throw new AppError('End date is required.', 400);
+        }
+        if (!details.reason || !details.reason.trim()) {
+            throw new AppError('Leave reason is required.', 400);
+        }
+
+        const startDate = new Date(details.startDate);
+        const endDate = new Date(details.endDate);
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+            throw new AppError('Invalid date format.', 400);
+        }
+        if (endDate < startDate) {
+            throw new AppError('End date cannot be before the start date.', 400);
+        }
+
+        const diffTime = endDate.getTime() - startDate.getTime();
+        const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        if (totalDays <= 0) {
+            throw new AppError('Total days must be greater than zero.', 400);
+        }
+
+        requestData.leaveDetail = {
+            create: {
+                leaveType: details.leaveType.trim(),
+                startDate,
+                endDate,
+                totalDays,
+                reason: details.reason.trim(),
+                coveringStaff: details.coveringStaff ? details.coveringStaff.trim() : null,
+            }
+        };
     }
     const newRequest = await prisma.request.create({ data: requestData });
 
@@ -84,12 +154,109 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
     }
     // Remove unsupported 'details' field before update
     const { details, ...cleanData } = data;
+    
+    const updateData: any = { ...cleanData };
+
+    if (details) {
+      if (request.type === 'PURCHASE') {
+        updateData.purchaseDetail = { update: details };
+      } else if (request.type === 'MAINTENANCE') {
+        if (details.equipmentName !== undefined && !details.equipmentName.trim()) {
+          throw new AppError('Equipment name is required.', 400);
+        }
+        if (details.location !== undefined && !details.location.trim()) {
+          throw new AppError('Location is required.', 400);
+        }
+        if (details.issueDescription !== undefined && !details.issueDescription.trim()) {
+          throw new AppError('Issue description is required.', 400);
+        }
+        if (details.urgencyLevel !== undefined && !['LOW', 'NORMAL', 'HIGH', 'EMERGENCY'].includes(details.urgencyLevel)) {
+          throw new AppError('Urgency level must be Low, Normal, High, or Emergency.', 400);
+        }
+
+        const existingDetail = await prisma.maintenanceDetail.findUniqueOrThrow({
+          where: { requestId: id }
+        });
+
+        const finalDescription = details.issueDescription !== undefined ? details.issueDescription.trim() : null;
+        const finalNotes = details.notes !== undefined ? details.notes.trim() : null;
+
+        let formattedDescription = undefined;
+        if (finalDescription !== null || finalNotes !== null) {
+          let currentDesc = '';
+          let currentNotes = '';
+          const existingIssueDesc = existingDetail.issueDescription ?? '';
+          if (existingIssueDesc.startsWith('Issue Description:\n')) {
+            const parts = existingIssueDesc.split('\n\nNotes:\n');
+            const descPart = parts[0] ?? '';
+            const notesPart = parts[1] ?? '';
+            currentDesc = descPart.replace('Issue Description:\n', '').trim();
+            currentNotes = notesPart ? notesPart.trim() : '';
+          } else {
+            currentDesc = existingIssueDesc;
+          }
+
+          const descToUse = finalDescription !== null ? finalDescription : currentDesc;
+          const notesToUse = finalNotes !== null ? finalNotes : currentNotes;
+          const notesStr = notesToUse ? `\n\nNotes:\n${notesToUse}` : '';
+          formattedDescription = `Issue Description:\n${descToUse}${notesStr}`;
+        }
+
+        updateData.maintenanceDetail = {
+          update: {
+            equipmentName: details.equipmentName !== undefined ? details.equipmentName.trim() : undefined,
+            location: details.location !== undefined ? details.location.trim() : undefined,
+            urgencyLevel: details.urgencyLevel !== undefined ? details.urgencyLevel : undefined,
+            issueDescription: formattedDescription !== undefined ? formattedDescription : undefined,
+          }
+        };
+      } else if (request.type === 'LEAVE') {
+        if (details.leaveType !== undefined && !details.leaveType.trim()) {
+          throw new AppError('Leave type is required.', 400);
+        }
+        if (details.reason !== undefined && !details.reason.trim()) {
+          throw new AppError('Leave reason is required.', 400);
+        }
+
+        const existingDetail = await prisma.leaveDetail.findUniqueOrThrow({
+          where: { requestId: id }
+        });
+
+        const startVal = details.startDate !== undefined ? details.startDate : existingDetail.startDate;
+        const endVal = details.endDate !== undefined ? details.endDate : existingDetail.endDate;
+
+        const startDate = new Date(startVal);
+        const endDate = new Date(endVal);
+
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          throw new AppError('Invalid date format.', 400);
+        }
+        if (endDate < startDate) {
+          throw new AppError('End date cannot be before the start date.', 400);
+        }
+
+        const diffTime = endDate.getTime() - startDate.getTime();
+        const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        if (totalDays <= 0) {
+          throw new AppError('Total days must be greater than zero.', 400);
+        }
+
+        updateData.leaveDetail = {
+          update: {
+            leaveType: details.leaveType !== undefined ? details.leaveType.trim() : undefined,
+            startDate: details.startDate !== undefined ? startDate : undefined,
+            endDate: details.endDate !== undefined ? endDate : undefined,
+            totalDays,
+            reason: details.reason !== undefined ? details.reason.trim() : undefined,
+            coveringStaff: details.coveringStaff !== undefined ? (details.coveringStaff ? details.coveringStaff.trim() : null) : undefined,
+          }
+        };
+      }
+    }
+
     const updated = await prisma.request.update({
       where: { id },
-      data: {
-        ...cleanData,
-        purchaseDetail: details ? { update: details } : undefined,
-      },
+      data: updateData,
     });
     await prisma.auditLog.create({
       data: {
@@ -205,7 +372,11 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
           }
         }, 
         currentStep: true,
-        auditLogs: { orderBy: { timestamp: 'asc' } } 
+        auditLogs: { orderBy: { timestamp: 'asc' } },
+        purchaseDetail: true,
+        leaveDetail: true,
+        maintenanceDetail: true,
+        department: true,
       },
     });
 

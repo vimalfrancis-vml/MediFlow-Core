@@ -7,6 +7,7 @@ import { NOTIFICATIONS_REFRESH_EVENT } from '../constants/notifications';
 import ActionModal from '../components/ActionModal';
 import { WorkflowProgress } from '../components/WorkflowProgress';
 import { AuditTimeline } from '../components/AuditTimeline';
+import { RequestTypeDetails } from '../components/RequestTypeDetails';
 import './ApproverDetailsPage.css';
 
 type ModalAction = 'approve' | 'reject' | 'return' | null;
@@ -197,6 +198,8 @@ export default function ApproverDetailsPage() {
               </div>
             </div>
           </section>
+
+          <RequestTypeDetails request={request} />
 
           <AuditTimeline logs={request.auditLogs || []} />
 

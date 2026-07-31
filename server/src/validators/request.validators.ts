@@ -6,15 +6,28 @@ export const createRequestSchema = z.object({
   type: z.enum(['PURCHASE', 'LEAVE', 'MAINTENANCE']),
   priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'EMERGENCY']).optional(),
   details: z.object({
+    // Purchase fields
     itemDescription: z.string().optional(),
     quantity: z.number().optional(),
     justification: z.string().optional(),
     vendorName: z.string().optional(),
     budgetCode: z.string().optional(),
     estimatedCost: z.number().optional(),
+    
+    // Maintenance fields
+    equipmentName: z.string().optional(),
+    location: z.string().optional(),
+    issueDescription: z.string().optional(),
+    urgencyLevel: z.enum(['LOW', 'NORMAL', 'HIGH', 'EMERGENCY']).optional(),
+    notes: z.string().optional(),
+    
+    // Leave fields
     leaveType: z.string().optional(),
-    urgencyLevel: z.string().optional(),
+    startDate: z.string().optional(),
+    endDate: z.string().optional(),
     totalDays: z.number().optional(),
+    reason: z.string().optional(),
+    coveringStaff: z.string().optional(),
   }).optional(),
 });
 
@@ -30,3 +43,4 @@ export const documentSchema = z.object({
   fileName: z.string().min(1, { message: 'File name is required.' }),
   url: z.string().url({ message: 'A valid URL is required.' }),
 });
+

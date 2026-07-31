@@ -3831,3 +3831,6 @@
 [2026-07-30 20:20:26:2026] [[31merror[39m]: [31mError: Invalid email or password.[39m
 [31m    at <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\routes\auth.ts:25:19)[39m
 [31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-07-31 20:09:54:954] [[31merror[39m]: [31m403 - You can only approve requests from your own department. - /api/v1/requests/007978a5-e4fd-42c0-b584-ff0c6ade5cc3/approve - POST - ::ffff:127.0.0.1[39m
+[2026-07-31 20:09:58:958] [[31merror[39m]: [31m403 - You can only approve requests from your own department. - /api/v1/requests/d9eb8175-a2e2-4b9b-8e84-9f3a66bbd24f/reject - POST - ::ffff:127.0.0.1[39m
+[2026-07-31 20:10:01:101] [[31merror[39m]: [31m403 - You can only approve requests from your own department. - /api/v1/requests/ddd0e41b-0741-465c-a0c1-99d12f280329/return - POST - ::ffff:127.0.0.1[39m
