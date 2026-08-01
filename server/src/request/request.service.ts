@@ -421,10 +421,13 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
     if (actor.role === UserRole.ADMIN) {
       rawRequests = await prisma.request.findMany({ include: { workflowTemplate: true } });
     } else {
-      // Fetch own requests and actionable requests in two efficient queries (C-08/C-09).
-      // For the "actionable" query we filter at the DB level using the actor's role and
-      // department — no per-request canUserActOnRequest loop needed.
-      const [own, actionable] = await Promise.all([
+      // Fetch own requests, actionable requests, and previously-actioned requests in three
+      // efficient queries so that analytics/statistics are always accurate:
+      //   - own: requests the user submitted
+      //   - actionable: requests currently waiting for this user's approval
+      //   - participated: requests this user has already approved/rejected/returned
+      //     (needed so dashboard KPIs stay accurate after an action is taken)
+      const [own, actionable, participated] = await Promise.all([
         prisma.request.findMany({
           where: { requestedById: actor.id },
           include: { workflowTemplate: true },
@@ -440,11 +443,30 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
           },
           include: { workflowTemplate: true },
         }),
+        // Fetch requests where this user has taken at least one approval action
+        // (excludes COMMENTED — only meaningful approval actions count)
+        prisma.request.findMany({
+          where: {
+            approvalActions: {
+              some: {
+                actorId: actor.id,
+                action: {
+                  in: [
+                    ApprovalActionType.APPROVED,
+                    ApprovalActionType.REJECTED,
+                    ApprovalActionType.RETURNED,
+                  ],
+                },
+              },
+            },
+          },
+          include: { workflowTemplate: true },
+        }),
       ]);
 
-      // Merge and deduplicate by id (a user may own a request that is also actionable)
+      // Merge and deduplicate by id
       const seen = new Map<string, (typeof own)[number]>();
-      for (const r of [...own, ...actionable]) {
+      for (const r of [...own, ...actionable, ...participated]) {
         seen.set(r.id, r);
       }
       rawRequests = Array.from(seen.values());

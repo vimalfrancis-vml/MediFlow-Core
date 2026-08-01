@@ -303,4 +303,174 @@ describe('Maintenance & Leave Request Integration and Edge Cases', () => {
     // Clean up
     await prisma.request.delete({ where: { id: req.id } });
   });
+
+  it('Leave date validation — same-day leave should be accepted (1 day)', async () => {
+    const actorEmployee: AuthUser = {
+      id: employeeUser.id,
+      email: employeeUser.email,
+      role: employeeUser.role,
+      departmentId: employeeUser.departmentId,
+      departmentCode: 'CARD',
+      firstName: employeeUser.firstName,
+      lastName: employeeUser.lastName,
+    };
+
+    const req = await RequestService.createRequest({
+      title: 'Same Day Leave',
+      type: RequestType.LEAVE,
+      priority: Priority.NORMAL,
+      details: {
+        leaveType: 'Casual',
+        startDate: '2026-09-01',
+        endDate: '2026-09-01',
+        reason: 'Personal work.',
+      },
+    }, actorEmployee);
+
+    const leaveDetail = await prisma.leaveDetail.findUniqueOrThrow({ where: { requestId: req.id } });
+    expect(leaveDetail.totalDays).toBe(1);
+
+    await prisma.request.delete({ where: { id: req.id } });
+  });
+
+  it('Leave date validation — month boundary (Jan 31 → Feb 1) should be accepted', async () => {
+    const actorEmployee: AuthUser = {
+      id: employeeUser.id,
+      email: employeeUser.email,
+      role: employeeUser.role,
+      departmentId: employeeUser.departmentId,
+      departmentCode: 'CARD',
+      firstName: employeeUser.firstName,
+      lastName: employeeUser.lastName,
+    };
+
+    const req = await RequestService.createRequest({
+      title: 'Month Boundary Leave',
+      type: RequestType.LEAVE,
+      priority: Priority.NORMAL,
+      details: {
+        leaveType: 'Annual',
+        startDate: '2026-01-31',
+        endDate: '2026-02-01',
+        reason: 'Rest.',
+      },
+    }, actorEmployee);
+
+    const leaveDetail = await prisma.leaveDetail.findUniqueOrThrow({ where: { requestId: req.id } });
+    expect(leaveDetail.totalDays).toBe(2);
+
+    await prisma.request.delete({ where: { id: req.id } });
+  });
+
+  it('Leave date validation — year boundary (Dec 31 → Jan 1 next year) should be accepted', async () => {
+    const actorEmployee: AuthUser = {
+      id: employeeUser.id,
+      email: employeeUser.email,
+      role: employeeUser.role,
+      departmentId: employeeUser.departmentId,
+      departmentCode: 'CARD',
+      firstName: employeeUser.firstName,
+      lastName: employeeUser.lastName,
+    };
+
+    const req = await RequestService.createRequest({
+      title: 'Year Boundary Leave',
+      type: RequestType.LEAVE,
+      priority: Priority.NORMAL,
+      details: {
+        leaveType: 'Annual',
+        startDate: '2026-12-31',
+        endDate: '2027-01-01',
+        reason: 'New Year.',
+      },
+    }, actorEmployee);
+
+    const leaveDetail = await prisma.leaveDetail.findUniqueOrThrow({ where: { requestId: req.id } });
+    expect(leaveDetail.totalDays).toBe(2);
+
+    await prisma.request.delete({ where: { id: req.id } });
+  });
+
+  it('Leave date validation — leap year date (Feb 28 → Feb 29) should be accepted', async () => {
+    const actorEmployee: AuthUser = {
+      id: employeeUser.id,
+      email: employeeUser.email,
+      role: employeeUser.role,
+      departmentId: employeeUser.departmentId,
+      departmentCode: 'CARD',
+      firstName: employeeUser.firstName,
+      lastName: employeeUser.lastName,
+    };
+
+    // 2028 is a leap year
+    const req = await RequestService.createRequest({
+      title: 'Leap Year Leave',
+      type: RequestType.LEAVE,
+      priority: Priority.NORMAL,
+      details: {
+        leaveType: 'Sick',
+        startDate: '2028-02-28',
+        endDate: '2028-02-29',
+        reason: 'Medical appointment.',
+      },
+    }, actorEmployee);
+
+    const leaveDetail = await prisma.leaveDetail.findUniqueOrThrow({ where: { requestId: req.id } });
+    expect(leaveDetail.totalDays).toBe(2);
+
+    await prisma.request.delete({ where: { id: req.id } });
+  });
+
+  it('Leave date validation — end before start must be rejected by backend regardless of frontend', async () => {
+    const actorEmployee: AuthUser = {
+      id: employeeUser.id,
+      email: employeeUser.email,
+      role: employeeUser.role,
+      departmentId: employeeUser.departmentId,
+      departmentCode: 'CARD',
+      firstName: employeeUser.firstName,
+      lastName: employeeUser.lastName,
+    };
+
+    await expect(
+      RequestService.createRequest({
+        title: 'Invalid Date Range',
+        type: RequestType.LEAVE,
+        priority: Priority.NORMAL,
+        details: {
+          leaveType: 'Annual',
+          startDate: '2026-08-10',
+          endDate: '2026-08-05',
+          reason: 'Test.',
+        },
+      }, actorEmployee)
+    ).rejects.toThrow('End date cannot be before the start date.');
+  });
+
+  it('Leave date validation — invalid date format must be rejected by backend', async () => {
+    const actorEmployee: AuthUser = {
+      id: employeeUser.id,
+      email: employeeUser.email,
+      role: employeeUser.role,
+      departmentId: employeeUser.departmentId,
+      departmentCode: 'CARD',
+      firstName: employeeUser.firstName,
+      lastName: employeeUser.lastName,
+    };
+
+    await expect(
+      RequestService.createRequest({
+        title: 'Malformed Date',
+        type: RequestType.LEAVE,
+        priority: Priority.NORMAL,
+        details: {
+          leaveType: 'Annual',
+          startDate: 'not-a-date',
+          endDate: '2026-08-10',
+          reason: 'Test.',
+        },
+      }, actorEmployee)
+    ).rejects.toThrow('Invalid date format.');
+  });
 }, 30000);
+

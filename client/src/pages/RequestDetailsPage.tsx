@@ -142,13 +142,17 @@ export default function RequestDetailsPage() {
             <span className="request-date">Created on {new Date(request.createdAt).toLocaleDateString()}</span>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-            {request.status === 'DRAFT' && request.requestedById === user?.id && (
+            {(request.status === 'DRAFT' || request.status === 'RETURNED') && request.requestedById === user?.id && (
               <button
                 className="btn-submit"
                 onClick={handleSubmitRequest}
                 disabled={isActionLoading}
               >
-                {isActionLoading ? 'Submitting…' : 'Submit for Approval'}
+                {isActionLoading
+                  ? 'Submitting…'
+                  : request.status === 'RETURNED'
+                  ? 'Resubmit for Approval'
+                  : 'Submit for Approval'}
               </button>
             )}
             {(request.status === 'DRAFT' || request.status === 'RETURNED') && request.requestedById === user?.id && (

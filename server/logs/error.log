@@ -3834,3 +3834,146 @@
 [2026-07-31 20:09:54:954] [[31merror[39m]: [31m403 - You can only approve requests from your own department. - /api/v1/requests/007978a5-e4fd-42c0-b584-ff0c6ade5cc3/approve - POST - ::ffff:127.0.0.1[39m
 [2026-07-31 20:09:58:958] [[31merror[39m]: [31m403 - You can only approve requests from your own department. - /api/v1/requests/d9eb8175-a2e2-4b9b-8e84-9f3a66bbd24f/reject - POST - ::ffff:127.0.0.1[39m
 [2026-07-31 20:10:01:101] [[31merror[39m]: [31m403 - You can only approve requests from your own department. - /api/v1/requests/ddd0e41b-0741-465c-a0c1-99d12f280329/return - POST - ::ffff:127.0.0.1[39m
+[2026-07-31 22:14:22:1422] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/7bbba0ce-694d-41e3-868b-6f75b626238f/comments - GET - ::1[39m
+[2026-07-31 22:14:22:1422] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:533:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-07-31 22:14:22:1422] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/7bbba0ce-694d-41e3-868b-6f75b626238f/documents - GET - ::1[39m
+[2026-07-31 22:14:22:1422] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-07-31 22:14:22:1422] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/7bbba0ce-694d-41e3-868b-6f75b626238f - GET - ::1[39m
+[2026-07-31 22:14:22:1422] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-07-31 22:17:34:1734] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/7bbba0ce-694d-41e3-868b-6f75b626238f/comments - GET - ::1[39m
+[2026-07-31 22:17:34:1734] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:533:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-07-31 22:17:35:1735] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/7bbba0ce-694d-41e3-868b-6f75b626238f/documents - GET - ::1[39m
+[2026-07-31 22:17:35:1735] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-07-31 22:17:35:1735] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/7bbba0ce-694d-41e3-868b-6f75b626238f - GET - ::1[39m
+[2026-07-31 22:17:35:1735] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-07-31 22:19:30:1930] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/7bbba0ce-694d-41e3-868b-6f75b626238f/documents - GET - ::1[39m
+[2026-07-31 22:19:30:1930] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-07-31 22:19:31:1931] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/7bbba0ce-694d-41e3-868b-6f75b626238f/comments - GET - ::1[39m
+[2026-07-31 22:19:31:1931] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:533:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-07-31 22:19:31:1931] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/7bbba0ce-694d-41e3-868b-6f75b626238f - GET - ::1[39m
+[2026-07-31 22:19:31:1931] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-01 13:14:41:1441] [[31merror[39m]: [31m401 - Please sign in again to verify your identity. - /api/v1/auth/me - GET - ::1[39m
+[2026-08-01 13:14:41:1441] [[31merror[39m]: [31mError: Please sign in again to verify your identity.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:62:17)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-01 13:14:53:1453] [[31merror[39m]: [31m401 - Please sign in again to verify your identity. - /api/v1/auth/me - GET - ::1[39m
+[2026-08-01 13:14:53:1453] [[31merror[39m]: [31mError: Please sign in again to verify your identity.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:62:17)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-01 13:15:59:1559] [[31merror[39m]: [31m500 - [39m
+[31mInvalid `prisma.user.findUnique()` invocation in[39m
+[31mC:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\routes\auth.ts:19:36[39m
+
+[31m  16   return next(new AppError('Please provide both email and password.', 400));[39m
+[31m  17 }[39m
+[31m  18 [39m
+[31m→ 19 const user = await prisma.user.findUnique([39m
+[31mCan't reach database server at ep-small-scene-aodwhtbu-pooler.c-2.ap-southeast-1.aws.neon.tech - /api/v1/auth/login - POST - ::1[39m
+[2026-08-01 13:15:59:1559] [[31merror[39m]: [31mPrismaClientKnownRequestError: [39m
+[31mInvalid `prisma.user.findUnique()` invocation in[39m
+[31mC:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\routes\auth.ts:19:36[39m
+
+[31m  16   return next(new AppError('Please provide both email and password.', 400));[39m
+[31m  17 }[39m
+[31m  18 [39m
+[31m→ 19 const user = await prisma.user.findUnique([39m
+[31mCan't reach database server at ep-small-scene-aodwhtbu-pooler.c-2.ap-southeast-1.aws.neon.tech[39m
+[31m    at zr.handleRequestError (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)[39m
+[31m    at zr.handleAndLogRequestError (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)[39m
+[31m    at zr.request (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async a (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:963:24)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\routes\auth.ts:19:18)[39m
+[2026-08-01 13:17:13:1713] [[31merror[39m]: [31m500 - [39m
+[31mInvalid `prisma.user.findUnique()` invocation in[39m
+[31mC:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\routes\auth.ts:19:36[39m
+
+[31m  16   return next(new AppError('Please provide both email and password.', 400));[39m
+[31m  17 }[39m
+[31m  18 [39m
+[31m→ 19 const user = await prisma.user.findUnique([39m
+[31mCan't reach database server at ep-small-scene-aodwhtbu-pooler.c-2.ap-southeast-1.aws.neon.tech - /api/v1/auth/login - POST - ::1[39m
+[2026-08-01 13:17:13:1713] [[31merror[39m]: [31mPrismaClientKnownRequestError: [39m
+[31mInvalid `prisma.user.findUnique()` invocation in[39m
+[31mC:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\routes\auth.ts:19:36[39m
+
+[31m  16   return next(new AppError('Please provide both email and password.', 400));[39m
+[31m  17 }[39m
+[31m  18 [39m
+[31m→ 19 const user = await prisma.user.findUnique([39m
+[31mCan't reach database server at ep-small-scene-aodwhtbu-pooler.c-2.ap-southeast-1.aws.neon.tech[39m
+[31m    at zr.handleRequestError (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)[39m
+[31m    at zr.handleAndLogRequestError (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)[39m
+[31m    at zr.request (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async a (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:963:24)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\routes\auth.ts:19:18)[39m
+[2026-08-01 13:47:00:470] [[31merror[39m]: [31m401 - Invalid email or password. - /api/v1/auth/login - POST - ::1[39m
+[2026-08-01 13:47:00:470] [[31merror[39m]: [31mError: Invalid email or password.[39m
+[31m    at <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\routes\auth.ts:25:19)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31m401 - User profile no longer exists or is disabled. - /api/v1/auth/me - GET - ::1[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31mError: User profile no longer exists or is disabled.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:47:19)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31m401 - User profile no longer exists or is disabled. - /api/v1/requests/analytics - GET - ::1[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31mError: User profile no longer exists or is disabled.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:47:19)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31m401 - User profile no longer exists or is disabled. - /api/v1/notifications - GET - ::1[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31mError: User profile no longer exists or is disabled.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:47:19)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31m401 - User profile no longer exists or is disabled. - /api/v1/auth/me - GET - ::1[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31mError: User profile no longer exists or is disabled.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:47:19)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31m401 - User profile no longer exists or is disabled. - /api/v1/requests/analytics - GET - ::1[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31mError: User profile no longer exists or is disabled.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:47:19)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31m401 - User profile no longer exists or is disabled. - /api/v1/notifications - GET - ::1[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31mError: User profile no longer exists or is disabled.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:47:19)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31m401 - User profile no longer exists or is disabled. - /api/v1/requests?page=1&limit=10 - GET - ::1[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31mError: User profile no longer exists or is disabled.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:47:19)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31m401 - User profile no longer exists or is disabled. - /api/v1/requests?page=1&limit=10 - GET - ::1[39m
+[2026-08-01 13:52:30:5230] [[31merror[39m]: [31mError: User profile no longer exists or is disabled.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:47:19)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m

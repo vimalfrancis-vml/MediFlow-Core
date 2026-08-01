@@ -27,7 +27,6 @@ export default function NewRequestPage() {
   // Maintenance Details State
   const [equipmentName, setEquipmentName] = useState('');
   const [location, setLocation] = useState('');
-  const [urgencyLevel, setUrgencyLevel] = useState('NORMAL');
   const [issueDescription, setIssueDescription] = useState('');
   const [maintenanceNotes, setMaintenanceNotes] = useState('');
 
@@ -76,7 +75,7 @@ export default function NewRequestPage() {
         } else if (req.type === 'MAINTENANCE' && req.maintenanceDetail) {
           setEquipmentName(req.maintenanceDetail.equipmentName || '');
           setLocation(req.maintenanceDetail.location || '');
-          setUrgencyLevel(req.maintenanceDetail.urgencyLevel || 'NORMAL');
+          // urgencyLevel is now derived from request priority, not a separate field
           
           const { desc, notes } = deserializeMaintenance(req.maintenanceDetail.issueDescription || '');
           setIssueDescription(desc);
@@ -161,14 +160,12 @@ export default function NewRequestPage() {
         setError('Issue description is required.');
         return;
       }
-      if (!['LOW', 'NORMAL', 'HIGH', 'EMERGENCY'].includes(urgencyLevel)) {
-        setError('Urgency level must be Low, Normal, High, or Emergency.');
-        return;
-      }
+      // urgencyLevel is derived from the request-level priority so users
+      // don't have to fill in two redundant fields that share the same enum.
       detailsPayload = {
         equipmentName: equipmentName.trim(),
         location: location.trim(),
-        urgencyLevel,
+        urgencyLevel: priority,
         issueDescription: issueDescription.trim(),
         notes: maintenanceNotes.trim(),
       };
@@ -446,23 +443,8 @@ export default function NewRequestPage() {
                   </div>
                 </div>
 
-                <div className="mb-4">
-                  <label htmlFor="urgencyLevel" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Urgency Level
-                  </label>
-                  <select
-                    id="urgencyLevel"
-                    value={urgencyLevel}
-                    onChange={(e) => setUrgencyLevel(e.target.value)}
-                    disabled={isSubmitting}
-                    className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
-                  >
-                    <option value="LOW">Low</option>
-                    <option value="NORMAL">Normal</option>
-                    <option value="HIGH">High</option>
-                    <option value="EMERGENCY">Emergency</option>
-                  </select>
-                </div>
+                {/* Urgency Level is automatically derived from the request Priority field above.
+                    No separate input is needed — this avoids the duplicate field the user review flagged. */}
 
                 <div className="mb-4">
                   <label htmlFor="issueDescription" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
@@ -555,6 +537,7 @@ export default function NewRequestPage() {
                       id="endDate"
                       type="date"
                       value={endDate}
+                      min={startDate || undefined}
                       onChange={(e) => setEndDate(e.target.value)}
                       disabled={isSubmitting}
                       required
