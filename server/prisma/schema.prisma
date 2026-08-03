@@ -68,6 +68,11 @@ model User {
   department   Department   @relation(fields: [departmentId], references: [id], onDelete: Restrict)
   requests     Request[]    @relation("RequestedBy")
   departmentHods Department[] @relation("HodDepartment")
+  approvalActions ApprovalAction[]
+  comments       Comment[]
+  attachments    Attachment[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
 }
 
 model Department {
@@ -200,6 +205,7 @@ model ApprovalAction {
   takenAt   DateTime           @default(now())
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  actor   User    @relation(fields: [actorId], references: [id])
 
   @@index([requestId])
   @@index([actorId])
@@ -213,6 +219,7 @@ model Comment {
   createdAt DateTime @default(now())
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  author  User    @relation(fields: [authorId], references: [id])
 }
 
 model Attachment {
@@ -226,6 +233,7 @@ model Attachment {
   createdAt    DateTime @default(now())
 
   request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  uploadedBy User    @relation(fields: [uploadedById], references: [id])
 }
 
 model Notification {
@@ -237,6 +245,7 @@ model Notification {
   createdAt   DateTime @default(now())
 
   request Request? @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  recipient User     @relation(fields: [recipientId], references: [id], onDelete: Cascade)
 
   @@index([recipientId, isRead])
   @@index([createdAt(sort: Desc)])
@@ -251,4 +260,5 @@ model AuditLog {
   timestamp   DateTime @default(now())
 
   request Request? @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  actor   User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
 }

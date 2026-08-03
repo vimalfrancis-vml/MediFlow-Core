@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# TypeScript generated files
+*.js
+*.js.map
+*.d.ts
+*.d.ts.map
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel/
+
+# Railway
+.railway/
+
+# Prisma generated client
+node_modules/.prisma
