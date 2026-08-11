@@ -50,6 +50,7 @@ export default function RequestDetailsPage() {
 
   useEffect(() => {
     loadData();
+    window.scrollTo(0, 0);
   }, [loadData]);
 
   const handleAddComment = async () => {

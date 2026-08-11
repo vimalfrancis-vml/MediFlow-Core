@@ -50,6 +50,7 @@ export default function ApproverDetailsPage() {
 
   useEffect(() => {
     loadData();
+    window.scrollTo(0, 0);
   }, [loadData]);
 
   const handleAction = async (comment: string) => {

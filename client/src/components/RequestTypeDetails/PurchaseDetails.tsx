@@ -1,3 +1,4 @@
+
 import type { RequestItem } from '../../services/api';
 
 interface PurchaseDetailsProps {
