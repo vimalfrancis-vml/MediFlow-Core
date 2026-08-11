@@ -395,11 +395,28 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
 
     const enrichedRequest = { ...request, auditLogs: enrichedAuditLogs };
 
-    // Authorization – requester, approvers, or admin can view
+    // Authorization – requester, admins, current/past approvers, or anyone in the workflow steps can view
+    const isInWorkflow = request.workflowTemplate?.steps.some(
+      (step: any) => step.approverRole === actor.role
+    ) ?? false;
+
+    // Check if they have taken any approval actions on this request in the past
+    const hasParticipated = await prisma.approvalAction.findFirst({
+      where: {
+        requestId: id,
+        actorId: actor.id,
+      },
+    }) !== null;
+
+    // HODs are restricted to requests in their department
+    const isHodAuthorized = actor.role !== UserRole.HOD || actor.departmentId === request.departmentId;
+
     if (
       request.requestedById !== actor.id &&
       actor.role !== UserRole.ADMIN &&
-      !(await WorkflowEngine.canUserActOnRequest(id, actor.id))
+      !(await WorkflowEngine.canUserActOnRequest(id, actor.id)) &&
+      !hasParticipated &&
+      !(isInWorkflow && isHodAuthorized)
     ) {
       throw new AppError('You are not allowed to view this request.', 403);
     }

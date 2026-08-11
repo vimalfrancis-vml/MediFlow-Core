@@ -8,6 +8,7 @@ import ActionModal from '../components/ActionModal';
 import { WorkflowProgress } from '../components/WorkflowProgress';
 import { AuditTimeline } from '../components/AuditTimeline';
 import { RequestTypeDetails } from '../components/RequestTypeDetails';
+import { useAuth } from '../context/AuthContext';
 import './ApproverDetailsPage.css';
 
 type ModalAction = 'approve' | 'reject' | 'return' | null;
@@ -15,6 +16,7 @@ type ModalAction = 'approve' | 'reject' | 'return' | null;
 export default function ApproverDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [request, setRequest] = useState<RequestItem | null>(null);
   const [comments, setComments] = useState<CommentItem[]>([]);
@@ -79,7 +81,11 @@ export default function ApproverDetailsPage() {
     }
   };
 
-  const isActionable = request?.status === 'IN_REVIEW';
+  const isActionable = 
+    request?.status === 'IN_REVIEW' &&
+    request?.currentStep &&
+    user?.role === request.currentStep.approverRole &&
+    (user?.role !== 'HOD' || user?.departmentCode === request.department?.code);
 
   return (
     <DashboardLayout title="MediFlow" brandPrefix="Approver">

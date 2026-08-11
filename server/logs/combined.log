@@ -7997,3 +7997,35 @@
 [2026-08-05 12:15:38:1538] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
 [2026-08-05 12:16:08:168] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
 [2026-08-11 22:06:08:68] [[32minfo[39m]: [32mServer is running in development mode on port 5000[39m
+[2026-08-11 22:36:56:3656] [[32minfo[39m]: [32mServer is running in development mode on port 5000[39m
+[2026-08-11 22:37:39:3739] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-11 22:37:40:3740] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-11 22:37:40:3740] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-11 22:37:40:3740] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-11 22:37:40:3740] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-11 22:37:41:3741] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-11 22:37:41:3741] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-11 22:37:42:3742] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-11 22:37:42:3742] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-11 22:38:01:381] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-11 22:38:01:381] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d[39m
+[2026-08-11 22:38:01:381] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/comments[39m
+[2026-08-11 22:38:01:381] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/documents[39m
+[2026-08-11 22:38:02:382] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-11 22:38:03:383] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/comments[39m
+[2026-08-11 22:38:03:383] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/documents[39m
+[2026-08-11 22:38:03:383] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d[39m
+[2026-08-11 22:38:31:3831] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-11 22:39:01:391] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-11 22:39:05:395] [[32minfo[39m]: [32mServer is running in development mode on port 5000[39m
+[2026-08-11 22:39:10:3910] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-11 22:39:10:3910] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d[39m
+[2026-08-11 22:39:10:3910] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/comments[39m
+[2026-08-11 22:39:10:3910] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/documents[39m
+[2026-08-11 22:39:14:3914] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d[39m
+[2026-08-11 22:39:14:3914] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/comments[39m
+[2026-08-11 22:39:14:3914] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/documents[39m
+[2026-08-11 22:39:32:3932] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d[39m
+[2026-08-11 22:39:32:3932] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/comments[39m
+[2026-08-11 22:39:32:3932] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/documents[39m
+[2026-08-11 22:39:40:3940] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
