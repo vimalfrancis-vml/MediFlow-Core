@@ -11,6 +11,7 @@ import type { AnalyticsData } from '../services/api';
 import './DashboardPage.css';
 
 export default function ApproverDashboardPage() {
+  const [viewMode, setViewMode] = useState<'pending' | 'history'>('pending');
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,7 +27,11 @@ export default function ApproverDashboardPage() {
         api.getRequests({ ...filters, page, limit }),
         api.getAnalytics()
       ]);
-      setRequests(reqRes.data || []);
+      let fetchedRequests = reqRes.data || [];
+      if (viewMode === 'history') {
+        fetchedRequests = fetchedRequests.filter((r) => r.status !== 'IN_REVIEW');
+      }
+      setRequests(fetchedRequests);
       setAnalytics(analyticsRes.data);
       setError(null);
     } catch (err: any) {
@@ -38,7 +43,7 @@ export default function ApproverDashboardPage() {
 
   useEffect(() => {
     fetchRequests();
-  }, [filters, page]);
+  }, [filters, page, viewMode]);
 
   return (
     <DashboardLayout title="MediFlow" brandPrefix="Approver">
@@ -46,6 +51,20 @@ export default function ApproverDashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Approver Dashboard</h1>
           <p className="text-slate-500 mt-1">Review requests awaiting your approval.</p>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            className={`px-4 py-2 rounded ${viewMode === 'pending' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+            onClick={() => setViewMode('pending')}
+          >
+            Pending
+          </button>
+          <button
+            className={`px-4 py-2 rounded ${viewMode === 'history' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+            onClick={() => setViewMode('history')}
+          >
+            History
+          </button>
         </div>
       </div>
 

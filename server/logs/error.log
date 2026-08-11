@@ -3977,3 +3977,88 @@
 [2026-08-01 13:52:30:5230] [[31merror[39m]: [31mError: User profile no longer exists or is disabled.[39m
 [31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:47:19)[39m
 [31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments - GET - ::1[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents - GET - ::1[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:577:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760 - GET - ::1[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents - GET - ::1[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:577:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760 - GET - ::1[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments - GET - ::1[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760 - GET - ::1[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents - GET - ::1[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:577:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments - GET - ::1[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760 - GET - ::1[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments - GET - ::1[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents - GET - ::1[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:577:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-08-04 20:42:37:4237] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760 - GET - ::1[39m
+[2026-08-04 20:42:38:4238] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-04 20:42:38:4238] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments - GET - ::1[39m
+[2026-08-04 20:42:38:4238] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-08-04 20:42:38:4238] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents - GET - ::1[39m
+[2026-08-04 20:42:38:4238] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:577:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m

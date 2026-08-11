@@ -7573,3 +7573,427 @@
 [2026-08-01 14:59:04:594] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
 [2026-08-01 14:59:11:5911] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
 [2026-08-01 14:59:41:5941] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:32:47:3247] [[32minfo[39m]: [32mServer is running in development mode on port 5000[39m
+[2026-08-04 20:33:27:3327] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-04 20:33:31:3331] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:33:31:3331] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:33:31:3331] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:33:31:3331] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:33:32:3332] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:33:33:3333] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:33:33:3333] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:33:33:3333] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:33:38:3338] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:33:39:3339] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:34:09:349] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:34:38:3438] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:35:09:359] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:35:38:3538] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:35:55:3555] [[35mhttp[39m]: [35mPOST /api/v1/requests[39m
+[2026-08-04 20:35:57:3557] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:35:57:3557] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:35:57:3557] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:35:57:3557] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:35:58:3558] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:35:58:3558] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:36:00:360] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:36:00:360] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:36:08:368] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:36:08:368] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:36:08:368] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:36:08:368] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:36:08:368] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:36:08:368] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:36:08:368] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:36:09:369] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:36:19:3619] [[35mhttp[39m]: [35mPOST /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/submit[39m
+[2026-08-04 20:36:21:3621] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:36:21:3621] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:36:21:3621] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:36:23:3623] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:36:27:3627] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:36:27:3627] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:36:27:3627] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:36:28:3628] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:36:28:3628] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:36:28:3628] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:36:28:3628] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:36:28:3628] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:36:32:3632] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:36:33:3633] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:37:02:372] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:37:32:3732] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:37:43:3743] [[35mhttp[39m]: [35mPOST /api/v1/requests[39m
+[2026-08-04 20:37:44:3744] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:37:44:3744] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:37:44:3744] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:37:44:3744] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:37:46:3746] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:37:46:3746] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:37:46:3746] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:37:46:3746] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:37:48:3748] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8[39m
+[2026-08-04 20:37:48:3748] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/comments[39m
+[2026-08-04 20:37:48:3748] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:37:48:3748] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/documents[39m
+[2026-08-04 20:37:49:3749] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:37:49:3749] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8[39m
+[2026-08-04 20:37:49:3749] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/comments[39m
+[2026-08-04 20:37:50:3750] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/documents[39m
+[2026-08-04 20:37:53:3753] [[35mhttp[39m]: [35mPOST /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/submit[39m
+[2026-08-04 20:37:55:3755] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8[39m
+[2026-08-04 20:37:55:3755] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/comments[39m
+[2026-08-04 20:37:55:3755] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/documents[39m
+[2026-08-04 20:37:55:3755] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:38:47:3847] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-04 20:38:48:3848] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:38:48:3848] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:38:48:3848] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:38:48:3848] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:38:50:3850] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:38:50:3850] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:38:50:3850] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:38:50:3850] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:38:53:3853] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:38:53:3853] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8[39m
+[2026-08-04 20:38:53:3853] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/comments[39m
+[2026-08-04 20:38:53:3853] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/documents[39m
+[2026-08-04 20:38:53:3853] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:38:54:3854] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8[39m
+[2026-08-04 20:38:54:3854] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/comments[39m
+[2026-08-04 20:38:54:3854] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/documents[39m
+[2026-08-04 20:38:58:3858] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:38:58:3858] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:38:58:3858] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:38:59:3859] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:38:59:3859] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:38:59:3859] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:38:59:3859] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:38:59:3859] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:01:391] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:01:391] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:39:01:391] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:39:01:391] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:39:01:391] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:02:392] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:39:02:392] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:39:02:392] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:39:13:3913] [[35mhttp[39m]: [35mPOST /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/approve[39m
+[2026-08-04 20:39:16:3916] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:39:16:3916] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:39:16:3916] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments - GET - ::1[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-08-04 20:39:17:3917] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents - GET - ::1[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:577:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760 - GET - ::1[39m
+[2026-08-04 20:39:17:3917] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-04 20:39:19:3919] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:19:3919] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:19:3919] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:19:3919] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:19:3919] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:19:3919] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:19:3919] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:19:3919] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:23:3923] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:23:3923] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:39:23:3923] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:39:23:3923] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:39:23:3923] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents - GET - ::1[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:577:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760 - GET - ::1[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments - GET - ::1[39m
+[2026-08-04 20:39:24:3924] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-08-04 20:39:24:3924] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:39:24:3924] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:39:24:3924] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760 - GET - ::1[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents - GET - ::1[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:577:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments - GET - ::1[39m
+[2026-08-04 20:39:25:3925] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-08-04 20:39:25:3925] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:25:3925] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:25:3925] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:26:3926] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:26:3926] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:26:3926] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:26:3926] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:26:3926] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:29:3929] [[35mhttp[39m]: [35mPUT /api/v1/notifications/read-all[39m
+[2026-08-04 20:39:30:3930] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:38:3938] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-04 20:39:38:3938] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:38:3938] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:38:3938] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:39:3939] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:41:3941] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:41:3941] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:41:3941] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:41:3941] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:45:3945] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:45:3945] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8[39m
+[2026-08-04 20:39:45:3945] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/comments[39m
+[2026-08-04 20:39:45:3945] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/documents[39m
+[2026-08-04 20:39:46:3946] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:46:3946] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/comments[39m
+[2026-08-04 20:39:46:3946] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8/documents[39m
+[2026-08-04 20:39:46:3946] [[35mhttp[39m]: [35mGET /api/v1/requests/79c7c4f3-120a-4b2d-8302-8601d27f40d8[39m
+[2026-08-04 20:39:47:3947] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:47:3947] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:47:3947] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:47:3947] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:47:3947] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:47:3947] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:48:3948] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:39:48:3948] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:39:48:3948] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:48:3948] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:39:48:3948] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:39:48:3948] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:39:49:3949] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:39:49:3949] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:39:49:3949] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:39:49:3949] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:40:33:4033] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-04 20:40:34:4034] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:40:34:4034] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:40:34:4034] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:40:35:4035] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:40:36:4036] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:40:36:4036] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:40:36:4036] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:40:36:4036] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:40:39:4039] [[35mhttp[39m]: [35mPUT /api/v1/notifications/a29b38ba-744a-42d3-a4c2-cdd6709da1ee/read[39m
+[2026-08-04 20:40:40:4040] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:40:40:4040] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:40:40:4040] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:40:40:4040] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:40:40:4040] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:40:41:4041] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:40:41:4041] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:40:41:4041] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:40:41:4041] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:40:55:4055] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:40:55:4055] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:40:55:4055] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:40:56:4056] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:40:57:4057] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:40:57:4057] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:40:57:4057] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:40:57:4057] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:40:59:4059] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:40:59:4059] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:40:59:4059] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:40:59:4059] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:40:59:4059] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:41:00:410] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:41:00:410] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:41:00:410] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:41:14:4114] [[35mhttp[39m]: [35mPOST /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/approve[39m
+[2026-08-04 20:41:17:4117] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:41:17:4117] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:41:17:4117] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760 - GET - ::1[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-04 20:41:18:4118] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments - GET - ::1[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents - GET - ::1[39m
+[2026-08-04 20:41:18:4118] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:577:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-08-04 20:41:19:4119] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:41:19:4119] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:41:19:4119] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:41:19:4119] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:41:19:4119] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:41:19:4119] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:41:20:4120] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:41:20:4120] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:41:29:4129] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-04 20:41:29:4129] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:41:29:4129] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:41:29:4129] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:41:30:4130] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:41:30:4130] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:41:30:4130] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:41:30:4130] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:41:30:4130] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:41:33:4133] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:41:33:4133] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:41:33:4133] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:41:33:4133] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:41:34:4134] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:41:34:4134] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:41:34:4134] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:41:34:4134] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:41:56:4156] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-04 20:41:57:4157] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:41:57:4157] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:41:57:4157] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:41:58:4158] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:41:59:4159] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:41:59:4159] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:41:59:4159] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:41:59:4159] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:42:04:424] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:42:04:424] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:42:04:424] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:42:04:424] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:42:04:424] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:42:05:425] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:42:05:425] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:42:05:425] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:42:34:4234] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:42:35:4235] [[35mhttp[39m]: [35mPOST /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/reject[39m
+[2026-08-04 20:42:36:4236] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:42:36:4236] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:42:36:4236] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:42:37:4237] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760 - GET - ::1[39m
+[2026-08-04 20:42:38:4238] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:59:18)[39m
+[2026-08-04 20:42:38:4238] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:42:38:4238] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments - GET - ::1[39m
+[2026-08-04 20:42:38:4238] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getComments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:555:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:130:20)[39m
+[2026-08-04 20:42:38:4238] [[31merror[39m]: [31m403 - You are not allowed to view this request. - /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents - GET - ::1[39m
+[2026-08-04 20:42:38:4238] [[31merror[39m]: [31mError: You are not allowed to view this request.[39m
+[31m    at RequestService.getRequestById (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:404:13)[39m
+[31m    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)[39m
+[31m    at async RequestService.getDocuments (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\request\request.service.ts:577:5)[39m
+[31m    at async <anonymous> (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\controllers\request.controller.ts:136:21)[39m
+[2026-08-04 20:42:39:4239] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:42:39:4239] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:42:39:4239] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:42:39:4239] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:42:39:4239] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:42:39:4239] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:42:40:4240] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:42:40:4240] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:43:05:435] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-04 20:43:06:436] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:06:436] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:43:06:436] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:43:06:436] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:07:437] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:43:07:437] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:43:08:438] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:43:08:438] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:43:16:4316] [[35mhttp[39m]: [35mPUT /api/v1/notifications/f6aa7fef-7ead-4416-9991-eec79dcff3f5/read[39m
+[2026-08-04 20:43:17:4317] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:17:4317] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:43:17:4317] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:43:17:4317] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:43:17:4317] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:18:4318] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:43:18:4318] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:43:18:4318] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:18:4318] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:43:25:4325] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:25:4325] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:43:25:4325] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:43:25:4325] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:43:25:4325] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:25:4325] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:43:26:4326] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:43:26:4326] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:43:28:4328] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:28:4328] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:43:28:4328] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:43:28:4328] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:43:29:4329] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:29:4329] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:43:29:4329] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:43:29:4329] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:43:36:4336] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:36:4336] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:43:36:4336] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:43:36:4336] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:36:4336] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:43:36:4336] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:43:37:4337] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-04 20:43:37:4337] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-04 20:43:41:4341] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:41:4341] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:43:41:4341] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:43:41:4341] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-04 20:43:42:4342] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-04 20:43:42:4342] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760[39m
+[2026-08-04 20:43:42:4342] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/comments[39m
+[2026-08-04 20:43:43:4343] [[35mhttp[39m]: [35mGET /api/v1/requests/cb7d6bf0-86c6-47eb-b181-7d054af5b760/documents[39m
+[2026-08-05 12:12:32:1232] [[32minfo[39m]: [32mServer is running in development mode on port 5000[39m
+[2026-08-05 12:14:08:148] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-05 12:14:10:1410] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-05 12:14:10:1410] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-05 12:14:10:1410] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-05 12:14:11:1411] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-05 12:14:12:1412] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-05 12:14:12:1412] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-05 12:14:12:1412] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-05 12:14:12:1412] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-05 12:14:40:1440] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-05 12:15:07:157] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-05 12:15:08:158] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-05 12:15:08:158] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-05 12:15:08:158] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-05 12:15:08:158] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-05 12:15:09:159] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-05 12:15:09:159] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-05 12:15:09:159] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-05 12:15:09:159] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-05 12:15:38:1538] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-05 12:16:08:168] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-11 22:06:08:68] [[32minfo[39m]: [32mServer is running in development mode on port 5000[39m

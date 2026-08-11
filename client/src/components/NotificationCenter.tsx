@@ -3,13 +3,15 @@ import { NOTIFICATIONS_REFRESH_EVENT } from '../constants/notifications';
 import { useNavigate } from 'react-router-dom';
 import { api, type NotificationItem } from '../services/api';
 import './NotificationCenter.css';
-
+import { useAuth } from '../context/AuthContext';
+const APPROVER_ROLES = ['HOD', 'DIRECTOR', 'MEDICAL_SUPERINTENDENT', 'HR', 'PURCHASE_OFFICER', 'MAINTENANCE_OFFICER'];
 export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+const { user } = useAuth();
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -73,7 +75,8 @@ export function NotificationCenter() {
     setIsOpen(false);
     const requestId = notif.requestId ?? notif.request?.id;
     if (requestId) {
-      navigate(`/request/${requestId}`);
+      const isApprover = user && APPROVER_ROLES.includes(user.role);
+      navigate(isApprover ? `/approver/request/${requestId}` : `/request/${requestId}`);
     }
   };
 
