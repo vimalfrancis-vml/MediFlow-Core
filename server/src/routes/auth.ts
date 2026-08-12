@@ -1,14 +1,26 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import rateLimit from 'express-rate-limit';
 import { prisma } from '../db';
 import { AppError } from '../middleware/errorHandler';
 import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 15, // limit each IP to 15 requests per windowMs
+  message: {
+    status: 'fail',
+    message: 'Too many login attempts from this IP, please try again after 15 minutes.'
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 // POST /api/v1/auth/login
-router.post('/login', async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+router.post('/login', loginLimiter, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { email, password } = req.body;
 
@@ -25,9 +37,14 @@ router.post('/login', async (req: Request, res: Response, next: NextFunction): P
       return next(new AppError('Invalid email or password.', 401));
     }
 
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret && process.env.NODE_ENV === 'production') {
+      throw new Error('JWT_SECRET environment variable is not set in production.');
+    }
+
     const token = jwt.sign(
       { userId: user.id, role: user.role },
-      process.env.JWT_SECRET || 'supersecretchangeinproduction',
+      jwtSecret || 'supersecretchangeinproduction',
       { expiresIn: (process.env.JWT_EXPIRES_IN || '1d') as any }
     );
 

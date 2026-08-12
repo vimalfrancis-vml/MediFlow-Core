@@ -143,7 +143,9 @@
 }
 
 @media (max-width: 900px) {
-  .ad-grid { grid-template-columns: 1fr; }
+  .ad-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Sections */
@@ -306,7 +308,11 @@
   margin-bottom: 1.5rem;
 }
 
-@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 .state-card {
   display: flex;

@@ -78,8 +78,17 @@ export function RequestTable({
             {requests.map(request => (
               <tr 
                 key={request.id} 
+                tabIndex={0}
+                role="button"
+                aria-label={`View request ${request.referenceNumber || ''}: ${request.title || ''}`}
                 onClick={() => navigate(`${baseRoute}/${request.id}`)}
-                className="hover:bg-slate-50/60 cursor-pointer transition-colors duration-150"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    navigate(`${baseRoute}/${request.id}`);
+                  }
+                }}
+                className="hover:bg-slate-50/60 cursor-pointer transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 focus-visible:outline-offset-[-2px] focus-visible:bg-slate-50"
               >
                 <td className="px-5 py-3.5 font-mono text-[11px] font-medium text-slate-500">{request.referenceNumber || '—'}</td>
                 <td className="px-5 py-3.5 font-medium text-slate-800">{request.title || '—'}</td>

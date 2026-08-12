@@ -82,7 +82,7 @@ export default function ApproverDetailsPage() {
     }
   };
 
-  const isActionable = 
+  const isActionable =
     request?.status === 'IN_REVIEW' &&
     request?.currentStep &&
     user?.role === request.currentStep.approverRole &&
@@ -120,141 +120,141 @@ export default function ApproverDetailsPage() {
                   &larr; Back to Pending Approvals
                 </button>
               </div>
-        
-        <div className="ad-title-row">
-          <h1>{request.title}</h1>
-          <span className={`request-status status-${request.status.toLowerCase()}`}>
-            {request.status.replace(/_/g, ' ')}
-          </span>
-        </div>
 
-        <div className="ad-meta">
-          <span className="request-ref">{request.referenceNumber}</span>
-          <span>•</span>
-          <span>{new Date(request.createdAt).toLocaleDateString()}</span>
-          <span>•</span>
-          <span>{request.department?.name || '—'}</span>
-        </div>
-
-        {/* Error banner */}
-        {actionError && (
-          <div className="error-banner" role="alert">
-            ✕ {actionError}
-          </div>
-        )}
-
-        {/* Success banner */}
-        {actionSuccess && (
-          <div className="success-banner">
-            ✓ {actionSuccess}
-          </div>
-        )}
-
-        {/* Action Buttons — only when IN_REVIEW */}
-        {isActionable && (
-          <div className="ad-action-bar">
-            <button
-              id="btn-approve"
-              className="ad-btn ad-btn-approve"
-              onClick={() => setActiveModal('approve')}
-            >
-              ✓ Approve
-            </button>
-            <button
-              id="btn-return"
-              className="ad-btn ad-btn-return"
-              onClick={() => setActiveModal('return')}
-            >
-              ↩ Return for Changes
-            </button>
-            <button
-              id="btn-reject"
-              className="ad-btn ad-btn-reject"
-              onClick={() => setActiveModal('reject')}
-            >
-              ✕ Reject
-            </button>
-          </div>
-        )}
-      </header>
-
-      {/* Body */}
-      <main className="ad-grid max-w-7xl mx-auto">
-        <div className="ad-main-col">
-          <WorkflowProgress request={request} />
-
-          {/* Request Info */}
-          <section className="ad-section">
-            <h2>Request Details</h2>
-            <div className="info-grid">
-              <div className="info-item">
-                <span className="info-label">Type</span>
-                <span className="info-value">{request.type}</span>
+              <div className="ad-title-row">
+                <h1>{request.title}</h1>
+                <span className={`request-status status-${request.status.toLowerCase()}`}>
+                  {request.status.replace(/_/g, ' ')}
+                </span>
               </div>
-              <div className="info-item">
-                <span className="info-label">Priority</span>
-                <span className="info-value">{request.priority}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Department</span>
-                <span className="info-value">{request.department?.name || '—'}</span>
-              </div>
-              <div className="info-item">
-                <span className="info-label">Workflow</span>
-                <span className="info-value">{request.workflowTemplate?.name || '—'}</span>
-              </div>
-            </div>
-          </section>
 
-          <RequestTypeDetails request={request} />
+              <div className="ad-meta">
+                <span className="request-ref">{request.referenceNumber}</span>
+                <span>•</span>
+                <span>{new Date(request.createdAt).toLocaleDateString()}</span>
+                <span>•</span>
+                <span>{request.department?.name || '—'}</span>
+              </div>
 
-          <AuditTimeline logs={request.auditLogs || []} />
+              {/* Error banner */}
+              {actionError && (
+                <div className="error-banner" role="alert">
+                  ✕ {actionError}
+                </div>
+              )}
 
-          <section className="ad-section">
-            <h2>Comments & History</h2>
-            {comments.length === 0 ? (
-              <div className="empty-substate">No comments yet.</div>
-            ) : (
-              <div className="comments-list">
-                {comments.map(c => (
-                  <div key={c.id} className="comment-card">
-                    <div className="comment-header">
-                    <span className="comment-author">
-                        User …{c.actorId.slice(-6)}
-                      </span>
-                      <span className="comment-date">{new Date(c.createdAt).toLocaleString()}</span>
+              {/* Success banner */}
+              {actionSuccess && (
+                <div className="success-banner">
+                  ✓ {actionSuccess}
+                </div>
+              )}
+
+              {/* Action Buttons — only when IN_REVIEW */}
+              {isActionable && (
+                <div className="ad-action-bar">
+                  <button
+                    id="btn-approve"
+                    className="ad-btn ad-btn-approve"
+                    onClick={() => setActiveModal('approve')}
+                  >
+                    ✓ Approve
+                  </button>
+                  <button
+                    id="btn-return"
+                    className="ad-btn ad-btn-return"
+                    onClick={() => setActiveModal('return')}
+                  >
+                    ↩ Return for Changes
+                  </button>
+                  <button
+                    id="btn-reject"
+                    className="ad-btn ad-btn-reject"
+                    onClick={() => setActiveModal('reject')}
+                  >
+                    ✕ Reject
+                  </button>
+                </div>
+              )}
+            </header>
+
+            {/* Body */}
+            <main className="ad-grid max-w-7xl mx-auto">
+              <div className="ad-main-col">
+                <WorkflowProgress request={request} />
+
+                {/* Request Info */}
+                <section className="ad-section">
+                  <h2>Request Details</h2>
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <span className="info-label">Type</span>
+                      <span className="info-value">{request.type}</span>
                     </div>
-                    <p className="comment-body">{c.comment}</p>
+                    <div className="info-item">
+                      <span className="info-label">Priority</span>
+                      <span className="info-value">{request.priority}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Department</span>
+                      <span className="info-value">{request.department?.name || '—'}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Workflow</span>
+                      <span className="info-value">{request.workflowTemplate?.name || '—'}</span>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
+                </section>
 
-        {/* Sidebar */}
-        <div className="ad-sidebar">
-          <section className="ad-section">
-            <h2>Documents</h2>
-            {documents.length === 0 ? (
-              <div className="empty-substate">No documents attached.</div>
-            ) : (
-              <ul className="document-list">
-                {documents.map(d => (
-                  <li key={d.id} className="document-item">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                    </svg>
-                    <a href={d.url} target="_blank" rel="noopener noreferrer">{d.fileName}</a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        </div>
-      </main>
-    </>
+                <RequestTypeDetails request={request} />
+
+                <AuditTimeline logs={request.auditLogs || []} />
+
+                <section className="ad-section">
+                  <h2>Comments & History</h2>
+                  {comments.length === 0 ? (
+                    <div className="empty-substate">No comments yet.</div>
+                  ) : (
+                    <div className="comments-list">
+                      {comments.map(c => (
+                        <div key={c.id} className="comment-card">
+                          <div className="comment-header">
+                            <span className="comment-author">
+                              User …{c.actorId.slice(-6)}
+                            </span>
+                            <span className="comment-date">{new Date(c.createdAt).toLocaleString()}</span>
+                          </div>
+                          <p className="comment-body">{c.comment}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              </div>
+
+              {/* Sidebar */}
+              <div className="ad-sidebar">
+                <section className="ad-section">
+                  <h2>Documents</h2>
+                  {documents.length === 0 ? (
+                    <div className="empty-substate">No documents attached.</div>
+                  ) : (
+                    <ul className="document-list">
+                      {documents.map(d => (
+                        <li key={d.id} className="document-item">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                          </svg>
+                          <a href={d.url} target="_blank" rel="noopener noreferrer">{d.fileName}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </section>
+              </div>
+            </main>
+          </>
         )}
       </div>
     </DashboardLayout>

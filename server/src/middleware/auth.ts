@@ -30,6 +30,9 @@ export const requireAuth = async (
 
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error('JWT_SECRET environment variable is not set in production.');
+      }
       console.warn('[WARN] JWT_SECRET env var is not set — using insecure default. Set it in production.');
     }
 

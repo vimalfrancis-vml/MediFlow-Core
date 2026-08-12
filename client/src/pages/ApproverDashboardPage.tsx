@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api, type RequestItem } from '../services/api';
 import { AnalyticsCards } from '../components/AnalyticsCards';
 import { SimpleChart } from '../components/SimpleChart';
@@ -11,6 +12,7 @@ import type { AnalyticsData } from '../services/api';
 import './DashboardPage.css';
 
 export default function ApproverDashboardPage() {
+  const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<'pending' | 'history'>('pending');
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -28,8 +30,12 @@ export default function ApproverDashboardPage() {
         api.getAnalytics()
       ]);
       let fetchedRequests = reqRes.data || [];
-      if (viewMode === 'history') {
-        fetchedRequests = fetchedRequests.filter((r) => r.status !== 'IN_REVIEW');
+      if (viewMode === 'pending') {
+        fetchedRequests = fetchedRequests.filter((r) => r.status === 'IN_REVIEW');
+      } else if (viewMode === 'history') {
+        fetchedRequests = fetchedRequests.filter(
+          (r) => r.status === 'APPROVED' || r.status === 'REJECTED' || r.status === 'RETURNED'
+        );
       }
       setRequests(fetchedRequests);
       setAnalytics(analyticsRes.data);
@@ -52,19 +58,27 @@ export default function ApproverDashboardPage() {
           <h1 className="text-2xl font-bold text-slate-900">Approver Dashboard</h1>
           <p className="text-slate-500 mt-1">Review requests awaiting your approval.</p>
         </div>
-        <div className="flex space-x-2">
+        <div className="flex items-center space-x-4">
           <button
-            className={`px-4 py-2 rounded ${viewMode === 'pending' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-            onClick={() => setViewMode('pending')}
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow-sm transition-colors duration-150"
+            onClick={() => navigate('/new-request')}
           >
-            Pending
+            + New Request
           </button>
-          <button
-            className={`px-4 py-2 rounded ${viewMode === 'history' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}`}
-            onClick={() => setViewMode('history')}
-          >
-            History
-          </button>
+          <div className="flex space-x-2">
+            <button
+              className={`px-4 py-2 rounded ${viewMode === 'pending' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+              onClick={() => setViewMode('pending')}
+            >
+              Pending
+            </button>
+            <button
+              className={`px-4 py-2 rounded ${viewMode === 'history' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+              onClick={() => setViewMode('history')}
+            >
+              History
+            </button>
+          </div>
         </div>
       </div>
 
