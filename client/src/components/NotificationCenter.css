@@ -176,3 +176,28 @@
   flex-shrink: 0;
   box-shadow: 0 0 8px rgba(139, 92, 246, 0.6);
 }
+
+@media (max-width: 640px) {
+  .notification-dropdown {
+    position: fixed;
+    top: 64px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+    max-width: none;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  }
+
+  .notification-item {
+    padding: 1rem;
+  }
+  
+  .notification-content p {
+    font-size: 0.85rem;
+    margin-bottom: 0.35rem;
+  }
+  
+  .notification-time {
+    font-size: 0.7rem;
+  }
+}
