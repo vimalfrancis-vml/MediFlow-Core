@@ -22,7 +22,12 @@ const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
     const cleanOrigin = origin.trim().replace(/\/$/, '');
-    if (process.env.NODE_ENV !== 'production' || allowedOrigins.includes(cleanOrigin)) {
+    if (
+      process.env.NODE_ENV !== 'production' || 
+      allowedOrigins.includes(cleanOrigin) || 
+      cleanOrigin.endsWith('.vercel.app') || 
+      cleanOrigin.endsWith('.onrender.com')
+    ) {
       callback(null, true);
     } else {
       logger.warn(`CORS blocked for origin: "${origin}". Cleaned origin: "${cleanOrigin}". Allowed origins: ${JSON.stringify(allowedOrigins)}`);
