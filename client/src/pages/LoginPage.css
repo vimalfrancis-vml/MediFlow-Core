@@ -9,58 +9,49 @@
   justify-content: center;
   position: relative;
   overflow: hidden;
-  background: #110f24;
+  background: #0b1329;
   padding: 1rem;
 }
 
-/* --- Ambient animated background --- */
+/* --- Ambient subtle background glow --- */
 .login-ambient-bg {
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
+  pointer-events: none;
 }
 
 .ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.15;
-  animation: float 12s ease-in-out infinite;
+  filter: blur(100px);
+  opacity: 0.12;
 }
 
 .ambient-orb-1 {
-  width: 420px;
-  height: 420px;
+  width: 500px;
+  height: 500px;
   background: #6366f1;
-  top: -10%;
-  left: -5%;
-  animation-delay: 0s;
+  top: -15%;
+  left: -10%;
 }
 
 .ambient-orb-2 {
-  width: 350px;
-  height: 350px;
+  width: 450px;
+  height: 450px;
   background: #8b5cf6;
-  bottom: -15%;
-  right: -5%;
-  animation-delay: -4s;
+  bottom: -20%;
+  right: -10%;
 }
 
 .ambient-orb-3 {
-  width: 280px;
-  height: 280px;
-  background: #a78bfa;
+  width: 300px;
+  height: 300px;
+  background: #6366f1;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  animation-delay: -8s;
-}
-
-@keyframes float {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%      { transform: translate(30px, -20px) scale(1.05); }
-  66%      { transform: translate(-20px, 15px) scale(0.95); }
 }
 
 /* --- Login card --- */
@@ -68,16 +59,14 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 440px;
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: 20px;
-  padding: 2.5rem 2rem 2rem;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.05),
-    0 24px 80px -12px rgba(0, 0, 0, 0.5);
+  max-width: 420px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  padding: 2.25rem 2rem 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
 }
 
 /* --- Header / Branding --- */

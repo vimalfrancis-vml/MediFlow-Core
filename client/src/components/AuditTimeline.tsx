@@ -8,7 +8,7 @@ interface AuditTimelineProps {
 export function AuditTimeline({ logs }: AuditTimelineProps) {
   if (!logs || logs.length === 0) {
     return (
-      <div className="section-card mt-8 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+      <div className="section-card mt-8 bg-white p-6 rounded-xl shadow-sm border border-slate-200/80">
         <h2 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-4">Audit Timeline</h2>
         <div className="flex flex-col items-center justify-center py-6 text-center text-slate-400">
           <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +82,7 @@ export function AuditTimeline({ logs }: AuditTimelineProps) {
   };
 
   return (
-    <div className="section-card mt-8 bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+    <div className="section-card mt-8 bg-white p-6 rounded-xl shadow-sm border border-slate-200/80">
       <h2 className="text-lg font-bold text-slate-900 mb-6 border-b border-slate-100 pb-4">Audit Timeline</h2>
       <div className="relative border-l border-slate-200 ml-3">
         {logs.map((log, index) => {

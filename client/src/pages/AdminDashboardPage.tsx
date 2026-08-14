@@ -47,10 +47,10 @@ export default function AdminDashboardPage() {
       title="MediFlow" 
       brandPrefix="Admin"
       nav={
-        <nav className="admin-nav flex items-center gap-2 sm:gap-4 mr-2 sm:mr-4">
-          <button className="nav-link-btn text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin')}>Overview</button>
-          <button className="nav-link-btn text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin/users')}>Users</button>
-          <button className="nav-link-btn text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin/departments')}>Departments</button>
+        <nav className="admin-nav flex items-center gap-1 sm:gap-2 mr-2 sm:mr-4">
+          <button className="px-3 py-1 rounded-md text-xs sm:text-sm font-semibold bg-indigo-50 text-indigo-700 transition-colors" onClick={() => navigate('/admin')}>Overview</button>
+          <button className="px-3 py-1 rounded-md text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" onClick={() => navigate('/admin/users')}>Users</button>
+          <button className="px-3 py-1 rounded-md text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" onClick={() => navigate('/admin/departments')}>Departments</button>
         </nav>
       }
     >
