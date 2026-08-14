@@ -72,17 +72,17 @@ export function WorkflowProgress({ request }: WorkflowProgressProps) {
         </div>
       </div>
 
-      <div className="relative">
-        <div className="flex justify-between items-center relative z-10">
+      <div className="relative pl-1 md:pl-0">
+        <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center relative z-10 gap-6 md:gap-0">
           {steps.map((step, index) => {
             const state = getStepState(step.order);
             const isLast = index === steps.length - 1;
             
             return (
               <Fragment key={step.id}>
-                {/* Node */}
-                <div className="flex flex-col items-center flex-1 relative group cursor-help">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all duration-300 z-10 ${getStateStyles(state)}`}>
+                {/* Node wrapper - row on mobile, col on desktop */}
+                <div className="flex flex-row md:flex-col items-start md:items-center gap-4 md:gap-0 flex-1 relative group cursor-help w-full md:w-auto">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm border-2 transition-all duration-300 z-10 flex-shrink-0 ${getStateStyles(state)}`}>
                     {state === 'COMPLETED' ? (
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
                     ) : state === 'REJECTED' ? (
@@ -91,25 +91,28 @@ export function WorkflowProgress({ request }: WorkflowProgressProps) {
                       step.order
                     )}
                   </div>
-                  <span className={`text-xs font-semibold mt-3 text-center transition-colors max-w-[100px] leading-tight ${state === 'CURRENT' ? 'text-indigo-900' : 'text-slate-500'}`}>
-                    {step.stepName}
-                  </span>
-                  <span className={`text-[10px] mt-1 uppercase tracking-wider font-medium ${state === 'CURRENT' ? 'text-indigo-600' : 'text-slate-400'}`}>
-                    {step.approverRole.replace(/_/g, ' ')}
-                  </span>
+                  
+                  <div className="flex flex-col items-start md:items-center mt-0.5 md:mt-3 leading-tight">
+                    <span className={`text-xs font-semibold transition-colors max-w-[200px] md:max-w-[100px] text-left md:text-center ${state === 'CURRENT' ? 'text-indigo-900' : 'text-slate-500'}`}>
+                      {step.stepName}
+                    </span>
+                    <span className={`text-[10px] mt-1 uppercase tracking-wider font-medium text-left md:text-center ${state === 'CURRENT' ? 'text-indigo-600' : 'text-slate-400'}`}>
+                      {step.approverRole.replace(/_/g, ' ')}
+                    </span>
+                  </div>
                   
                   {/* Tooltip */}
-                  <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-xs py-1 px-3 rounded whitespace-nowrap pointer-events-none z-20">
+                  <div className="absolute -top-12 left-10 md:left-auto opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-xs py-1 px-3 rounded whitespace-nowrap pointer-events-none z-20">
                     {state === 'COMPLETED' ? 'Completed' : state === 'CURRENT' ? 'Active Step' : state === 'PENDING' ? 'Awaiting action' : state}
                   </div>
-                </div>
 
-                {/* Connecting Line */}
-                {!isLast && (
-                  <div className="flex-auto h-[2px] -mx-4 mt-[-40px] relative z-0">
-                    <div className={`absolute inset-0 transition-colors duration-500 ${getLineColor(state)}`} />
-                  </div>
-                )}
+                  {/* Connecting Line - absolute vertical on mobile, relative horizontal on desktop */}
+                  {!isLast && (
+                    <div className="absolute left-[19px] top-10 w-[2px] h-6 md:relative md:left-auto md:top-auto md:w-auto md:h-[2px] md:flex-auto md:-mx-4 md:mt-[-40px] z-0">
+                      <div className={`absolute inset-0 transition-colors duration-500 ${getLineColor(state)}`} />
+                    </div>
+                  )}
+                </div>
               </Fragment>
             );
           })}

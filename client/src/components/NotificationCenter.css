@@ -1,7 +1,13 @@
 .notification-center {
   position: relative;
-  margin-right: 1rem;
+  margin-right: 0.5rem;
   z-index: 50;
+}
+
+@media (min-width: 640px) {
+  .notification-center {
+    margin-right: 1rem;
+  }
 }
 
 .notification-bell {

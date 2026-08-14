@@ -8352,3 +8352,156 @@
 [2026-08-13 00:11:12:1112] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
 [2026-08-13 00:12:12:1212] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
 [2026-08-13 00:13:12:1312] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:20:11:2011] [[32minfo[39m]: [32mServer is running in development mode on port 5000[39m
+[2026-08-14 22:22:11:2211] [[35mhttp[39m]: [35mGET /api/v1/auth/me[39m
+[2026-08-14 22:22:11:2211] [[31merror[39m]: [31m401 - Please sign in again to verify your identity. - /api/v1/auth/me - GET - ::1[39m
+[2026-08-14 22:22:11:2211] [[31merror[39m]: [31mError: Please sign in again to verify your identity.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:65:17)[39m
+[31m    at Layer.handleRequest (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\layer.js:152:17)[39m
+[31m    at next (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\route.js:157:13)[39m
+[31m    at Route.dispatch (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\route.js:117:3)[39m
+[31m    at handle (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:435:11)[39m
+[31m    at Layer.handleRequest (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\layer.js:152:17)[39m
+[31m    at C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:295:15[39m
+[31m    at processParams (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:582:12)[39m
+[31m    at next (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:291:5)[39m
+[31m    at router.handle (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:186:3)[39m
+[2026-08-14 22:22:11:2211] [[35mhttp[39m]: [35mGET /api/v1/auth/me[39m
+[2026-08-14 22:22:11:2211] [[31merror[39m]: [31m401 - Please sign in again to verify your identity. - /api/v1/auth/me - GET - ::1[39m
+[2026-08-14 22:22:11:2211] [[31merror[39m]: [31mError: Please sign in again to verify your identity.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:65:17)[39m
+[31m    at Layer.handleRequest (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\layer.js:152:17)[39m
+[31m    at next (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\route.js:157:13)[39m
+[31m    at Route.dispatch (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\route.js:117:3)[39m
+[31m    at handle (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:435:11)[39m
+[31m    at Layer.handleRequest (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\layer.js:152:17)[39m
+[31m    at C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:295:15[39m
+[31m    at processParams (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:582:12)[39m
+[31m    at next (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:291:5)[39m
+[31m    at router.handle (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:186:3)[39m
+[2026-08-14 22:22:38:2238] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-14 22:22:40:2240] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:22:40:2240] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:22:40:2240] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:22:40:2240] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:22:41:2241] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:22:41:2241] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:22:41:2241] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:22:41:2241] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:22:53:2253] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:22:54:2254] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:23:03:233] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:23:03:233] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:23:03:233] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:23:04:234] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:23:04:234] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:23:04:234] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:23:05:235] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:23:05:235] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:23:14:2314] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:23:14:2314] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d[39m
+[2026-08-14 22:23:14:2314] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/comments[39m
+[2026-08-14 22:23:14:2314] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/documents[39m
+[2026-08-14 22:23:15:2315] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:23:15:2315] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d[39m
+[2026-08-14 22:23:15:2315] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/documents[39m
+[2026-08-14 22:23:15:2315] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/comments[39m
+[2026-08-14 22:23:42:2342] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-14 22:23:43:2343] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:23:43:2343] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:23:43:2343] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:23:44:2344] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:23:45:2345] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:23:45:2345] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:23:45:2345] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:23:45:2345] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:23:56:2356] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1[39m
+[2026-08-14 22:23:56:2356] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:23:56:2356] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1/comments[39m
+[2026-08-14 22:23:56:2356] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1/documents[39m
+[2026-08-14 22:23:57:2357] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:23:58:2358] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1[39m
+[2026-08-14 22:23:58:2358] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1/documents[39m
+[2026-08-14 22:23:58:2358] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1/comments[39m
+[2026-08-14 22:24:15:2415] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-14 22:24:15:2415] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:24:15:2415] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:24:15:2415] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:24:16:2416] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:24:16:2416] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:24:16:2416] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:24:16:2416] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:24:16:2416] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:24:26:2426] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:24:26:2426] [[35mhttp[39m]: [35mGET /api/v1/users[39m
+[2026-08-14 22:24:26:2426] [[35mhttp[39m]: [35mGET /api/v1/users[39m
+[2026-08-14 22:24:26:2426] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:24:35:2435] [[35mhttp[39m]: [35mGET /api/v1/users/eb04a02c-c255-428b-87d7-83176273887d[39m
+[2026-08-14 22:24:35:2435] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:24:35:2435] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:24:35:2435] [[35mhttp[39m]: [35mGET /api/v1/users/eb04a02c-c255-428b-87d7-83176273887d[39m
+[2026-08-14 22:24:44:2444] [[35mhttp[39m]: [35mGET /api/v1/departments[39m
+[2026-08-14 22:24:44:2444] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:24:44:2444] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:24:44:2444] [[35mhttp[39m]: [35mGET /api/v1/departments[39m
+[2026-08-14 22:24:51:2451] [[35mhttp[39m]: [35mGET /api/v1/departments/f1cc799e-b251-489f-9943-a5bb45960bc5[39m
+[2026-08-14 22:24:51:2451] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:24:51:2451] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:24:52:2452] [[35mhttp[39m]: [35mGET /api/v1/departments/f1cc799e-b251-489f-9943-a5bb45960bc5[39m
+[2026-08-14 22:25:21:2521] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:25:51:2551] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:26:21:2621] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:26:51:2651] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:27:21:2721] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:27:45:2745] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:28:15:2815] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:28:45:2845] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:29:15:2915] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:29:29:2929] [[35mhttp[39m]: [35mGET /api/v1/auth/me[39m
+[2026-08-14 22:29:30:2930] [[35mhttp[39m]: [35mGET /api/v1/auth/me[39m
+[2026-08-14 22:29:43:2943] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-14 22:29:44:2944] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:29:44:2944] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:29:44:2944] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:29:44:2944] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:29:45:2945] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:29:45:2945] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:29:45:2945] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:29:45:2945] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:29:57:2957] [[35mhttp[39m]: [35mGET /api/v1/auth/me[39m
+[2026-08-14 22:29:57:2957] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:29:58:2958] [[35mhttp[39m]: [35mGET /api/v1/auth/me[39m
+[2026-08-14 22:29:58:2958] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:30:07:307] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:30:07:307] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:30:07:307] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:30:07:307] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:30:07:307] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:30:07:307] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:30:08:308] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:30:08:308] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:30:18:3018] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:30:18:3018] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d[39m
+[2026-08-14 22:30:18:3018] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/comments[39m
+[2026-08-14 22:30:18:3018] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/documents[39m
+[2026-08-14 22:30:18:3018] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:30:18:3018] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d[39m
+[2026-08-14 22:30:18:3018] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/documents[39m
+[2026-08-14 22:30:18:3018] [[35mhttp[39m]: [35mGET /api/v1/requests/d61a44cc-ff0e-49c5-84a1-d6d60e86b23d/comments[39m
+[2026-08-14 22:30:43:3043] [[35mhttp[39m]: [35mPOST /api/v1/auth/login[39m
+[2026-08-14 22:30:44:3044] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:30:44:3044] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:30:44:3044] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:30:44:3044] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:30:45:3045] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:30:45:3045] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:30:46:3046] [[35mhttp[39m]: [35mGET /api/v1/requests/analytics[39m
+[2026-08-14 22:30:46:3046] [[35mhttp[39m]: [35mGET /api/v1/requests?page=1&limit=10[39m
+[2026-08-14 22:30:54:3054] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:30:54:3054] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1[39m
+[2026-08-14 22:30:54:3054] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1/comments[39m
+[2026-08-14 22:30:54:3054] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1/documents[39m
+[2026-08-14 22:30:54:3054] [[35mhttp[39m]: [35mGET /api/v1/notifications[39m
+[2026-08-14 22:30:54:3054] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1/comments[39m
+[2026-08-14 22:30:54:3054] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1/documents[39m
+[2026-08-14 22:30:55:3055] [[35mhttp[39m]: [35mGET /api/v1/requests/51c30d9e-207e-490c-a961-afee7b925ee1[39m

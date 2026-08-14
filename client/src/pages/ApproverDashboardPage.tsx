@@ -53,27 +53,27 @@ export default function ApproverDashboardPage() {
 
   return (
     <DashboardLayout title="MediFlow" brandPrefix="Approver">
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Approver Dashboard</h1>
           <p className="text-slate-500 mt-1">Review requests awaiting your approval.</p>
         </div>
-        <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto">
           <button
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow-sm transition-colors duration-150"
+            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow-sm transition-colors duration-150 text-center"
             onClick={() => navigate('/new-request')}
           >
             + New Request
           </button>
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 w-full sm:w-auto">
             <button
-              className={`px-4 py-2 rounded ${viewMode === 'pending' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+              className={`flex-1 sm:flex-none px-4 py-2 rounded ${viewMode === 'pending' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}`}
               onClick={() => setViewMode('pending')}
             >
               Pending
             </button>
             <button
-              className={`px-4 py-2 rounded ${viewMode === 'history' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}`}
+              className={`flex-1 sm:flex-none px-4 py-2 rounded ${viewMode === 'history' ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-800'}`}
               onClick={() => setViewMode('history')}
             >
               History

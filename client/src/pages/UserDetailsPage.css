@@ -75,3 +75,14 @@
   font-weight: var(--weight-medium);
   color: #0f172a;
 }
+
+@media (max-width: 640px) {
+  .details-card {
+    padding: 1.25rem;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

@@ -39,10 +39,10 @@ export default function DepartmentDetailsPage() {
       title="MediFlow"
       brandPrefix="Admin"
       nav={
-        <nav className="admin-nav flex items-center gap-4 mr-4">
-          <button className="nav-link-btn text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin')}>Overview</button>
-          <button className="nav-link-btn text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin/users')}>Users</button>
-          <button className="nav-link-btn text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin/departments')}>Departments</button>
+        <nav className="admin-nav flex items-center gap-2 sm:gap-4 mr-2 sm:mr-4">
+          <button className="nav-link-btn text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin')}>Overview</button>
+          <button className="nav-link-btn text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin/users')}>Users</button>
+          <button className="nav-link-btn text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin/departments')}>Departments</button>
         </nav>
       }
     >
@@ -89,7 +89,7 @@ export default function DepartmentDetailsPage() {
               </div>
             </div>
 
-            <div className="dept-employees-section">
+            <div className="dept-employees-section text-left">
               <h3>Department Employees ({department._count?.users || 0})</h3>
               
               {!department.users || department.users.length === 0 ? (
@@ -97,36 +97,38 @@ export default function DepartmentDetailsPage() {
                   No employees assigned to this department.
                 </div>
               ) : (
-                <table className="dept-users-table">
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Role</th>
-                      <th>Email</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {department.users.map(user => (
-                      <tr key={user.id}>
-                        <td>
-                          <div className="user-name">
-                            {user.firstName} {user.lastName}
-                          </div>
-                        </td>
-                        <td>
-                          <span className="role-badge">{user.role.replace(/_/g, ' ')}</span>
-                        </td>
-                        <td>{user.email}</td>
-                        <td>
-                          <span className={`status-badge ${user.isActive ? 'status-active' : 'status-inactive'}`}>
-                            {user.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        </td>
+                <div className="overflow-x-auto w-full">
+                  <table className="dept-users-table">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Email</th>
+                        <th>Status</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {department.users.map(user => (
+                        <tr key={user.id}>
+                          <td>
+                            <div className="user-name">
+                              {user.firstName} {user.lastName}
+                            </div>
+                          </td>
+                          <td>
+                            <span className="role-badge">{user.role.replace(/_/g, ' ')}</span>
+                          </td>
+                          <td>{user.email}</td>
+                          <td>
+                            <span className={`status-badge ${user.isActive ? 'status-active' : 'status-inactive'}`}>
+                              {user.isActive ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           </>

@@ -47,14 +47,14 @@ export default function AdminDashboardPage() {
       title="MediFlow" 
       brandPrefix="Admin"
       nav={
-        <nav className="admin-nav flex items-center gap-4 mr-4">
-          <button className="nav-link-btn text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin')}>Overview</button>
-          <button className="nav-link-btn text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin/users')}>Users</button>
-          <button className="nav-link-btn text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin/departments')}>Departments</button>
+        <nav className="admin-nav flex items-center gap-2 sm:gap-4 mr-2 sm:mr-4">
+          <button className="nav-link-btn text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin')}>Overview</button>
+          <button className="nav-link-btn text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin/users')}>Users</button>
+          <button className="nav-link-btn text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900" onClick={() => navigate('/admin/departments')}>Departments</button>
         </nav>
       }
     >
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
           <p className="text-slate-500 mt-1">System-wide overview of all workflows and requests.</p>

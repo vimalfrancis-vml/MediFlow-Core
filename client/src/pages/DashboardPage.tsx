@@ -45,13 +45,13 @@ export default function DashboardPage() {
   return (
     <DashboardLayout title="MediFlow">
       {/* Page heading row */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Executive Overview</h1>
           <p className="text-sm text-slate-500 mt-1">Manage and track the status of your internal requests.</p>
         </div>
         <button
-          className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow-sm transition-colors duration-150"
+          className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow-sm transition-colors duration-150 whitespace-nowrap"
           onClick={() => navigate('/new-request')}
         >
           + New Request
