@@ -15,15 +15,17 @@ const app = express();
 
 // Initialize Middlewares
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) 
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim().replace(/\/$/, '')) 
   : [];
 
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
-    if (process.env.NODE_ENV !== 'production' || allowedOrigins.includes(origin)) {
+    const cleanOrigin = origin.trim().replace(/\/$/, '');
+    if (process.env.NODE_ENV !== 'production' || allowedOrigins.includes(cleanOrigin)) {
       callback(null, true);
     } else {
+      logger.warn(`CORS blocked for origin: "${origin}". Cleaned origin: "${cleanOrigin}". Allowed origins: ${JSON.stringify(allowedOrigins)}`);
       callback(null, false);
     }
   },
