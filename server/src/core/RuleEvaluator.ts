@@ -104,10 +104,8 @@ export function evaluateRules(
   // Deduplicate consecutive identical roles if any remain
   const deduplicatedSteps: WorkflowStep[] = [];
   for (const step of steps) {
-    if (
-      deduplicatedSteps.length === 0 ||
-      deduplicatedSteps[deduplicatedSteps.length - 1].approverRole !== step.approverRole
-    ) {
+    const lastStep = deduplicatedSteps[deduplicatedSteps.length - 1];
+    if (!lastStep || lastStep.approverRole !== step.approverRole) {
       deduplicatedSteps.push(step);
     }
   }
