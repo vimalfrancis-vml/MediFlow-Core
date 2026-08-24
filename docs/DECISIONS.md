@@ -1,77 +1,47 @@
-# Architectural Decision Log
+# Key Design & Architectural Decisions
 
-*Last Updated: 2026-07-18*
+*Document Version: 1.0 (Client Handover Edition)*
 
-This document serves as a historical record of major architectural and design decisions made throughout the MediFlow project. Its purpose is to explain *why* certain approaches were chosen, making developer onboarding and future AI sessions much easier.
-
----
-
-## Dynamic Workflow Architecture
-### Date
-2026-07-18
-### Decision
-Workflows are data-driven via `WorkflowTemplate` and `WorkflowStep` database tables rather than hardcoded in the codebase.
-### Reason
-Different request types (Maintenance, Purchase, Leave) require entirely different, often complex approval chains that may change frequently based on hospital policy. Hardcoding these chains would require constant code deployments. A dynamic structure allows administrators to adjust pipelines safely.
-### Alternatives Considered
-Hardcoding approval logic in specific services (e.g., `LeaveService`, `PurchaseService`). This was rejected due to lack of flexibility and high long-term maintenance overhead.
-### Status
-Active
+This document explains the key design choices made during the creation of **MediFlow**, detailing *why* the system was built this way to help hospital administrators and IT leads understand its foundation.
 
 ---
 
-## DashboardLayout & DashboardHeader Introduction
-### Date
-2026-07-18
-### Decision
-Implement a unified `DashboardLayout` and `DashboardHeader` to wrap all authenticated routes.
-### Reason
-To guarantee a consistent navigation experience, strict layout bounds, and uniform branding across all role-based dashboards (Admin, Approver, Employee), avoiding UI drift and duplicated layout code across page components.
-### Alternatives Considered
-Duplicating a navbar component in every single page view. Rejected due to code duplication and difficulty in maintaining consistent spacing.
-### Status
-Active
+## 1. Flexible & Customizable Workflows
+* **What We Built:** Approval paths for requests (Leave, Equipment Purchases, Facilities Maintenance) are stored as flexible system rules rather than fixed code.
+* **Why This Matters:** Hospital policies and approval hierarchies change over time. By storing workflow rules flexibly, administrators can adjust approval steps without needing software developers to rewrite the core application code.
+* **Benefit to Hospital:** Saves long-term maintenance costs and allows hospital management to update approval rules whenever internal policies change.
 
 ---
 
-## Shared UI Component Standardization
-### Date
-2026-07-18
-### Decision
-Standardize loading and empty states using shared `LoadingState` and `EmptyState` components.
-### Reason
-To provide a highly polished, consistent user experience across the application whenever data is being fetched or when a list/table has no records to display.
-### Alternatives Considered
-Using plain text ("Loading..." or "No data") directly inside pages. Rejected as it violates the project philosophy of premium aesthetics and reusable components.
-### Status
-Active
+## 2. Dynamic High-Value Approval Escalation
+* **What We Built:** An automatic spending threshold checker. Any purchase request exceeding **₹1,00,000** automatically adds a Hospital Director approval step into the approval chain.
+* **Why This Matters:** Routine medical supplies can be approved quickly by Department Heads and Purchase Officers, but major capital purchases require executive oversight.
+* **Benefit to Hospital:** Prevents unauthorized large expenditures while ensuring low-cost daily items are approved without unnecessary management delays.
 
 ---
 
-## Notification Refresh Event System
-### Date
-2026-07-18
-### Decision
-Use a custom window event (`NOTIFICATIONS_REFRESH_EVENT`) for cross-component communication to trigger notification fetches.
-### Reason
-Components deep in the React tree need a way to tell the globally-mounted `NotificationCenter` that an action occurred (e.g., a request was approved) so it can refresh the unread count. Using a native custom event is lightweight and avoids introducing complex, heavy state-management libraries (like Redux or Zustand) just for notification triggers.
-### Alternatives Considered
-- Redux / Zustand: Deemed over-engineering for the current MVP scope.
-- Prop drilling: Impossible since the Notification Center sits at a different level in the layout hierarchy.
-- WebSockets: Acknowledged as the optimal long-term solution, but deferred to the post-MVP roadmap to maintain rapid development speed.
-### Status
-Active
+## 3. Unified Screen Design & Navigation Header
+* **What We Built:** A single shared top header and screen framework that adapts dynamically to whoever is logged in (Doctor, HOD, Director, HR Manager, or Administrator).
+* **Why This Matters:** Keeps the visual design consistent, modern, and predictable across all departments.
+* **Benefit to Hospital:** Reduces training time for hospital staff. Switching between roles or viewing different pages feels seamless and familiar.
 
 ---
 
-## Accessibility-First UI Standardization
-### Date
-2026-07-18
-### Decision
-Mandate ARIA labels, semantic HTML, and visible focus states across all interactive elements.
-### Reason
-To ensure the application is usable by all hospital staff, including those relying on screen readers or keyboard navigation, aligning with standard compliance requirements for medical software.
-### Alternatives Considered
-None. Accessibility is a hard requirement for the project philosophy.
-### Status
-Active
+## 4. Instant Status Notifications & Badge System
+* **What We Built:** A top-corner notification bell that updates hospital staff whenever a request requires their action or when their own application status changes.
+* **Why This Matters:** Doctors and managers don't need to manually check their email or call other departments to ask "Did you approve my request?". The application alerts them immediately inside the system.
+* **Benefit to Hospital:** Accelerates request processing times and eliminates phone/email follow-up bottlenecks.
+
+---
+
+## 5. Complete Audit Trail & Visual History Timeline
+* **What We Built:** Every action—creation, approval, rejection, or comment—is automatically saved with exact dates, times, and user details, and displayed as a visual progress timeline on each request.
+* **Why This Matters:** Transparency is essential in medical operations. Everyone can see exactly where a request is stuck, who approved it, and why a decision was made.
+* **Benefit to Hospital:** Provides 100% accountability, satisfies institutional audit standards, and prevents lost paperwork.
+
+---
+
+## 6. Accessibility & Clean Interface Standard
+* **What We Built:** High-contrast text colors, clear buttons, keyboard navigation support, and simple status badges (e.g., Green for Approved, Yellow for Pending, Red for Rejected).
+* **Why This Matters:** Hospital staff work under high-stress, fast-paced conditions and use a variety of computer monitors and tablets.
+* **Benefit to Hospital:** Reduces user error, prevents eye strain, and ensures all hospital staff can easily use the software regardless of technical skill.

@@ -402,6 +402,11 @@ export class WorkflowEngine {
       return false;
     }
 
+    // Self-approval hard check: A requester cannot approve their own request
+    if (userId === request.requestedById) {
+      return false;
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: userId, isActive: true },
     });
@@ -434,6 +439,11 @@ export class WorkflowEngine {
   ): Promise<void> {
     if (!request.currentStep) {
       throw new AppError('No active workflow step found.', 400);
+    }
+
+    // Self-approval hard check: A requester cannot approve their own request
+    if (actor.id === request.requestedById) {
+      throw new AppError('You cannot approve your own request.', 403);
     }
 
     if (actor.role !== request.currentStep.approverRole) {

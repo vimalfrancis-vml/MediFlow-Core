@@ -4,6 +4,7 @@ export interface RuleContext {
   type: RequestType;
   priority: Priority;
   departmentCode: string;
+  requesterRole?: UserRole;
   details: {
     estimatedCost?: number;     // PurchaseDetail
     leaveType?: string;         // LeaveDetail

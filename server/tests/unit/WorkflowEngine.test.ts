@@ -198,4 +198,57 @@ describe('WorkflowEngine Integration Tests', () => {
     await prisma.request.delete({ where: { id: request.id } });
     await prisma.workflowTemplate.delete({ where: { id: steps[0]!.templateId } });
   }, 30000);
+
+  it('should process HOD-created high-cost purchase request with correct composed steps (Procurement Review -> Director) and prevent HOD self-approval', async () => {
+    const actorHod: AuthUser = {
+      id: hodUser.id,
+      email: hodUser.email,
+      role: hodUser.role,
+      departmentId: hodUser.departmentId,
+      departmentCode: 'CARD',
+      firstName: hodUser.firstName,
+      lastName: hodUser.lastName,
+    };
+
+    // 1. Create a DRAFT High Cost Purchase Request created by HOD
+    const request = await prisma.request.create({
+      data: {
+        referenceNumber: `PR-HOD-HIGH-${Date.now()}`,
+        title: 'Defibrillator Unit',
+        type: RequestType.PURCHASE,
+        priority: Priority.HIGH,
+        status: RequestStatus.DRAFT,
+        requestedById: hodUser.id,
+        departmentId: hodUser.departmentId,
+        workflowTemplateId: template.id,
+        purchaseDetail: {
+          create: {
+            itemDescription: 'Advanced Defibrillator',
+            quantity: 1,
+            estimatedCost: 200000, // High cost (> 100k) + Created by HOD
+            justification: 'Dept replacement',
+          },
+        },
+      },
+    });
+
+    // 2. Submit the request
+    const submitted = await WorkflowEngine.submitRequest(request.id, actorHod);
+
+    // Verify composed steps: Procurement Review -> Director Approval (2 steps, no duplicate roles, no HOD step)
+    const steps = await StepResolver.getStepsForRequest(request.id);
+    expect(steps.length).toBe(2);
+    expect(steps[0]?.approverRole).toBe(UserRole.PURCHASE_OFFICER);
+    expect(steps[1]?.approverRole).toBe(UserRole.DIRECTOR);
+
+    // 3. Verify Self-Approval Hard Stop: Requester (HOD) cannot act on their own request
+    const canRequesterAct = await WorkflowEngine.canUserActOnRequest(request.id, hodUser.id);
+    expect(canRequesterAct).toBe(false);
+
+    // Clean up request & dynamic template
+    await prisma.request.delete({ where: { id: request.id } });
+    if (steps[0]?.templateId !== template.id) {
+      await prisma.workflowTemplate.delete({ where: { id: steps[0]!.templateId } });
+    }
+  }, 30000);
 });

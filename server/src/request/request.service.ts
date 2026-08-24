@@ -27,7 +27,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
     let templateId = workflowTemplateId;
     if (!templateId) {
       const tmpl = await prisma.workflowTemplate.findFirst({
-        where: { requestType: cleanData.type },
+        where: { requestType: cleanData.type, isActive: true },
       });
       if (!tmpl) {
         throw new Error('No workflow template found for request type');
