@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { WorkflowProgress } from '../components/WorkflowProgress';
 import { AuditTimeline } from '../components/AuditTimeline';
 import { RequestTypeDetails } from '../components/RequestTypeDetails';
+import { formatDate, formatDateTime } from '../utils/date';
 import './RequestDetailsPage.css';
 
 export default function RequestDetailsPage() {
@@ -140,7 +141,7 @@ export default function RequestDetailsPage() {
 
           <div className="details-content">
             <h1>{request.title}</h1>
-            <span className="request-date">Created on {new Date(request.createdAt).toLocaleDateString()}</span>
+            <span className="request-date">Created on {formatDate(request.createdAt)}</span>
           </div>
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
             {(request.status === 'DRAFT' || request.status === 'RETURNED') && request.requestedById === user?.id && (
@@ -214,7 +215,7 @@ export default function RequestDetailsPage() {
                       <span className="comment-author">
                           {c.actorId === user?.id ? 'You' : `User …${c.actorId.slice(-6)}`}
                         </span>
-                        <span className="comment-date">{new Date(c.createdAt).toLocaleString()}</span>
+                        <span className="comment-date">{formatDateTime(c.createdAt)}</span>
                       </div>
                       <p className="comment-body">{c.comment}</p>
                     </div>

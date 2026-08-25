@@ -8,11 +8,11 @@ export const createRequestSchema = z.object({
   details: z.object({
     // Purchase fields
     itemDescription: z.string().optional(),
-    quantity: z.number().optional(),
+    quantity: z.number().min(1, { message: 'Quantity must be at least 1.' }).optional(),
     justification: z.string().optional(),
     vendorName: z.string().optional(),
     budgetCode: z.string().optional(),
-    estimatedCost: z.number().optional(),
+    estimatedCost: z.number().min(1, { message: 'Estimated cost must be greater than zero.' }).optional(),
     
     // Maintenance fields
     equipmentName: z.string().optional(),

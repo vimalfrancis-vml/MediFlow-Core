@@ -1,5 +1,6 @@
 
 import type { RequestItem } from '../services/api';
+import { formatDateTime } from '../utils/date';
 
 interface AuditTimelineProps {
   logs: NonNullable<RequestItem['auditLogs']>;
@@ -102,7 +103,7 @@ export function AuditTimeline({ logs }: AuditTimelineProps) {
                 </div>
                 <div className="text-right flex-shrink-0 ml-4">
                   <time className="block mb-1 text-xs font-normal text-slate-400">
-                    {currentDate.toLocaleString()}
+                    {formatDateTime(log.timestamp)}
                   </time>
                   {elapsed && (
                     <span className="text-[10px] text-slate-400 bg-slate-50 px-2 py-0.5 rounded-full border border-slate-100">

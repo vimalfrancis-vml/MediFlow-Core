@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireAuth, requireRole } from '../middleware/auth';
-import { getUsers, getUserById } from '../controllers/user.controller';
+import { getUsers, getUserById, createUser, updateUser } from '../controllers/user.controller';
 
 const router = Router();
 
@@ -9,6 +9,8 @@ router.use(requireAuth);
 router.use(requireRole(['ADMIN']));
 
 router.get('/', getUsers);
+router.post('/', createUser);
 router.get('/:id', getUserById);
+router.put('/:id', updateUser);
 
 export default router;

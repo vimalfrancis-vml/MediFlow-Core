@@ -9,6 +9,7 @@ import { WorkflowProgress } from '../components/WorkflowProgress';
 import { AuditTimeline } from '../components/AuditTimeline';
 import { RequestTypeDetails } from '../components/RequestTypeDetails';
 import { useAuth } from '../context/AuthContext';
+import { formatDate, formatDateTime } from '../utils/date';
 import './ApproverDetailsPage.css';
 
 type ModalAction = 'approve' | 'reject' | 'return' | null;
@@ -131,7 +132,7 @@ export default function ApproverDetailsPage() {
               <div className="ad-meta">
                 <span className="request-ref">{request.referenceNumber}</span>
                 <span>•</span>
-                <span>{new Date(request.createdAt).toLocaleDateString()}</span>
+                <span>{formatDate(request.createdAt)}</span>
                 <span>•</span>
                 <span>{request.department?.name || '—'}</span>
               </div>
@@ -222,7 +223,7 @@ export default function ApproverDetailsPage() {
                             <span className="comment-author">
                               User …{c.actorId.slice(-6)}
                             </span>
-                            <span className="comment-date">{new Date(c.createdAt).toLocaleString()}</span>
+                            <span className="comment-date">{formatDateTime(c.createdAt)}</span>
                           </div>
                           <p className="comment-body">{c.comment}</p>
                         </div>

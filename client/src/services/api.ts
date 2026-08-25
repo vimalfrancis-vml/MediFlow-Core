@@ -299,12 +299,41 @@ export const api = {
     return request<{ success: boolean; data: UserItem }>(`/users/${id}`);
   },
 
+  createUser(data: {
+    email: string;
+    employeeId: string;
+    firstName: string;
+    lastName: string;
+    password?: string;
+    role: string;
+    departmentId: string;
+  }) {
+    return request<{ success: boolean; message: string; data: UserItem }>('/users', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateUser(id: string, data: Partial<UserItem> & { password?: string }) {
+    return request<{ success: boolean; message: string; data: UserItem }>(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
   getDepartments() {
     return request<{ success: boolean; data: DepartmentItem[] }>('/departments');
   },
 
   getDepartmentById(id: string) {
     return request<{ success: boolean; data: DepartmentItem }>(`/departments/${id}`);
+  },
+
+  updateDepartmentHod(departmentId: string, hodId: string | null) {
+    return request<{ success: boolean; message: string; data: DepartmentItem }>(`/departments/${departmentId}/hod`, {
+      method: 'PUT',
+      body: JSON.stringify({ hodId }),
+    });
   },
 
   getNotifications() {

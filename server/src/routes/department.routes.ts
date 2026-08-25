@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireAuth, requireRole } from '../middleware/auth';
-import { getDepartments, getDepartmentById } from '../controllers/department.controller';
+import { getDepartments, getDepartmentById, updateDepartmentHod } from '../controllers/department.controller';
 
 const router = Router();
 
@@ -10,5 +10,6 @@ router.use(requireRole(['ADMIN']));
 
 router.get('/', getDepartments);
 router.get('/:id', getDepartmentById);
+router.put('/:id/hod', updateDepartmentHod);
 
 export default router;

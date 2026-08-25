@@ -4134,3 +4134,27 @@
 [31m    at processParams (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:582:12)[39m
 [31m    at next (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:291:5)[39m
 [31m    at router.handle (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:186:3)[39m
+[2026-08-24 23:08:36:836] [[31merror[39m]: [31m401 - Please sign in again to verify your identity. - /api/v1/auth/me - GET - ::1[39m
+[2026-08-24 23:08:36:836] [[31merror[39m]: [31mError: Please sign in again to verify your identity.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:65:17)[39m
+[31m    at Layer.handleRequest (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\layer.js:152:17)[39m
+[31m    at next (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\route.js:157:13)[39m
+[31m    at Route.dispatch (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\route.js:117:3)[39m
+[31m    at handle (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:435:11)[39m
+[31m    at Layer.handleRequest (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\layer.js:152:17)[39m
+[31m    at C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:295:15[39m
+[31m    at processParams (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:582:12)[39m
+[31m    at next (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:291:5)[39m
+[31m    at router.handle (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:186:3)[39m
+[2026-08-24 23:08:36:836] [[31merror[39m]: [31m401 - Please sign in again to verify your identity. - /api/v1/auth/me - GET - ::1[39m
+[2026-08-24 23:08:36:836] [[31merror[39m]: [31mError: Please sign in again to verify your identity.[39m
+[31m    at requireAuth (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\src\middleware\auth.ts:65:17)[39m
+[31m    at Layer.handleRequest (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\layer.js:152:17)[39m
+[31m    at next (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\route.js:157:13)[39m
+[31m    at Route.dispatch (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\route.js:117:3)[39m
+[31m    at handle (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:435:11)[39m
+[31m    at Layer.handleRequest (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\lib\layer.js:152:17)[39m
+[31m    at C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:295:15[39m
+[31m    at processParams (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:582:12)[39m
+[31m    at next (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:291:5)[39m
+[31m    at router.handle (C:\Users\vimal\OneDrive\Jubilee hospital demo\mediflow-core\server\node_modules\router\index.js:186:3)[39m

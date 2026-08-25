@@ -1,4 +1,5 @@
 import type { RequestItem } from '../../services/api';
+import { formatDate } from '../../utils/date';
 
 interface LeaveDetailsProps {
   request: RequestItem;
@@ -7,18 +8,6 @@ interface LeaveDetailsProps {
 export default function LeaveDetails({ request }: LeaveDetailsProps) {
   const details = request.leaveDetail;
   if (!details) return null;
-
-  const formatDate = (dateStr: string) => {
-    try {
-      return new Date(dateStr).toLocaleDateString(undefined, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
-    } catch {
-      return dateStr;
-    }
-  };
 
   return (
     <section className="details-section fade-in">

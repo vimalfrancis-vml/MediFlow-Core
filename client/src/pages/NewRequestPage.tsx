@@ -376,7 +376,7 @@ export default function NewRequestPage() {
                     <input
                       id="estimatedCost"
                       type="number"
-                      min="0"
+                      min="1"
                       step="0.01"
                       value={estimatedCost}
                       onChange={(e) => setEstimatedCost(e.target.value)}

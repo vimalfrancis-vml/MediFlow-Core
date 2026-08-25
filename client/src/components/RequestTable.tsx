@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import type { RequestItem } from '../services/api';
 import { LoadingState } from './LoadingState';
 import { EmptyState } from './EmptyState';
+import { formatDate } from '../utils/date';
 
 interface RequestTableProps {
   requests: RequestItem[];
@@ -99,7 +100,7 @@ export function RequestTable({
                 </td>
                 <td className="px-5 py-3.5 text-slate-600">{request.department?.name || '—'}</td>
                 <td className="px-5 py-3.5 whitespace-nowrap text-slate-500 text-xs">
-                  {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : '—'}
+                  {formatDate(request.createdAt)}
                 </td>
                 <td className="px-5 py-3.5">
                   <span className={`request-status status-${(request.status || '').toLowerCase()} px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide`}>

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { api, type NotificationItem } from '../services/api';
 import './NotificationCenter.css';
 import { useAuth } from '../context/AuthContext';
+import { formatDateTime } from '../utils/date';
 const APPROVER_ROLES = ['HOD', 'DIRECTOR', 'MEDICAL_SUPERINTENDENT', 'HR', 'PURCHASE_OFFICER', 'MAINTENANCE_OFFICER'];
 export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false);
@@ -128,7 +129,7 @@ const { user } = useAuth();
                   <div className="notification-content">
                     <p>{notif.message}</p>
                     <span className="notification-time">
-                      {new Date(notif.createdAt).toLocaleString()}
+                      {formatDateTime(notif.createdAt)}
                     </span>
                   </div>
                   {!notif.isRead && <div className="unread-dot" aria-hidden="true" />}
