@@ -1,4 +1,9 @@
 {
+  "name": "mediflow-core",
+  "private": true,
+  "scripts": {
+    "build": "cd client && npm run build"
+  },
   "devDependencies": {
     "typescript": "^5.9.2"
   }
