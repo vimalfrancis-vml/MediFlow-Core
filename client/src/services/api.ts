@@ -1,4 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+const rawEnvUrl = import.meta.env.VITE_API_URL?.trim().replace(/\/$/, '') || '';
+const API_BASE_URL = rawEnvUrl
+  ? (rawEnvUrl.endsWith('/api/v1') ? rawEnvUrl : `${rawEnvUrl}/api/v1`)
+  : '/api/v1';
+
 
 export interface UserItem {
   id: string;

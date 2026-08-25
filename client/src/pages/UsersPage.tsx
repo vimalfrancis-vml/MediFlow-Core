@@ -103,14 +103,14 @@ export default function UsersPage() {
       }
     >
       <div className="users-page-container">
-        <div className="users-header flex justify-between items-center mb-6">
+        <div className="users-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">System Users</h1>
             <p className="text-slate-500 mt-1">Manage system access, roles, and departmental assignments</p>
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm text-sm transition-colors"
+            className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm text-sm transition-colors whitespace-nowrap"
           >
             + Create New User
           </button>

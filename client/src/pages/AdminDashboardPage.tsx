@@ -59,6 +59,12 @@ export default function AdminDashboardPage() {
           <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
           <p className="text-slate-500 mt-1">System-wide overview of all workflows and requests.</p>
         </div>
+        <button
+          className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-md shadow-sm transition-colors duration-150 whitespace-nowrap"
+          onClick={() => navigate('/admin/users')}
+        >
+          + Create New User
+        </button>
       </div>
 
       {isLoading && !analytics && !requests.length ? (

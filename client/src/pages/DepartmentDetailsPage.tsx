@@ -134,7 +134,15 @@ export default function DepartmentDetailsPage() {
             </div>
 
             <div className="dept-employees-section text-left mt-6">
-              <h3 className="text-base font-bold text-slate-900 mb-4">Department Employees ({department._count?.users || 0})</h3>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                <h3 className="text-base font-bold text-slate-900 m-0">Department Employees ({department._count?.users || 0})</h3>
+                <button
+                  onClick={() => navigate('/admin/users')}
+                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md text-xs shadow-sm transition-colors whitespace-nowrap"
+                >
+                  + Create New User
+                </button>
+              </div>
               
               {!department.users || department.users.length === 0 ? (
                 <div className="empty-employees p-6 text-center text-slate-400 bg-slate-50 rounded-lg border border-slate-200">
