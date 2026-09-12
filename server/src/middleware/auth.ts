@@ -38,11 +38,12 @@ export const requireAuth = async (
 
     const decoded = jwt.verify(
       token,
-      jwtSecret || 'supersecretchangeinproduction'
+      jwtSecret || 'supersecretchangeinproduction',
+      { algorithms: ['HS256'] }
     ) as JwtPayload;
 
     const user = await prisma.user.findUnique({
-      where: { id: decoded.userId, isActive: true },
+      where: { id: decoded.userId, isActive: true, deletedAt: null },
       include: { department: { select: { code: true } } },
     });
 
@@ -61,7 +62,13 @@ export const requireAuth = async (
     };
 
     next();
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof jwt.TokenExpiredError) {
+      return next(new AppError('Your session has expired. Please sign in again.', 401));
+    }
+    if (error instanceof jwt.JsonWebTokenError) {
+      return next(new AppError('Invalid authentication token. Please sign in again.', 401));
+    }
     return next(new AppError('Please sign in again to verify your identity.', 401));
   }
 };

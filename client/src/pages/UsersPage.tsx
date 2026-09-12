@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api, type UserItem, type DepartmentItem } from '../services/api';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { LoadingState } from '../components/LoadingState';
+import { AdminNav } from '../components/AdminNav';
 import './UsersPage.css';
 
 const ROLES = [
@@ -60,6 +61,17 @@ export default function UsersPage() {
     fetchUsersAndDepts();
   }, []);
 
+  useEffect(() => {
+    if (!showModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isSubmitting) {
+        setShowModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showModal, isSubmitting]);
+
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setModalError(null);
@@ -90,17 +102,30 @@ export default function UsersPage() {
     }
   };
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [deptFilter, setDeptFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      !searchTerm ||
+      `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = !roleFilter || u.role === roleFilter;
+    const matchesDept = !deptFilter || u.department?.id === deptFilter;
+    const matchesStatus =
+      !statusFilter || (statusFilter === 'active' ? u.isActive : !u.isActive);
+
+    return matchesSearch && matchesRole && matchesDept && matchesStatus;
+  });
+
   return (
     <DashboardLayout
       title="MediFlow"
       brandPrefix="Admin"
-      nav={
-        <nav className="admin-nav flex items-center gap-1 sm:gap-2 mr-2 sm:mr-4">
-          <button className="px-3 py-1 rounded-md text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" onClick={() => navigate('/admin')}>Overview</button>
-          <button className="px-3 py-1 rounded-md text-xs sm:text-sm font-semibold bg-indigo-50 text-indigo-700 transition-colors" onClick={() => navigate('/admin/users')}>Users</button>
-          <button className="px-3 py-1 rounded-md text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" onClick={() => navigate('/admin/departments')}>Departments</button>
-        </nav>
-      }
+      nav={<AdminNav />}
     >
       <div className="users-page-container">
         <div className="users-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -116,12 +141,68 @@ export default function UsersPage() {
           </button>
         </div>
 
+        {/* Filter Bar */}
+        <div className="bg-white p-4 rounded-xl shadow-xs border border-slate-200/80 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Search</label>
+            <input
+              type="text"
+              placeholder="Search by name, email, ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Role</label>
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-indigo-500 bg-white"
+            >
+              <option value="">All Roles</option>
+              {ROLES.map((r) => (
+                <option key={r.value} value={r.value}>{r.label}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Department</label>
+            <select
+              value={deptFilter}
+              onChange={(e) => setDeptFilter(e.target.value)}
+              className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-indigo-500 bg-white"
+            >
+              <option value="">All Departments</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>{d.displayName || d.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full px-3 py-1.5 text-xs border border-slate-200 rounded-md focus:outline-none focus:border-indigo-500 bg-white"
+            >
+              <option value="">All Statuses</option>
+              <option value="active">Active Only</option>
+              <option value="inactive">Inactive Only</option>
+            </select>
+          </div>
+        </div>
+
         {isLoading ? (
           <LoadingState message="Loading users..." />
         ) : error ? (
           <div className="state-card error-state">
             <p>{error}</p>
             <button className="retry-btn" onClick={fetchUsersAndDepts}>Retry</button>
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <div className="bg-white p-8 rounded-xl border border-slate-200 text-center text-slate-500 text-sm">
+            No users match your criteria.
           </div>
         ) : (
           <div className="users-table-container">
@@ -135,20 +216,20 @@ export default function UsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((user) => (
+                {filteredUsers.map((user) => (
                   <tr key={user.id} onClick={() => navigate(`/admin/users/${user.id}`)}>
                     <td>
-                      <div className="user-name">
+                      <div className="user-name font-semibold text-slate-900">
                         {user.firstName} {user.lastName}
                       </div>
-                      <div className="user-email">{user.email}</div>
+                      <div className="user-email text-xs text-slate-500">{user.email} • {user.employeeId}</div>
                     </td>
                     <td>
-                      <span className="role-badge">
-                        {user.role.replace(/_/g, ' ')}
+                      <span className="role-badge font-medium text-xs">
+                        {user.roleRef?.displayName || user.role.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td>{user.department?.name || '—'}</td>
+                    <td>{user.department?.displayName || user.department?.name || '—'}</td>
                     <td>
                       <span className={`status-badge ${user.isActive ? 'status-active' : 'status-inactive'}`}>
                         {user.isActive ? 'Active' : 'Inactive'}
@@ -163,13 +244,25 @@ export default function UsersPage() {
 
         {/* CREATE USER MODAL */}
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-            <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 text-left relative fade-in">
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+            onClick={() => { if (!isSubmitting) setShowModal(false); }}
+          >
+            <div 
+              className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 text-left relative border border-slate-200"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="user-modal-title"
+            >
               <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
-                <h3 className="text-lg font-bold text-slate-900">Create New System User</h3>
+                <h3 id="user-modal-title" className="text-lg font-bold text-slate-900">Create New System User</h3>
                 <button
+                  type="button"
                   onClick={() => setShowModal(false)}
-                  className="text-slate-400 hover:text-slate-600 text-lg font-bold"
+                  disabled={isSubmitting}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600"
+                  aria-label="Close dialog"
                 >
                   ✕
                 </button>

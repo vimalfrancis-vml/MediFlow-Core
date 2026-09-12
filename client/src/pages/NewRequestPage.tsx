@@ -2,11 +2,13 @@ import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { DashboardLayout } from '../components/DashboardLayout';
+import { useTerminology } from '../context/TerminologyContext';
 import './NewRequestPage.css';
 
 export default function NewRequestPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { getRequestTypeLabel } = useTerminology();
   const isEditMode = !!id;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -212,17 +214,23 @@ export default function NewRequestPage() {
           priority,
           details: detailsPayload,
         });
+        navigate(`/request/${id}`, { replace: true });
       } else {
-        await api.createRequest({
+        const res = await api.createRequest({
           title: title.trim(),
           type,
           priority,
           details: detailsPayload,
         });
+        const createdId = res.data?.id;
+        if (createdId) {
+          navigate(`/request/${createdId}`, { replace: true });
+        } else {
+          navigate('/dashboard', { replace: true });
+        }
       }
-      navigate('/dashboard', { replace: true });
     } catch (err: any) {
-      setError(err.message || 'Failed to submit request.');
+      setError(err.message || 'Failed to create request.');
     } finally {
       setIsSubmitting(false);
     }
@@ -307,9 +315,9 @@ export default function NewRequestPage() {
                     disabled={isSubmitting || isEditMode}
                     className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
                   >
-                    <option value="PURCHASE">Purchase Request</option>
-                    <option value="MAINTENANCE">Maintenance Request</option>
-                    <option value="LEAVE">Leave Application</option>
+                    <option value="PURCHASE">{getRequestTypeLabel('PURCHASE')}</option>
+                    <option value="MAINTENANCE">{getRequestTypeLabel('MAINTENANCE')}</option>
+                    <option value="LEAVE">{getRequestTypeLabel('LEAVE')}</option>
                   </select>
                 </div>
                 <div>
@@ -346,7 +354,7 @@ export default function NewRequestPage() {
                     type="text"
                     value={itemDescription}
                     onChange={(e) => setItemDescription(e.target.value)}
-                    placeholder="What do you need?"
+                    placeholder="e.g. Surgical Gloves, ECG Paper Roll"
                     disabled={isSubmitting}
                     required
                     className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
@@ -385,6 +393,15 @@ export default function NewRequestPage() {
                       className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
                     />
                   </div>
+
+                  {Number(estimatedCost) > 100000 && (
+                    <div className="col-span-1 sm:col-span-2 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-950 text-xs flex items-start gap-2.5">
+                      <span className="font-bold text-emerald-700 text-sm">₹</span>
+                      <div>
+                        <span className="font-bold text-emerald-900">Hospital Finance Policy:</span> Because this purchase exceeds ₹1,00,000, Jubilee Hospital governance automatically requires mandatory Finance clearance as Step 1 before departmental review.
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -594,7 +611,7 @@ export default function NewRequestPage() {
                 className="px-5 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-md shadow-sm hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Submitting…' : isEditMode ? 'Save Changes' : 'Submit Request'}
+                {isSubmitting ? 'Saving…' : isEditMode ? 'Save Changes' : 'Create Request (Draft)'}
               </button>
             </div>
           </form>

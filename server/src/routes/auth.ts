@@ -10,13 +10,14 @@ const router = Router();
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 15, // limit each IP to 15 requests per windowMs
+  max: process.env.LOGIN_RATE_LIMIT_MAX ? parseInt(process.env.LOGIN_RATE_LIMIT_MAX, 10) : 10,
   message: {
     status: 'fail',
     message: 'Too many login attempts from this IP, please try again after 15 minutes.'
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => process.env.NODE_ENV === 'test' && req.headers['x-test-rate-limit'] !== 'true',
 });
 
 // POST /api/v1/auth/login
@@ -28,13 +29,18 @@ router.post('/login', loginLimiter, async (req: Request, res: Response, next: Ne
       return next(new AppError('Please provide both email and password.', 400));
     }
 
+    const cleanEmail = String(email).trim().toLowerCase();
     const user = await prisma.user.findUnique({
-      where: { email, isActive: true },
+      where: { email: cleanEmail },
       include: { department: { select: { code: true } } },
     });
 
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return next(new AppError('Invalid email or password.', 401));
+    }
+
+    if (!user.isActive || user.deletedAt !== null) {
+      return next(new AppError('Your account has been deactivated. Please contact an administrator.', 403));
     }
 
     const jwtSecret = process.env.JWT_SECRET;
@@ -45,7 +51,10 @@ router.post('/login', loginLimiter, async (req: Request, res: Response, next: Ne
     const token = jwt.sign(
       { userId: user.id, role: user.role },
       jwtSecret || 'supersecretchangeinproduction',
-      { expiresIn: (process.env.JWT_EXPIRES_IN || '1d') as any }
+      {
+        algorithm: 'HS256',
+        expiresIn: (process.env.JWT_EXPIRES_IN || '1d') as any,
+      }
     );
 
     res.status(200).json({

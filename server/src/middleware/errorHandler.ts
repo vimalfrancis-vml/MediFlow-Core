@@ -23,6 +23,18 @@ export const errorHandler = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _next: NextFunction
 ): void => {
+  if (err.name === 'MulterError') {
+    err.statusCode = 400;
+    err.isOperational = true;
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      err.message = 'File size exceeds maximum allowed limit of 10MB.';
+    } else if (err.code === 'LIMIT_FILE_COUNT') {
+      err.message = 'Too many files uploaded at once.';
+    } else if (err.code === 'LIMIT_UNEXPECTED_FILE') {
+      err.message = `Unexpected form field: ${err.field || 'unknown'}.`;
+    }
+  }
+
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 

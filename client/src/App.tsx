@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { TerminologyProvider } from './context/TerminologyContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
@@ -12,9 +13,13 @@ import UsersPage from './pages/UsersPage';
 import UserDetailsPage from './pages/UserDetailsPage';
 import DepartmentsPage from './pages/DepartmentsPage';
 import DepartmentDetailsPage from './pages/DepartmentDetailsPage';
+import RolesPage from './pages/RolesPage';
+import TerminologyPage from './pages/TerminologyPage';
+import WorkflowsPage from './pages/WorkflowsPage';
+import AuditLogsPage from './pages/AuditLogsPage';
 
 const ADMIN_ROLES = ['ADMIN'];
-const APPROVER_ROLES = ['HOD', 'DIRECTOR', 'MEDICAL_SUPERINTENDENT', 'HR', 'PURCHASE_OFFICER', 'MAINTENANCE_OFFICER'];
+const APPROVER_ROLES = ['HOD', 'DIRECTOR', 'MEDICAL_SUPERINTENDENT', 'HR', 'PURCHASE_OFFICER', 'MAINTENANCE_OFFICER', 'FINANCE_OFFICER'];
 
 /**
  * Guards a route by allowed roles.
@@ -38,7 +43,8 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
+        <TerminologyProvider>
+          <Routes>
           <Route path="/login" element={<LoginPage />} />
 
           {/* Protected routes — require authentication */}
@@ -97,6 +103,38 @@ function App() {
                 </RoleRoute>
               }
             />
+            <Route
+              path="/admin/roles"
+              element={
+                <RoleRoute roles={ADMIN_ROLES}>
+                  <RolesPage />
+                </RoleRoute>
+              }
+            />
+            <Route
+              path="/admin/workflows"
+              element={
+                <RoleRoute roles={ADMIN_ROLES}>
+                  <WorkflowsPage />
+                </RoleRoute>
+              }
+            />
+            <Route
+              path="/admin/terminology"
+              element={
+                <RoleRoute roles={ADMIN_ROLES}>
+                  <TerminologyPage />
+                </RoleRoute>
+              }
+            />
+            <Route
+              path="/admin/audit-logs"
+              element={
+                <RoleRoute roles={ADMIN_ROLES}>
+                  <AuditLogsPage />
+                </RoleRoute>
+              }
+            />
 
             {/* Approver routes — shared by HOD, Director, Medical Superintendent, etc. */}
             <Route
@@ -120,6 +158,7 @@ function App() {
           {/* Default redirect */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
+        </TerminologyProvider>
       </AuthProvider>
     </BrowserRouter>
   );

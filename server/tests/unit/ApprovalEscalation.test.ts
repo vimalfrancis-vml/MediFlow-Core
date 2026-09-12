@@ -121,7 +121,7 @@ describe('Approval Dynamic Escalation & Rule Composition Tests', () => {
       expect(result[1].isFinal).toBe(true);
     });
 
-    it('₹1,00,001: Boundary high-value purchase should escalate to Director (3 steps)', () => {
+    it('₹1,00,001: Boundary high-value purchase should route to Finance first and escalate to Director (4 steps)', () => {
       const ctx: RuleContext = {
         type: RequestType.PURCHASE,
         priority: Priority.NORMAL,
@@ -130,14 +130,15 @@ describe('Approval Dynamic Escalation & Rule Composition Tests', () => {
         details: { estimatedCost: 100001 },
       };
       const result = evaluateRules(ctx, basePurchaseSteps);
-      expect(result.length).toBe(3);
-      expect(result[0].approverRole).toBe(UserRole.HOD);
-      expect(result[1].approverRole).toBe(UserRole.PURCHASE_OFFICER);
-      expect(result[2].approverRole).toBe(UserRole.DIRECTOR);
-      expect(result[2].isFinal).toBe(true);
+      expect(result.length).toBe(4);
+      expect(result[0].approverRole).toBe(UserRole.FINANCE_OFFICER);
+      expect(result[1].approverRole).toBe(UserRole.HOD);
+      expect(result[2].approverRole).toBe(UserRole.PURCHASE_OFFICER);
+      expect(result[3].approverRole).toBe(UserRole.DIRECTOR);
+      expect(result[3].isFinal).toBe(true);
     });
 
-    it('₹5,00,000: High-value purchase should escalate to Director (3 steps)', () => {
+    it('₹5,00,000: High-value purchase should route to Finance first and escalate to Director (4 steps)', () => {
       const ctx: RuleContext = {
         type: RequestType.PURCHASE,
         priority: Priority.NORMAL,
@@ -146,11 +147,12 @@ describe('Approval Dynamic Escalation & Rule Composition Tests', () => {
         details: { estimatedCost: 500000 },
       };
       const result = evaluateRules(ctx, basePurchaseSteps);
-      expect(result.length).toBe(3);
-      expect(result[0].approverRole).toBe(UserRole.HOD);
-      expect(result[1].approverRole).toBe(UserRole.PURCHASE_OFFICER);
-      expect(result[2].approverRole).toBe(UserRole.DIRECTOR);
-      expect(result[2].isFinal).toBe(true);
+      expect(result.length).toBe(4);
+      expect(result[0].approverRole).toBe(UserRole.FINANCE_OFFICER);
+      expect(result[1].approverRole).toBe(UserRole.HOD);
+      expect(result[2].approverRole).toBe(UserRole.PURCHASE_OFFICER);
+      expect(result[3].approverRole).toBe(UserRole.DIRECTOR);
+      expect(result[3].isFinal).toBe(true);
     });
   });
 
@@ -169,7 +171,7 @@ describe('Approval Dynamic Escalation & Rule Composition Tests', () => {
       expect(result[0].isFinal).toBe(true);
     });
 
-    it('HOD → ₹2,00,000 Purchase: Omits HOD self-approval and escalates to Director (Procurement -> Director, 2 steps, no duplicate roles)', () => {
+    it('HOD → ₹2,00,000 Purchase: Omits HOD self-approval, routes to Finance first, and escalates to Director (Finance -> Procurement -> Director, 3 steps, no duplicate roles)', () => {
       const ctx: RuleContext = {
         type: RequestType.PURCHASE,
         priority: Priority.NORMAL,
@@ -178,10 +180,11 @@ describe('Approval Dynamic Escalation & Rule Composition Tests', () => {
         details: { estimatedCost: 200000 },
       };
       const result = evaluateRules(ctx, basePurchaseSteps);
-      expect(result.length).toBe(2);
-      expect(result[0].approverRole).toBe(UserRole.PURCHASE_OFFICER);
-      expect(result[1].approverRole).toBe(UserRole.DIRECTOR);
-      expect(result[1].isFinal).toBe(true);
+      expect(result.length).toBe(3);
+      expect(result[0].approverRole).toBe(UserRole.FINANCE_OFFICER);
+      expect(result[1].approverRole).toBe(UserRole.PURCHASE_OFFICER);
+      expect(result[2].approverRole).toBe(UserRole.DIRECTOR);
+      expect(result[2].isFinal).toBe(true);
 
       // Verify no duplicate roles exist
       const roles = result.map((r) => r.approverRole);

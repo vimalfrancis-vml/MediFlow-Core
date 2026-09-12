@@ -69,7 +69,7 @@ describe('RuleEvaluator Unit Tests', () => {
     expect(result[1]?.isFinal).toBe(true);
   });
 
-  it('should dynamically inject Director approval for high cost purchase request', () => {
+  it('should dynamically inject Finance Review as first step and Director approval for high cost purchase request', () => {
     const ctx: RuleContext = {
       type: RequestType.PURCHASE,
       priority: Priority.NORMAL,
@@ -80,13 +80,15 @@ describe('RuleEvaluator Unit Tests', () => {
     };
 
     const result = evaluateRules(ctx, basePurchaseSteps);
-    expect(result.length).toBe(3);
-    expect(result[0]?.approverRole).toBe(UserRole.HOD);
-    expect(result[1]?.approverRole).toBe(UserRole.PURCHASE_OFFICER);
-    expect(result[1]?.isFinal).toBe(false);
-    expect(result[2]?.approverRole).toBe(UserRole.DIRECTOR);
-    expect(result[2]?.isFinal).toBe(true);
-    expect(result[2]?.stepName).toBe('Director Approval');
+    expect(result.length).toBe(4);
+    expect(result[0]?.approverRole).toBe(UserRole.FINANCE_OFFICER);
+    expect(result[0]?.stepName).toBe('Finance Department Review');
+    expect(result[1]?.approverRole).toBe(UserRole.HOD);
+    expect(result[2]?.approverRole).toBe(UserRole.PURCHASE_OFFICER);
+    expect(result[2]?.isFinal).toBe(false);
+    expect(result[3]?.approverRole).toBe(UserRole.DIRECTOR);
+    expect(result[3]?.isFinal).toBe(true);
+    expect(result[3]?.stepName).toBe('Director Approval');
   });
 
   it('should inject Medical Superintendent approval for leave request exceeding 14 days', () => {

@@ -6,36 +6,53 @@ datasource db {
   provider = "postgresql"
 }
 
+model Role {
+  id          String   @id @default(uuid())
+  code        String   @unique
+  displayName String
+  description String?
+  isSystem    Boolean  @default(false)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+}
+
 model User {
-  id             String       @id @default(uuid())
-  employeeId     String       @unique
-  email          String       @unique
-  passwordHash   String
-  firstName      String
-  lastName       String
-  role           UserRole
-  departmentId   String
-  isActive       Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  deletedAt      DateTime?
-  departmentHods Department[] @relation("HodDepartment")
-  requests       Request[]    @relation("RequestedBy")
-  department     Department   @relation(fields: [departmentId], references: [id])
+  id               String       @id @default(uuid())
+  employeeId       String       @unique
+  email            String       @unique
+  passwordHash     String
+  firstName        String
+  lastName         String
+  role             UserRole
+  roleId           String?
+  departmentId     String
+  isActive         Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  deletedAt        DateTime?
+  departmentHods   Department[] @relation("HodDepartment")
+  requests         Request[]    @relation("RequestedBy")
+  assignedRequests Request[]    @relation("AssignedTo")
+  department       Department   @relation(fields: [departmentId], references: [id])
+  roleRef          Role?        @relation(fields: [roleId], references: [id])
 }
 
 model Department {
-  id        String    @id @default(uuid())
-  name      String
-  code      String    @unique
-  hodId     String?
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  hod       User?     @relation("HodDepartment", fields: [hodId], references: [id])
-  requests  Request[]
-  users     User[]
+  id                String         @id @default(uuid())
+  name              String
+  code              String         @unique
+  displayName       String?
+  hodId             String?
+  isActive          Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  deletedAt         DateTime?
+  hod               User?          @relation("HodDepartment", fields: [hodId], references: [id])
+  requests          Request[]
+  users             User[]
+  stepApproverSteps WorkflowStep[] @relation("StepApproverDepartment")
 }
 
 model Request {
@@ -49,6 +66,7 @@ model Request {
   departmentId       String
   workflowTemplateId String
   currentStepId      String?
+  assignedToUserId   String?
   submittedAt        DateTime?
   completedAt        DateTime?
   createdAt          DateTime           @default(now())
@@ -65,12 +83,14 @@ model Request {
   currentStep        WorkflowStep?      @relation("CurrentStep", fields: [currentStepId], references: [id])
   department         Department         @relation(fields: [departmentId], references: [id])
   requestedBy        User               @relation("RequestedBy", fields: [requestedById], references: [id])
+  assignedToUser     User?              @relation("AssignedTo", fields: [assignedToUserId], references: [id])
   workflowTemplate   WorkflowTemplate   @relation(fields: [workflowTemplateId], references: [id])
 
   @@index([requestedById])
   @@index([status])
   @@index([type])
   @@index([currentStepId])
+  @@index([assignedToUserId])
   @@index([departmentId, status])
   @@index([createdAt(sort: Desc)])
 }
@@ -113,25 +133,32 @@ model WorkflowTemplate {
   id          String         @id @default(uuid())
   name        String
   requestType RequestType
+  version     Int            @default(1)
   isActive    Boolean        @default(true)
   description String?
+  deletedAt   DateTime?
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
   requests    Request[]
   steps       WorkflowStep[]
+
+  @@index([requestType, isActive, version])
 }
 
 model WorkflowStep {
-  id             String           @id @default(uuid())
-  templateId     String
-  stepName       String
-  order          Int
-  approverRole   UserRole
-  isFinal        Boolean          @default(false)
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  activeRequests Request[]        @relation("CurrentStep")
-  template       WorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  id                     String           @id @default(uuid())
+  templateId             String
+  stepName               String
+  order                  Int
+  approverRole           UserRole
+  approverDepartmentId   String?
+  allowDynamicForwarding Boolean          @default(false)
+  isFinal                Boolean          @default(false)
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  activeRequests         Request[]        @relation("CurrentStep")
+  template               WorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  approverDepartment     Department?      @relation("StepApproverDepartment", fields: [approverDepartmentId], references: [id])
 
   @@index([templateId, order])
 }
@@ -194,6 +221,16 @@ model AuditLog {
   request     Request? @relation(fields: [requestId], references: [id])
 }
 
+model SystemTerminology {
+  id          String   @id @default(uuid())
+  category    String
+  key         String   @unique
+  label       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 enum UserRole {
   ADMIN
   DIRECTOR
@@ -202,6 +239,7 @@ enum UserRole {
   HR
   PURCHASE_OFFICER
   MAINTENANCE_OFFICER
+  FINANCE_OFFICER
   EMPLOYEE
 }
 
@@ -234,4 +272,5 @@ enum ApprovalActionType {
   RETURNED
   CANCELLED
   COMMENTED
+  FORWARDED
 }

@@ -40,7 +40,25 @@ export const commentSchema = z.object({
 });
 
 export const documentSchema = z.object({
-  fileName: z.string().min(1, { message: 'File name is required.' }),
-  url: z.string().url({ message: 'A valid URL is required.' }),
+  fileName: z
+    .string()
+    .min(1, { message: 'File name is required.' })
+    .max(255, { message: 'File name cannot exceed 255 characters.' })
+    .refine((name) => !/[\\/\0]|(\.\.)/.test(name), {
+      message: 'File name must not contain directory traversal characters or path separators.',
+    })
+    .refine((name) => !/\.(exe|bat|cmd|sh|php|pl|cgi|vbs|jar|msi|ps1)$/i.test(name), {
+      message: 'Executable file types are not permitted.',
+    }),
+  url: z
+    .string()
+    .min(1, { message: 'Document URL or storage path is required.' })
+    .refine((u) => !/^(javascript|data|vbscript|file):/i.test(u.trim()), {
+      message: 'Dangerous URL scheme is strictly prohibited.',
+    })
+    .refine((u) => /^https?:\/\//i.test(u) || /^\/[a-zA-Z0-9_\-./]+$/.test(u), {
+      message: 'Document location must be a valid HTTP/HTTPS URL or secure storage path.',
+    }),
 });
+
 

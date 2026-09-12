@@ -10,6 +10,7 @@ describe('WorkflowEngine Integration Tests', () => {
   let purchaseUser: any;
   let directorUser: any;
   let maintenanceUser: any;
+  let financeUser: any;
   let template: any;
 
   beforeAll(async () => {
@@ -19,6 +20,7 @@ describe('WorkflowEngine Integration Tests', () => {
     purchaseUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.PURCHASE_OFFICER } });
     directorUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.DIRECTOR } });
     maintenanceUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.MAINTENANCE_OFFICER } });
+    financeUser = await prisma.user.findFirstOrThrow({ where: { role: UserRole.FINANCE_OFFICER } });
 
     // Fetch the standard Purchase template
     template = await prisma.workflowTemplate.findFirstOrThrow({
@@ -146,14 +148,27 @@ describe('WorkflowEngine Integration Tests', () => {
     // 2. Submit the request
     const submitted = await WorkflowEngine.submitRequest(request.id, actorEmployee);
 
-    // Verify step list contains 3 steps: HOD -> Purchase Officer -> Director
+    // Verify step list contains 4 steps: Finance -> HOD -> Purchase Officer -> Director
     const steps = await StepResolver.getStepsForRequest(request.id);
-    expect(steps.length).toBe(3);
-    expect(steps[0]?.approverRole).toBe(UserRole.HOD);
-    expect(steps[1]?.approverRole).toBe(UserRole.PURCHASE_OFFICER);
-    expect(steps[2]?.approverRole).toBe(UserRole.DIRECTOR);
+    expect(steps.length).toBe(4);
+    expect(steps[0]?.approverRole).toBe(UserRole.FINANCE_OFFICER);
+    expect(steps[1]?.approverRole).toBe(UserRole.HOD);
+    expect(steps[2]?.approverRole).toBe(UserRole.PURCHASE_OFFICER);
+    expect(steps[3]?.approverRole).toBe(UserRole.DIRECTOR);
 
-    // 3. Approve as HOD
+    // 3. Approve as Finance Officer (First step)
+    const actorFinance: AuthUser = {
+      id: financeUser.id,
+      email: financeUser.email,
+      role: financeUser.role,
+      departmentId: financeUser.departmentId,
+      departmentCode: 'FIN',
+      firstName: financeUser.firstName,
+      lastName: financeUser.lastName,
+    };
+    await WorkflowEngine.approve(request.id, 'Budget cleared', actorFinance);
+
+    // 4. Approve as HOD
     const actorHod: AuthUser = {
       id: hodUser.id,
       email: hodUser.email,
@@ -165,7 +180,7 @@ describe('WorkflowEngine Integration Tests', () => {
     };
     await WorkflowEngine.approve(request.id, 'Dept needs this', actorHod);
 
-    // 4. Approve as Purchase Officer
+    // 5. Approve as Purchase Officer
     const actorPurchase: AuthUser = {
       id: purchaseUser.id,
       email: purchaseUser.email,
@@ -177,10 +192,10 @@ describe('WorkflowEngine Integration Tests', () => {
     };
     const poApproved = await WorkflowEngine.approve(request.id, 'Quotes checked', actorPurchase);
     
-    // Should advance to Director approval (step 3)
-    expect(poApproved.currentStepId).toBe(steps[2]?.id);
+    // Should advance to Director approval (step 4, index 3)
+    expect(poApproved.currentStepId).toBe(steps[3]?.id);
 
-    // 5. Approve as Director (Final)
+    // 6. Approve as Director (Final)
     const actorDirector: AuthUser = {
       id: directorUser.id,
       email: directorUser.email,
@@ -196,7 +211,10 @@ describe('WorkflowEngine Integration Tests', () => {
 
     // Clean up request & dynamic template
     await prisma.request.delete({ where: { id: request.id } });
-    await prisma.workflowTemplate.delete({ where: { id: steps[0]!.templateId } });
+    if (steps[0]?.templateId && steps[0].templateId !== template.id) {
+      await prisma.workflowStep.deleteMany({ where: { templateId: steps[0].templateId } });
+      await prisma.workflowTemplate.delete({ where: { id: steps[0].templateId } }).catch(() => {});
+    }
   }, 30000);
 
   it('should process HOD-created high-cost purchase request with correct composed steps (Procurement Review -> Director) and prevent HOD self-approval', async () => {
@@ -235,11 +253,12 @@ describe('WorkflowEngine Integration Tests', () => {
     // 2. Submit the request
     const submitted = await WorkflowEngine.submitRequest(request.id, actorHod);
 
-    // Verify composed steps: Procurement Review -> Director Approval (2 steps, no duplicate roles, no HOD step)
+    // Verify composed steps: Finance Review -> Procurement Review -> Director Approval (3 steps, no duplicate roles, no HOD step)
     const steps = await StepResolver.getStepsForRequest(request.id);
-    expect(steps.length).toBe(2);
-    expect(steps[0]?.approverRole).toBe(UserRole.PURCHASE_OFFICER);
-    expect(steps[1]?.approverRole).toBe(UserRole.DIRECTOR);
+    expect(steps.length).toBe(3);
+    expect(steps[0]?.approverRole).toBe(UserRole.FINANCE_OFFICER);
+    expect(steps[1]?.approverRole).toBe(UserRole.PURCHASE_OFFICER);
+    expect(steps[2]?.approverRole).toBe(UserRole.DIRECTOR);
 
     // 3. Verify Self-Approval Hard Stop: Requester (HOD) cannot act on their own request
     const canRequesterAct = await WorkflowEngine.canUserActOnRequest(request.id, hodUser.id);

@@ -2,6 +2,8 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth';
 import * as requestController from '../controllers/request.controller';
+import * as attachmentController from '../controllers/attachment.controller';
+import { uploadAttachmentMiddleware } from '../middleware/upload';
 
 const router = Router();
 
@@ -18,12 +20,21 @@ router.get('/requests', requireAuth, requestController.listRequests);
 router.post('/requests/:id/comments', requireAuth, requestController.addComment);
 router.get('/requests/:id/comments', requireAuth, requestController.getComments);
 
-// Documents endpoints
+// Attachments endpoints (Phase 6)
+router.post('/requests/:id/attachments', requireAuth, uploadAttachmentMiddleware.single('file'), attachmentController.uploadAttachment);
+router.get('/requests/:id/attachments', requireAuth, attachmentController.getAttachments);
+router.get('/requests/:id/attachments/:attachmentId', requireAuth, attachmentController.getAttachmentFile);
+router.delete('/requests/:id/attachments/:attachmentId', requireAuth, attachmentController.deleteAttachment);
+
+// Documents endpoints (Legacy / Backward Compatibility)
 router.post('/requests/:id/documents', requireAuth, requestController.uploadDocument);
 router.get('/requests/:id/documents', requireAuth, requestController.getDocuments);
 
 router.post('/requests/:id/approve', requireAuth, requestController.approve);
 router.post('/requests/:id/reject', requireAuth, requestController.reject);
 router.post('/requests/:id/return', requireAuth, requestController.returnForCorrection);
+router.post('/requests/:id/forward', requireAuth, requestController.forward);
+router.get('/requests/:id/recipients', requireAuth, requestController.getEligibleRecipients);
 
 export default router;
+

@@ -171,15 +171,108 @@ body {
   letter-spacing: var(--tracking-wider);
   white-space: nowrap;
   line-height: 1;
+  border: 1px solid transparent;
 }
 
-.status-draft     { background-color: var(--status-draft-bg);     color: var(--status-draft-text); }
-.status-submitted { background-color: var(--status-submitted-bg); color: var(--status-submitted-text); }
+.status-draft     { background-color: var(--status-draft-bg);     color: var(--status-draft-text);     border-color: #cbd5e1; }
+.status-submitted { background-color: var(--status-submitted-bg); color: var(--status-submitted-text); border-color: #c7d2fe; }
 .status-in_review,
-.status-in-review { background-color: var(--status-in_review-bg); color: var(--status-in_review-text); }
-.status-approved  { background-color: var(--status-approved-bg);  color: var(--status-approved-text); }
-.status-rejected  { background-color: var(--status-rejected-bg);  color: var(--status-rejected-text); }
-.status-returned  { background-color: var(--status-returned-bg);  color: var(--status-returned-text); }
-.status-cancelled { background-color: var(--status-cancelled-bg); color: var(--status-cancelled-text); }
-.status-active    { background-color: #d1fae5; color: #047857; }
-.status-inactive  { background-color: #f1f5f9; color: #64748b; }
+.status-in-review { background-color: var(--status-in_review-bg); color: var(--status-in_review-text); border-color: #fde68a; }
+.status-approved  { background-color: var(--status-approved-bg);  color: var(--status-approved-text);  border-color: #a7f3d0; }
+.status-rejected  { background-color: var(--status-rejected-bg);  color: var(--status-rejected-text);  border-color: #fecaca; }
+.status-returned  { background-color: var(--status-returned-bg);  color: var(--status-returned-text);  border-color: #fed7aa; }
+.status-cancelled { background-color: var(--status-cancelled-bg); color: var(--status-cancelled-text); border-color: #e2e8f0; }
+.status-active    { background-color: #d1fae5; color: #047857; border-color: #a7f3d0; }
+.status-inactive  { background-color: #f1f5f9; color: #64748b; border-color: #e2e8f0; }
+
+/* --- REUSABLE BUTTON UTILITIES --- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: var(--brand-primary);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  border: 1px solid transparent;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--brand-hover);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 2px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #ffffff;
+  color: #334155;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #f8fafc;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--focus-border);
+  outline-offset: 2px;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #ef4444;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  border: 1px solid transparent;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition-fast);
+}
+
+.btn-danger:hover:not(:disabled) {
+  background-color: #dc2626;
+}
+
+.btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

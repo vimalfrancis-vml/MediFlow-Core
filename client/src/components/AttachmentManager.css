@@ -1,0 +1,261 @@
+.attachment-manager {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.attachment-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.attachment-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text-main, #0f172a);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.attachment-count-badge {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+}
+
+.attachment-actions-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.attachment-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid var(--color-border, #cbd5e1);
+  background: var(--color-surface, #ffffff);
+  color: var(--color-text-main, #334155);
+}
+
+.attachment-btn:hover:not(:disabled) {
+  background: var(--color-surface-subtle, #f8fafc);
+  border-color: #94a3b8;
+}
+
+.attachment-btn:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+}
+
+.attachment-btn-primary {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+.attachment-btn-primary:hover:not(:disabled) {
+  background: #0369a1;
+  border-color: #0369a1;
+}
+
+.attachment-hidden-input {
+  display: none;
+}
+
+/* Upload Dropzone */
+.attachment-dropzone {
+  border: 2px dashed var(--color-border, #cbd5e1);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  background: var(--color-surface-subtle, #f8fafc);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: 1.25rem;
+}
+
+.attachment-dropzone:hover,
+.attachment-dropzone.drag-active {
+  border-color: #0284c7;
+  background: #f0f9ff;
+}
+
+.attachment-dropzone-icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.attachment-dropzone-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-main, #334155);
+  margin: 0 0 0.25rem 0;
+}
+
+.attachment-dropzone-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #64748b);
+  margin: 0;
+}
+
+/* Alerts / Banners */
+.attachment-alert {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.attachment-alert-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.attachment-alert-success {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+/* Attachments List */
+.attachment-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.attachment-card {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.attachment-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.attachment-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.attachment-file-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.attachment-file-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.attachment-file-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-main, #0f172a);
+  margin: 0 0 0.25rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attachment-file-meta {
+  font-size: 0.75rem;
+  color: var(--color-text-muted, #64748b);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.attachment-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border, #f1f5f9);
+}
+
+.attachment-action-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 0.35rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--color-text-main, #334155);
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.attachment-action-btn:hover {
+  background: var(--color-surface-subtle, #f1f5f9);
+  color: #0f172a;
+}
+
+.attachment-action-btn.delete-btn:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.attachment-empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--color-text-muted, #64748b);
+  font-size: 0.875rem;
+  background: var(--color-surface-subtle, #f8fafc);
+  border-radius: 8px;
+  border: 1px dashed var(--color-border, #e2e8f0);
+}
+
+@media (max-width: 640px) {
+  .attachment-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .attachment-actions-bar {
+    width: 100%;
+  }
+
+  .attachment-list {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,6 +1,7 @@
 // src/request/request.service.ts
 
 import { WorkflowEngine } from '../core/WorkflowEngine';
+import { resolveActiveWorkflowTemplate } from '../core/StepResolver';
 import { prisma } from '../db';
 import { Request, RequestStatus, ApprovalActionType, UserRole } from '@prisma/client';
 import { AuthUser } from '../core/WorkflowEngine'; // reuse interface
@@ -23,17 +24,9 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
     const referenceNumber = `REQ-${Date.now()}`;
     const { requestedById, departmentId, workflowTemplateId, details, ...cleanData } = data;
     
-    // Resolve workflowTemplateId: use provided or fallback to a template matching request type
-    let templateId = workflowTemplateId;
-    if (!templateId) {
-      const tmpl = await prisma.workflowTemplate.findFirst({
-        where: { requestType: cleanData.type, isActive: true },
-      });
-      if (!tmpl) {
-        throw new Error('No workflow template found for request type');
-      }
-      templateId = tmpl.id;
-    }
+    // Resolve workflowTemplateId: use provided or fallback to authoritative active template
+    const template = await resolveActiveWorkflowTemplate(cleanData.type, workflowTemplateId);
+    const templateId = template.id;
     const requestData: any = {
         ...cleanData,
         requestedBy: { connect: { id: actor.id } },
@@ -293,64 +286,107 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
   }
 
   /** Add a comment to a request */
-  /**
-   * Add a comment to a request and create an audit entry.
-   * @param requestId Request identifier.
-   * @param comment   Text of the comment.
-   * @param actor     Authenticated user adding the comment.
-   */
   static async addComment(requestId: string, comment: string, actor: AuthUser) {
-    const request = await prisma.request.findUniqueOrThrow({ where: { id: requestId } });
-    // Any participant can comment; no extra check needed beyond auth
-    await prisma.approvalAction.create({
-      data: {
-        requestId,
-        stepId: request.currentStepId ?? '',
-        actorId: actor.id,
-        action: ApprovalActionType.COMMENTED,
-        comment,
-      },
+    // 1. Authorize: Ensure actor has access to view this request
+    const request = await this.getRequestById(requestId, actor);
+    
+    if (!comment || !comment.trim()) {
+      throw new AppError('Comment cannot be empty.', 400);
+    }
+
+    const cleanComment = comment.trim();
+
+    await prisma.$transaction(async (tx) => {
+      await tx.approvalAction.create({
+        data: {
+          requestId,
+          stepId: request.currentStepId ?? '',
+          actorId: actor.id,
+          action: ApprovalActionType.COMMENTED,
+          comment: cleanComment,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: actor.id,
+          requestId,
+          action: 'COMMENTED',
+          description: `Comment added by ${actor.firstName} ${actor.lastName}`,
+        },
+      });
     });
-    await prisma.auditLog.create({
-      data: {
-        actorId: actor.id,
-        requestId,
-        action: 'COMMENTED',
-        description: `Comment added by ${actor.firstName}`,
-      },
-    });
+
     return { success: true };
   }
 
   /** Upload a document (URL) */
-  /**
-   * Upload a document URL for a request and log audit.
-   * @param requestId Request identifier.
-   * @param fileName  Name of the uploaded file.
-   * @param url       URL where the document is stored.
-   * @param actor     Authenticated user uploading the document.
-   */
   static async uploadDocument(requestId: string, fileName: string, url: string, actor: AuthUser) {
-    // For simplicity store in a generic Document table (assumed to exist)
-    await prisma.attachment.create({
-      data: { 
-        requestId, 
-        originalName: fileName, 
-        storagePath: url, 
-        mimeType: 'application/octet-stream', // Default
-        sizeBytes: 0, // Default
-        uploadedById: actor.id 
-      },
+    // 1. Authorize: Ensure actor has access to view this request
+    const request = await this.getRequestById(requestId, actor);
+
+    // 2. State check: Cannot upload documents to cancelled or rejected requests
+    if (request.status === RequestStatus.CANCELLED || request.status === RequestStatus.REJECTED) {
+      throw new AppError('Cannot upload documents to a cancelled or rejected request.', 400);
+    }
+
+    // 3. Clean and sanitize filename against path traversal
+    const cleanFileName = fileName.replace(/[\\/\0]|(\.\.)/g, '').trim();
+    if (!cleanFileName) {
+      throw new AppError('Invalid file name.', 400);
+    }
+
+    // 4. Scheme check: only http, https, or relative internal path starting with /
+    const trimmedUrl = url.trim();
+    if (/^(javascript|data|vbscript|file):/i.test(trimmedUrl)) {
+      throw new AppError('Dangerous URL schemes are strictly prohibited.', 400);
+    }
+    if (!/^https?:\/\//i.test(trimmedUrl) && !/^\/[a-zA-Z0-9_\-./]+$/.test(trimmedUrl)) {
+      throw new AppError('Document URL must be a valid HTTP/HTTPS URL or secure storage path.', 400);
+    }
+
+    // Infer MIME type
+    const ext = cleanFileName.split('.').pop()?.toLowerCase() || '';
+    const mimeMap: Record<string, string> = {
+      pdf: 'application/pdf',
+      png: 'image/png',
+      jpg: 'image/jpeg',
+      jpeg: 'image/jpeg',
+      doc: 'application/msword',
+      docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      xls: 'application/vnd.ms-excel',
+      xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      txt: 'text/plain',
+      csv: 'text/csv',
+    };
+    const mimeType = mimeMap[ext] || 'application/octet-stream';
+
+    // 5. Atomic transaction: create Attachment + AuditLog
+    const attachment = await prisma.$transaction(async (tx) => {
+      const created = await tx.attachment.create({
+        data: {
+          requestId,
+          originalName: cleanFileName,
+          storagePath: trimmedUrl,
+          mimeType,
+          sizeBytes: 0, // Architecture note: URLs/metadata stored, file bytes handled by storage backend
+          uploadedById: actor.id,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: actor.id,
+          requestId,
+          action: 'DOCUMENT_UPLOADED',
+          description: `Document "${cleanFileName}" uploaded by ${actor.firstName} ${actor.lastName}`,
+        },
+      });
+
+      return created;
     });
-    await prisma.auditLog.create({
-      data: {
-        actorId: actor.id,
-        requestId,
-        action: 'DOCUMENT_UPLOADED',
-        description: `Document "${fileName}" uploaded by ${actor.firstName}`,
-      },
-    });
-    return { success: true };
+
+    return { success: true, data: attachment };
   }
 
   /** Retrieve a request by id */
@@ -373,27 +409,64 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         }, 
         currentStep: true,
         auditLogs: { orderBy: { timestamp: 'asc' } },
+        attachments: { orderBy: { createdAt: 'desc' } },
         purchaseDetail: true,
         leaveDetail: true,
         maintenanceDetail: true,
         department: true,
+        requestedBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+            roleRef: { select: { displayName: true } },
+            department: { select: { id: true, name: true, code: true, displayName: true } },
+          },
+        },
+        assignedToUser: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            role: true,
+            roleRef: { select: { displayName: true } },
+            department: { select: { id: true, name: true, code: true, displayName: true } },
+          },
+        },
       },
     });
 
-    // Enrich audit logs with actor information
-    const actorIds = [...new Set(request.auditLogs.map((l: any) => l.actorId).filter(Boolean))];
-    const actors = await prisma.user.findMany({
-      where: { id: { in: actorIds as string[] } },
-      select: { id: true, firstName: true, lastName: true, role: true }
+    // Enrich audit logs & attachments with user information
+    const userIds = [
+      ...new Set([
+        ...request.auditLogs.map((l: any) => l.actorId),
+        ...((request as any).attachments || []).map((a: any) => a.uploadedById),
+      ].filter(Boolean)),
+    ];
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds as string[] } },
+      select: { id: true, firstName: true, lastName: true, email: true, role: true }
     });
-    const actorMap = Object.fromEntries(actors.map((a: any) => [a.id, a]));
+    const userMap = Object.fromEntries(users.map((u: any) => [u.id, u]));
 
     const enrichedAuditLogs = request.auditLogs.map((log: any) => ({
       ...log,
-      actor: log.actorId ? actorMap[log.actorId] : null
+      actor: log.actorId ? userMap[log.actorId] : null
     }));
 
-    const enrichedRequest = { ...request, auditLogs: enrichedAuditLogs };
+    const enrichedAttachments = ((request as any).attachments || []).map((att: any) => ({
+      ...att,
+      uploadedBy: att.uploadedById ? userMap[att.uploadedById] : null
+    }));
+
+    const enrichedRequest = {
+      ...request,
+      auditLogs: enrichedAuditLogs,
+      attachments: enrichedAttachments
+    };
 
     // Authorization – requester, admins, current/past approvers, or anyone in the workflow steps can view
     const isInWorkflow = request.workflowTemplate?.steps.some(
@@ -410,17 +483,18 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
 
     // HODs are restricted to requests in their department
     const isHodAuthorized = actor.role !== UserRole.HOD || actor.departmentId === request.departmentId;
+    const canAct = await WorkflowEngine.canUserActOnRequest(id, actor.id);
 
     if (
       request.requestedById !== actor.id &&
       actor.role !== UserRole.ADMIN &&
-      !(await WorkflowEngine.canUserActOnRequest(id, actor.id)) &&
+      !canAct &&
       !hasParticipated &&
       !(isInWorkflow && isHodAuthorized)
     ) {
       throw new AppError('You are not allowed to view this request.', 403);
     }
-    return enrichedRequest;
+    return { ...enrichedRequest, canAct };
   }
 
   /** List requests visible to the user */
@@ -524,16 +598,13 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
     return results;
   }
 
-  /** Approve current step */
-  /**
-   * Approve the current step of a request via WorkflowEngine.
-   * @param id      Request ID.
-   * @param comment Optional approval comment.
-   * @param actor   Authenticated user performing approval.
-   * @returns Updated Request after approval.
-   */
-  static async approve(id: string, comment: string | undefined, actor: AuthUser) {
-    return WorkflowEngine.approve(id, comment, actor);
+  static async approve(
+    id: string,
+    comment: string | undefined,
+    actor: AuthUser,
+    options?: { isOverride?: boolean; overrideReason?: string }
+  ) {
+    return WorkflowEngine.approve(id, comment, actor, options);
   }
 
   /** Reject current step */
@@ -542,10 +613,16 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
    * @param id      Request ID.
    * @param comment Optional rejection comment.
    * @param actor   Authenticated user performing rejection.
+   * @param options Optional administrative override parameters.
    * @returns Updated Request after rejection.
    */
-  static async reject(id: string, comment: string | undefined, actor: AuthUser) {
-    return WorkflowEngine.reject(id, comment, actor);
+  static async reject(
+    id: string,
+    comment: string | undefined,
+    actor: AuthUser,
+    options?: { isOverride?: boolean; overrideReason?: string }
+  ) {
+    return WorkflowEngine.reject(id, comment, actor, options);
   }
 
   /** Return request to requester for correction */
@@ -558,6 +635,16 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
    */
   static async returnForCorrection(id: string, comment: string | undefined, actor: AuthUser) {
     return WorkflowEngine.returnForCorrection(id, comment, actor);
+  }
+
+  /** Forward request to another eligible recipient */
+  static async forward(id: string, targetUserId: string, comment: string | undefined, actor: AuthUser) {
+    return WorkflowEngine.forward(id, targetUserId, comment, actor);
+  }
+
+  /** Get eligible forwarding recipients for the current step */
+  static async getEligibleRecipients(id: string, actor: AuthUser) {
+    return WorkflowEngine.getEligibleRecipients(id, actor);
   }
 
   /** Retrieve comments for a request */

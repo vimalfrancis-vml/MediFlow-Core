@@ -1,5 +1,5 @@
 // Evaluates workflow rules to dynamically modify step sequences based on request context
-import { RuleContext, workflowRules } from './workflow.rules';
+import { RuleContext, getRequestMonetaryAmount } from './workflow.rules';
 import { WorkflowStep, UserRole, Priority } from '@prisma/client';
 
 /**
@@ -19,7 +19,7 @@ export function evaluateRules(
   if (ctx.requesterRole === UserRole.HOD) {
     if (ctx.type === 'PURCHASE') {
       // HOD self-approval omitted for purchase requests initiated by HOD.
-      // Procurement review handles initial operational processing; if > 100k, Director step is added at end.
+      // Procurement review / Director handles operational processing.
       steps = steps.filter((s) => s.approverRole !== UserRole.HOD);
     } else if (ctx.type === 'MAINTENANCE') {
       // Replace HOD step with Director Approval
@@ -50,8 +50,9 @@ export function evaluateRules(
     }
   }
 
-  // 2. High-Cost Purchase Rule (> ₹1,00,000)
-  if (ctx.type === 'PURCHASE' && (ctx.details.estimatedCost ?? 0) > 100000) {
+  // 2. High-Cost Purchase Rule (> ₹1,00,000) — Add Director Approval if not present
+  const monetaryAmount = getRequestMonetaryAmount(ctx);
+  if (ctx.type === 'PURCHASE' && (monetaryAmount ?? 0) > 100000) {
     const hasDirector = steps.some((s) => s.approverRole === UserRole.DIRECTOR);
     if (!hasDirector) {
       const afterIdx = steps.findIndex((s) => s.approverRole === UserRole.PURCHASE_OFFICER);
@@ -61,6 +62,8 @@ export function evaluateRules(
         stepName: 'Director Approval',
         order: 0,
         approverRole: UserRole.DIRECTOR,
+        approverDepartmentId: null,
+        allowDynamicForwarding: false,
         isFinal: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -73,7 +76,7 @@ export function evaluateRules(
     }
   }
 
-  // 3. Long / High-Priority Leave Rule
+  // 3. Long / High-Priority Leave Rule (> 14 days or HIGH/EMERGENCY)
   if (
     ctx.type === 'LEAVE' &&
     ((ctx.details.totalDays ?? 0) > 14 ||
@@ -89,6 +92,8 @@ export function evaluateRules(
         stepName: 'Medical Superintendent Approval',
         order: 0,
         approverRole: UserRole.MEDICAL_SUPERINTENDENT,
+        approverDepartmentId: null,
+        allowDynamicForwarding: false,
         isFinal: false,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -99,6 +104,35 @@ export function evaluateRules(
         steps.unshift(newStep);
       }
     }
+  }
+
+  // 4. System-Enforced Finance-First Invariant:
+  // Any qualifying request above ₹1,00,000 MUST have Finance Department review as the FIRST required stage.
+  // This cannot be bypassed by admin-configured templates.
+  if (monetaryAmount !== null && monetaryAmount > 100000) {
+    // Check if a Finance Officer step already exists
+    const existingFinanceIdx = steps.findIndex((s) => s.approverRole === UserRole.FINANCE_OFFICER);
+    let financeStep: WorkflowStep;
+
+    if (existingFinanceIdx !== -1) {
+      financeStep = steps.splice(existingFinanceIdx, 1)[0]!;
+    } else {
+      financeStep = {
+        id: `dynamic-finance-${Date.now()}`,
+        templateId: steps[0]?.templateId || '',
+        stepName: 'Finance Department Review',
+        order: 0,
+        approverRole: UserRole.FINANCE_OFFICER,
+        approverDepartmentId: null,
+        allowDynamicForwarding: true,
+        isFinal: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+    }
+
+    // Unshift to ensure Finance is the very first step
+    steps.unshift(financeStep);
   }
 
   // Deduplicate consecutive identical roles if any remain

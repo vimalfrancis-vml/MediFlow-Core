@@ -3,6 +3,7 @@ import type { RequestItem } from '../services/api';
 import { LoadingState } from './LoadingState';
 import { EmptyState } from './EmptyState';
 import { formatDate } from '../utils/date';
+import { useTerminology } from '../context/TerminologyContext';
 
 interface RequestTableProps {
   requests: RequestItem[];
@@ -26,10 +27,11 @@ export function RequestTable({
   onPageChange
 }: RequestTableProps) {
   const navigate = useNavigate();
+  const { getStatusLabel, getRequestTypeLabel } = useTerminology();
 
   if (isLoading) {
     return (
-      <div className="state-card loading-state bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+      <div className="state-card loading-state bg-white p-6 rounded-xl shadow-xs border border-slate-200">
         <LoadingState message="Loading requests..." />
       </div>
     );
@@ -37,9 +39,9 @@ export function RequestTable({
 
   if (error) {
     return (
-      <div className="state-card error-state bg-white p-10 rounded-xl shadow-sm border border-slate-100 text-center">
-        <p className="text-red-500 mb-4">{error}</p>
-        <button onClick={onRetry} className="retry-btn bg-indigo-50 text-indigo-600 px-4 py-2 rounded-lg hover:bg-indigo-100 font-medium transition-colors">
+      <div className="state-card error-state bg-white p-8 rounded-xl shadow-xs border border-red-200 text-center">
+        <p className="text-red-600 mb-4 text-sm">{error}</p>
+        <button onClick={onRetry} className="btn-secondary text-xs">
           Retry
         </button>
       </div>
@@ -48,7 +50,7 @@ export function RequestTable({
 
   if (requests.length === 0) {
     return (
-      <div className="state-card empty-state bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+      <div className="state-card empty-state bg-white p-8 rounded-xl shadow-xs border border-slate-200">
         <EmptyState
           message="No requests found matching your criteria."
           icon={
@@ -62,53 +64,67 @@ export function RequestTable({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200/80 overflow-hidden flex flex-col">
+    <div className="bg-white rounded-xl shadow-xs border border-slate-200 overflow-hidden flex flex-col">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm text-slate-600">
-          <thead className="bg-slate-50/80 border-b border-slate-200">
+          <thead className="bg-slate-50/90 border-b border-slate-200">
             <tr>
-              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Reference</th>
-              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Title</th>
-              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Type</th>
-              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Department</th>
-              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Date</th>
-              <th scope="col" className="px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
+              <th scope="col" className="px-4 sm:px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Reference</th>
+              <th scope="col" className="px-4 sm:px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Title</th>
+              <th scope="col" className="px-4 sm:px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Type</th>
+              <th scope="col" className="px-4 sm:px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Department</th>
+              <th scope="col" className="px-4 sm:px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Date</th>
+              <th scope="col" className="px-4 sm:px-5 py-3 text-[11px] font-bold text-slate-500 uppercase tracking-wider">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {requests.map(request => (
-              <tr 
-                key={request.id} 
-                tabIndex={0}
-                role="button"
-                aria-label={`View request ${request.referenceNumber || ''}: ${request.title || ''}`}
-                onClick={() => navigate(`${baseRoute}/${request.id}`)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    navigate(`${baseRoute}/${request.id}`);
-                  }
-                }}
-                className="hover:bg-slate-50/60 cursor-pointer transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 focus-visible:outline-offset-[-2px] focus-visible:bg-slate-50"
-              >
-                <td className="px-5 py-3.5 font-mono text-[11px] font-medium text-slate-500">{request.referenceNumber || '—'}</td>
-                <td className="px-5 py-3.5 font-medium text-slate-800">{request.title || '—'}</td>
-                <td className="px-5 py-3.5">
-                  <span className="px-2 py-0.5 bg-slate-100 border border-slate-200/60 rounded-md text-xs font-medium text-slate-600">
-                    {request.type || '—'}
-                  </span>
-                </td>
-                <td className="px-5 py-3.5 text-slate-600">{request.department?.name || '—'}</td>
-                <td className="px-5 py-3.5 whitespace-nowrap text-slate-500 text-xs">
-                  {formatDate(request.createdAt)}
-                </td>
-                <td className="px-5 py-3.5">
-                  <span className={`request-status status-${(request.status || '').toLowerCase()} px-2.5 py-0.5 rounded-full text-[11px] font-semibold uppercase tracking-wide`}>
-                    {request.status || '—'}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {requests.map(request => {
+              const isHighCost = request.type === 'PURCHASE' && Number(request.purchaseDetail?.estimatedCost || 0) > 100000;
+              return (
+                <tr 
+                  key={request.id} 
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`View request ${request.referenceNumber || ''}: ${request.title || ''}`}
+                  onClick={() => navigate(`${baseRoute}/${request.id}`)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      navigate(`${baseRoute}/${request.id}`);
+                    }
+                  }}
+                  className="hover:bg-slate-50/70 cursor-pointer transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500 focus-visible:outline-offset-[-2px] focus-visible:bg-indigo-50/30"
+                >
+                  <td className="px-4 sm:px-5 py-3 font-mono text-[11px] font-semibold text-slate-500">{request.referenceNumber || '—'}</td>
+                  <td className="px-4 sm:px-5 py-3 font-medium text-slate-900">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span>{request.title || '—'}</span>
+                      {isHighCost && (
+                        <span className="text-[10px] font-bold px-1.5 py-0.2 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded" title="Mandatory Finance Review">
+                          ₹ Policy
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 sm:px-5 py-3">
+                    <span className="px-2 py-0.5 bg-slate-100 border border-slate-200/70 rounded text-xs font-medium text-slate-700 whitespace-nowrap">
+                      {getRequestTypeLabel(request.type)}
+                    </span>
+                  </td>
+                  <td className="px-4 sm:px-5 py-3 text-slate-600 text-xs sm:text-sm">
+                    {request.department?.displayName || request.department?.name || '—'}
+                  </td>
+                  <td className="px-4 sm:px-5 py-3 whitespace-nowrap text-slate-500 text-xs">
+                    {formatDate(request.createdAt)}
+                  </td>
+                  <td className="px-4 sm:px-5 py-3">
+                    <span className={`status-badge status-${(request.status || '').toLowerCase()}`}>
+                      {getStatusLabel(request.status)}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

@@ -53,6 +53,7 @@ export class WorkflowEngine {
         data: {
           status: RequestStatus.IN_REVIEW,
           currentStepId: firstStep.id,
+          assignedToUserId: null,
           submittedAt: new Date(),
         },
       });
@@ -87,7 +88,8 @@ export class WorkflowEngine {
   public static async approve(
     requestId: string,
     comment: string | undefined,
-    actor: AuthUser
+    actor: AuthUser,
+    options?: { isOverride?: boolean; overrideReason?: string }
   ): Promise<Request> {
     const request = await prisma.request.findUniqueOrThrow({
       where: { id: requestId },
@@ -98,13 +100,17 @@ export class WorkflowEngine {
       throw new AppError('This request is not under review right now.', 400);
     }
 
-    // Verify actor is authorized for current step
-    await this.verifyApproverPermission(request, actor);
+    // Verify actor is authorized for current step (respecting explicit override checks)
+    await this.verifyApproverPermission(request, actor, options);
 
     // Resolve next step BEFORE the transaction (may perform DB reads/writes for dynamic templates)
     const nextStep = await StepResolver.getNextStep(request.id, request.currentStep.id);
 
     const isFinalStep = request.currentStep.isFinal || !nextStep;
+
+    const approvalComment = options?.isOverride
+      ? `[ADMIN OVERRIDE: ${options.overrideReason!.trim()}]${comment ? ` ${comment.trim()}` : ''}`
+      : comment;
 
     // Atomic transaction: approval action + state change + audit log (C-01)
     const updatedRequest = await prisma.$transaction(async (tx) => {
@@ -115,7 +121,7 @@ export class WorkflowEngine {
           stepId: request.currentStep!.id,
           actorId: actor.id,
           action: ApprovalActionType.APPROVED,
-          comment,
+          comment: approvalComment,
         },
       });
 
@@ -128,6 +134,7 @@ export class WorkflowEngine {
           data: {
             status: RequestStatus.APPROVED,
             currentStepId: null,
+            assignedToUserId: null,
             completedAt: new Date(),
           },
         });
@@ -141,38 +148,60 @@ export class WorkflowEngine {
           },
         });
 
-        await tx.auditLog.create({
-          data: {
-            actorId: actor.id,
-            requestId: request.id,
-            action: 'APPROVED',
-            description: `Final approval completed by ${actor.firstName} ${actor.lastName}`,
-          },
-        });
+        if (options?.isOverride) {
+          await tx.auditLog.create({
+            data: {
+              actorId: actor.id,
+              requestId: request.id,
+              action: 'ADMIN_OVERRIDE_FINAL_APPROVAL',
+              description: `Administrative override executed by Admin ${actor.firstName} ${actor.lastName} for step "${request.currentStep!.stepName}": ${options.overrideReason!.trim()}`,
+            },
+          });
+        } else {
+          await tx.auditLog.create({
+            data: {
+              actorId: actor.id,
+              requestId: request.id,
+              action: 'APPROVED',
+              description: `Final approval completed by ${actor.firstName} ${actor.lastName}`,
+            },
+          });
+        }
       } else {
-        // Advance to next step
+        // Advance to next step (resetting assigned recipient for new stage)
         updated = await tx.request.update({
           where: { id: requestId },
           data: {
             currentStepId: nextStep!.id,
+            assignedToUserId: null,
           },
         });
 
-        await tx.auditLog.create({
-          data: {
-            actorId: actor.id,
-            requestId: request.id,
-            action: 'STEP_APPROVED',
-            description: `Approved by ${actor.firstName} ${actor.lastName} (${request.currentStep!.stepName})`,
-          },
-        });
+        if (options?.isOverride) {
+          await tx.auditLog.create({
+            data: {
+              actorId: actor.id,
+              requestId: request.id,
+              action: 'ADMIN_OVERRIDE_STEP_APPROVAL',
+              description: `Administrative override executed by Admin ${actor.firstName} ${actor.lastName} for step "${request.currentStep!.stepName}": ${options.overrideReason!.trim()}`,
+            },
+          });
+        } else {
+          await tx.auditLog.create({
+            data: {
+              actorId: actor.id,
+              requestId: request.id,
+              action: 'STEP_APPROVED',
+              description: `Approved by ${actor.firstName} ${actor.lastName} (${request.currentStep!.stepName})`,
+            },
+          });
+        }
       }
 
       return updated;
     });
 
     // Notify next approvers AFTER commit using the freshly updated request (C-03)
-    // Wrapped in try/catch so a notification failure does NOT surface as a workflow error
     if (!isFinalStep && nextStep) {
       try {
         await this.notifyApprovers(updatedRequest, nextStep);
@@ -190,7 +219,8 @@ export class WorkflowEngine {
   public static async reject(
     requestId: string,
     comment: string | undefined,
-    actor: AuthUser
+    actor: AuthUser,
+    options?: { isOverride?: boolean; overrideReason?: string }
   ): Promise<Request> {
     const request = await prisma.request.findUniqueOrThrow({
       where: { id: requestId },
@@ -201,22 +231,28 @@ export class WorkflowEngine {
       throw new AppError('This request is not under review right now.', 400);
     }
 
-    if (!comment) {
+    if (!comment && !options?.overrideReason) {
       throw new AppError('Please provide a reason for rejecting the request.', 400);
     }
 
-    // Verify permission
-    await this.verifyApproverPermission(request, actor);
+    // Verify permission (respecting explicit override)
+    await this.verifyApproverPermission(request, actor, options);
+
+    const effectiveReason = options?.isOverride ? options.overrideReason!.trim() : comment!.trim();
 
     // Atomic transaction: rejection action + state change + notification + audit log (C-01)
     const updatedRequest = await prisma.$transaction(async (tx) => {
+      const rejectionComment = options?.isOverride
+        ? `[ADMIN OVERRIDE: ${options.overrideReason!.trim()}]${comment ? ` ${comment.trim()}` : ''}`
+        : comment;
+
       await tx.approvalAction.create({
         data: {
           requestId: request.id,
           stepId: request.currentStep!.id,
           actorId: actor.id,
           action: ApprovalActionType.REJECTED,
-          comment,
+          comment: rejectionComment,
         },
       });
 
@@ -225,6 +261,8 @@ export class WorkflowEngine {
         data: {
           status: RequestStatus.REJECTED,
           currentStepId: null,
+          assignedToUserId: null,
+          completedAt: new Date(),
         },
       });
 
@@ -232,18 +270,29 @@ export class WorkflowEngine {
         data: {
           recipientId: request.requestedById,
           requestId: request.id,
-          message: `Your request "${request.title}" has been rejected. Reason: ${comment}`,
+          message: `Your request "${request.title}" has been rejected. Reason: ${effectiveReason}`,
         },
       });
 
-      await tx.auditLog.create({
-        data: {
-          actorId: actor.id,
-          requestId: request.id,
-          action: 'REJECTED',
-          description: `Rejected by ${actor.firstName} ${actor.lastName}. Reason: ${comment}`,
-        },
-      });
+      if (options?.isOverride) {
+        await tx.auditLog.create({
+          data: {
+            actorId: actor.id,
+            requestId: request.id,
+            action: 'ADMIN_OVERRIDE_REJECTION',
+            description: `Administrative override rejection executed by Admin ${actor.firstName} ${actor.lastName}. Reason: ${options.overrideReason!.trim()}`,
+          },
+        });
+      } else {
+        await tx.auditLog.create({
+          data: {
+            actorId: actor.id,
+            requestId: request.id,
+            action: 'REJECTED',
+            description: `Rejected by ${actor.firstName} ${actor.lastName}. Reason: ${effectiveReason}`,
+          },
+        });
+      }
 
       return updated;
     });
@@ -292,6 +341,7 @@ export class WorkflowEngine {
         data: {
           status: RequestStatus.RETURNED,
           currentStepId: null,
+          assignedToUserId: null,
         },
       });
 
@@ -361,6 +411,7 @@ export class WorkflowEngine {
         data: {
           status: RequestStatus.CANCELLED,
           currentStepId: null,
+          assignedToUserId: null,
         },
       });
 
@@ -388,9 +439,184 @@ export class WorkflowEngine {
   }
 
   /**
+   * Forwards/reassigns the current step to a specific eligible recipient.
+   * Semantics:
+   * - Changes responsible recipient (`assignedToUserId`)
+   * - The current workflow step REMAINS PENDING (does NOT approve, complete, or advance the step)
+   * - Mandatory business rules & Finance-first invariants are strictly enforced
+   * - Self-approval is strictly prohibited
+   */
+  public static async forward(
+    requestId: string,
+    targetUserId: string,
+    comment: string | undefined,
+    actor: AuthUser
+  ): Promise<Request> {
+    const request = await prisma.request.findUniqueOrThrow({
+      where: { id: requestId },
+      include: {
+        currentStep: {
+          include: {
+            approverDepartment: true,
+          },
+        },
+        department: true,
+      },
+    });
+
+    if (request.status !== RequestStatus.IN_REVIEW || !request.currentStep) {
+      throw new AppError('This request is not under review right now.', 400);
+    }
+
+    // Verify actor is authorized to act on or forward this step
+    await this.verifyApproverPermission(request, actor);
+
+    // 1. Prohibit self-forwarding or redundant reassignment
+    if (targetUserId === actor.id) {
+      throw new AppError('Cannot forward request to yourself.', 400);
+    }
+    if (targetUserId === request.assignedToUserId) {
+      throw new AppError('Request is already assigned to this user.', 400);
+    }
+
+    // 2. Prohibit self-approval: cannot forward to the original requester
+    if (targetUserId === request.requestedById) {
+      throw new AppError('Cannot forward request to the original requester.', 400);
+    }
+
+    // 3. Fetch target user and validate active status
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId, isActive: true },
+      include: { department: true },
+    });
+
+    if (!targetUser) {
+      throw new AppError('Target recipient not found or is inactive.', 404);
+    }
+
+    // 4. Role validation: target user must match current step's required approver role
+    if (targetUser.role !== request.currentStep.approverRole) {
+      throw new AppError(`Target recipient must have role ${request.currentStep.approverRole}.`, 400);
+    }
+
+    // 5. Department validation:
+    // A. HOD step: must belong to request department
+    if (request.currentStep.approverRole === UserRole.HOD && targetUser.departmentId !== request.departmentId) {
+      throw new AppError('HOD approval can only be forwarded to a HOD of the requesting department.', 400);
+    }
+
+    // B. Department-scoped step (approverDepartmentId is set)
+    if (request.currentStep.approverDepartmentId && targetUser.departmentId !== request.currentStep.approverDepartmentId) {
+      throw new AppError('Target recipient does not belong to the required department for this step.', 400);
+    }
+
+    // C. Finance-first invariant: If current step is Finance, target must belong to Finance Department
+    if (request.currentStep.approverRole === UserRole.FINANCE_OFFICER && targetUser.department.code !== 'FIN') {
+      throw new AppError('Finance review can only be forwarded to Finance Department personnel.', 400);
+    }
+
+    // Atomic transaction: record FORWARDED action + update assignedToUserId + log audit (C-01)
+    const updatedRequest = await prisma.$transaction(async (tx) => {
+      await tx.approvalAction.create({
+        data: {
+          requestId: request.id,
+          stepId: request.currentStep!.id,
+          actorId: actor.id,
+          action: ApprovalActionType.FORWARDED,
+          comment,
+        },
+      });
+
+      const updated = await tx.request.update({
+        where: { id: requestId },
+        data: {
+          assignedToUserId: targetUser.id,
+        },
+      });
+
+      await tx.notification.create({
+        data: {
+          recipientId: targetUser.id,
+          requestId: request.id,
+          message: `Request "${request.title}" was forwarded to you by ${actor.firstName} ${actor.lastName} for ${request.currentStep!.stepName}.`,
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: actor.id,
+          requestId: request.id,
+          action: 'FORWARDED',
+          description: `Forwarded to ${targetUser.firstName} ${targetUser.lastName} (${targetUser.role}) by ${actor.firstName} ${actor.lastName}${comment ? `. Note: ${comment}` : ''}`,
+        },
+      });
+
+      return updated;
+    });
+
+    return updatedRequest;
+  }
+
+  /**
+   * Retrieves list of eligible users to whom the request can be forwarded at its current step.
+   */
+  public static async getEligibleRecipients(requestId: string, actor: AuthUser) {
+    const request = await prisma.request.findUniqueOrThrow({
+      where: { id: requestId },
+      include: {
+        currentStep: true,
+      },
+    });
+
+    if (request.status !== RequestStatus.IN_REVIEW || !request.currentStep) {
+      return [];
+    }
+
+    const whereClause: any = {
+      isActive: true,
+      role: request.currentStep.approverRole,
+      id: {
+        notIn: [request.requestedById, actor.id, ...(request.assignedToUserId ? [request.assignedToUserId] : [])],
+      },
+    };
+
+    if (request.currentStep.approverRole === UserRole.HOD) {
+      whereClause.departmentId = request.departmentId;
+    } else if (request.currentStep.approverDepartmentId) {
+      whereClause.departmentId = request.currentStep.approverDepartmentId;
+    } else if (request.currentStep.approverRole === UserRole.FINANCE_OFFICER) {
+      whereClause.department = { code: 'FIN' };
+    }
+
+    const eligible = await prisma.user.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        role: true,
+        department: {
+          select: {
+            id: true,
+            name: true,
+            code: true,
+            displayName: true,
+          },
+        },
+        roleRef: {
+          select: {
+            displayName: true,
+          },
+        },
+      },
+    });
+
+    return eligible;
+  }
+
+  /**
    * Returns whether a user is authorized to perform approval actions on a request.
-   * Note: Delegation support is not implemented in this version (no UserDelegation model).
-   * This is tracked as an architectural enhancement for Phase 4.
    */
   public static async canUserActOnRequest(requestId: string, userId: string): Promise<boolean> {
     const request = await prisma.request.findUnique({
@@ -409,9 +635,15 @@ export class WorkflowEngine {
 
     const user = await prisma.user.findUnique({
       where: { id: userId, isActive: true },
+      include: { department: true },
     });
 
     if (!user) {
+      return false;
+    }
+
+    // If request has been specifically forwarded/assigned to another user
+    if (request.assignedToUserId && request.assignedToUserId !== userId) {
       return false;
     }
 
@@ -425,25 +657,66 @@ export class WorkflowEngine {
       return false;
     }
 
+    // Finance department stable identity check (code 'FIN')
+    if (request.currentStep.approverRole === UserRole.FINANCE_OFFICER && user.department?.code !== 'FIN') {
+      return false;
+    }
+
+    if (request.currentStep.approverDepartmentId && user.departmentId !== request.currentStep.approverDepartmentId) {
+      return false;
+    }
+
     return true;
   }
 
   /**
    * Helper to verify if the actor matches permissions for the request's current step.
-   * Note: Delegation support is not implemented in this version (no UserDelegation model).
-   * This is tracked as an architectural enhancement for Phase 4.
    */
   private static async verifyApproverPermission(
-    request: Request & { currentStep: { approverRole: UserRole } | null },
-    actor: AuthUser
+    request: Request & { currentStep: { approverRole: UserRole; approverDepartmentId?: string | null; stepName?: string } | null },
+    actor: AuthUser,
+    options?: { isOverride?: boolean; overrideReason?: string }
   ): Promise<void> {
     if (!request.currentStep) {
       throw new AppError('No active workflow step found.', 400);
     }
 
-    // Self-approval hard check: A requester cannot approve their own request
+    // Self-approval hard check: A requester cannot approve their own request under any circumstances
     if (actor.id === request.requestedById) {
       throw new AppError('You cannot approve your own request.', 403);
+    }
+
+    if (options?.isOverride) {
+      if (actor.role !== UserRole.ADMIN) {
+        throw new AppError('Administrative override is restricted to administrators.', 403);
+      }
+      if (!options.overrideReason || !options.overrideReason.trim()) {
+        throw new AppError('Administrative override requires an explicit justification reason.', 400);
+      }
+
+      // Explicitly protect Finance-first rule: Never bypass Finance review for requests > ₹1,00,000
+      const reqWithDetails = await prisma.request.findUnique({
+        where: { id: request.id },
+        include: { purchaseDetail: true },
+      });
+      const cost = reqWithDetails?.purchaseDetail?.estimatedCost
+        ? Number(reqWithDetails.purchaseDetail.estimatedCost)
+        : 0;
+
+      if (cost > 100000 && request.currentStep.approverRole === UserRole.FINANCE_OFFICER) {
+        throw new AppError(
+          'Administrative override cannot bypass mandatory Finance-first approval for high-value requests exceeding ₹1,00,000.',
+          403
+        );
+      }
+
+      // Valid administrative override
+      return;
+    }
+
+    // If specifically assigned to another user, only that user can act
+    if (request.assignedToUserId && request.assignedToUserId !== actor.id) {
+      throw new AppError('This request has been specifically assigned to another reviewer.', 403);
     }
 
     if (actor.role !== request.currentStep.approverRole) {
@@ -453,38 +726,59 @@ export class WorkflowEngine {
     if (actor.role === UserRole.HOD && actor.departmentId !== request.departmentId) {
       throw new AppError('You can only approve requests from your own department.', 403);
     }
+
+    if (request.currentStep.approverRole === UserRole.FINANCE_OFFICER && actor.departmentCode !== 'FIN') {
+      throw new AppError('Only Finance department personnel can approve during Finance review.', 403);
+    }
+
+    if (request.currentStep.approverDepartmentId && actor.departmentId !== request.currentStep.approverDepartmentId) {
+      throw new AppError('You do not belong to the required department for this approval step.', 403);
+    }
   }
 
   /**
    * Helper to notify all eligible approvers for a workflow step.
-   * Accepts the already-committed (updated) request to ensure notifications
-   * contain accurate, up-to-date data (C-03).
-   * Runs OUTSIDE any transaction — notifications are best-effort and should not
-   * roll back a successful state change if the notification write fails.
    */
   private static async notifyApprovers(
     request: Request,
-    step: { approverRole: UserRole; stepName: string }
+    step: { approverRole: UserRole; stepName: string; approverDepartmentId?: string | null }
   ): Promise<void> {
-    const approvers = await prisma.user.findMany({
-      where: {
+    let approverIds: string[] = [];
+
+    if (request.assignedToUserId) {
+      approverIds = [request.assignedToUserId];
+    } else {
+      const whereClause: any = {
         role: step.approverRole,
         isActive: true,
-        ...(step.approverRole === UserRole.HOD ? { departmentId: request.departmentId } : {}),
-      },
-    });
+      };
+      if (step.approverRole === UserRole.HOD) {
+        whereClause.departmentId = request.departmentId;
+      } else if (step.approverDepartmentId) {
+        whereClause.departmentId = step.approverDepartmentId;
+      } else if (step.approverRole === UserRole.FINANCE_OFFICER) {
+        whereClause.department = { code: 'FIN' };
+      }
+
+      const approvers = await prisma.user.findMany({
+        where: whereClause,
+        select: { id: true },
+      });
+      approverIds = approvers.map((a) => a.id);
+    }
 
     const typeLabel = request.type.toLowerCase();
     const notificationMessage = `A new ${typeLabel} request "${request.title}" needs your review for step "${step.stepName}".`;
 
-    // Use createMany for a single round-trip instead of N individual creates (C-10)
-    await prisma.notification.createMany({
-      data: approvers.map((approver) => ({
-        recipientId: approver.id,
-        requestId: request.id,
-        message: notificationMessage,
-      })),
-      skipDuplicates: true,
-    });
+    if (approverIds.length > 0) {
+      await prisma.notification.createMany({
+        data: approverIds.map((recipientId) => ({
+          recipientId,
+          requestId: request.id,
+          message: notificationMessage,
+        })),
+        skipDuplicates: true,
+      });
+    }
   }
 }

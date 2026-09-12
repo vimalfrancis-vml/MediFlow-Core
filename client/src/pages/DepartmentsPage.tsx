@@ -3,13 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { api, type DepartmentItem } from '../services/api';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { LoadingState } from '../components/LoadingState';
-import './DepartmentsPage.css';
-import './UsersPage.css'; // For status badges
+import { AdminNav } from '../components/AdminNav';
 
 export default function DepartmentsPage() {
   const [departments, setDepartments] = useState<DepartmentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createName, setCreateName] = useState('');
+  const [createCode, setCreateCode] = useState('');
+  const [createDisplayName, setCreateDisplayName] = useState('');
+  const [createError, setCreateError] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
   const navigate = useNavigate();
 
   const fetchDepartments = async () => {
@@ -29,24 +34,57 @@ export default function DepartmentsPage() {
     fetchDepartments();
   }, []);
 
+  useEffect(() => {
+    if (!showCreateModal) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !isCreating) {
+        setShowCreateModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showCreateModal, isCreating]);
+
+  const handleCreateDepartment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreating(true);
+    setCreateError(null);
+    try {
+      await api.createDepartment({
+        name: createName.trim(),
+        code: createCode.trim().toUpperCase(),
+        displayName: createDisplayName.trim() || undefined,
+      });
+      setShowCreateModal(false);
+      setCreateName('');
+      setCreateCode('');
+      setCreateDisplayName('');
+      await fetchDepartments();
+    } catch (err: any) {
+      setCreateError(err.message || 'Failed to create department');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   return (
     <DashboardLayout
       title="MediFlow"
       brandPrefix="Admin"
-      nav={
-        <nav className="admin-nav flex items-center gap-1 sm:gap-2 mr-2 sm:mr-4">
-          <button className="px-3 py-1 rounded-md text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" onClick={() => navigate('/admin')}>Overview</button>
-          <button className="px-3 py-1 rounded-md text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors" onClick={() => navigate('/admin/users')}>Users</button>
-          <button className="px-3 py-1 rounded-md text-xs sm:text-sm font-semibold bg-indigo-50 text-indigo-700 transition-colors" onClick={() => navigate('/admin/departments')}>Departments</button>
-        </nav>
-      }
+      nav={<AdminNav />}
     >
       <div className="departments-page-container">
-        <div className="departments-header">
+        <div className="departments-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">System Departments</h1>
-            <p className="text-slate-500 mt-1">Read-only view of all departments</p>
+            <p className="text-slate-500 mt-1">Configure hospital departments, HODs, and routing scopes</p>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-xs text-sm transition-colors whitespace-nowrap"
+          >
+            + Create Department
+          </button>
         </div>
 
         {isLoading ? (
@@ -97,6 +135,104 @@ export default function DepartmentsPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* CREATE DEPARTMENT MODAL */}
+        {showCreateModal && (
+          <div 
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+            onClick={() => { if (!isCreating) setShowCreateModal(false); }}
+          >
+            <div 
+              className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 text-left border border-slate-200"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="dept-create-title"
+            >
+              <div className="flex justify-between items-center pb-3 border-b border-slate-100 mb-4">
+                <h3 id="dept-create-title" className="text-lg font-bold text-slate-900">Create New Department</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  disabled={isCreating}
+                  className="text-slate-400 hover:text-slate-600 p-1 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600"
+                  aria-label="Close dialog"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {createError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-700 text-xs rounded-md border border-red-200">
+                  {createError}
+                </div>
+              )}
+
+              <form onSubmit={handleCreateDepartment} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    Department Code <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. NEUR"
+                    value={createCode}
+                    onChange={(e) => setCreateCode(e.target.value.toUpperCase())}
+                    maxLength={10}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md uppercase focus:outline-none focus:border-indigo-500"
+                  />
+                  <p className="text-[11px] text-slate-400 mt-0.5">Short unique identifier (3-5 letters uppercase)</p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    Department Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Neurology"
+                    value={createName}
+                    onChange={(e) => setCreateName(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    Display Label <span className="text-slate-400 font-normal">(Optional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Department of Clinical Neurology"
+                    value={createDisplayName}
+                    onChange={(e) => setCreateDisplayName(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateModal(false)}
+                    disabled={isCreating}
+                    className="px-4 py-2 border border-slate-300 text-slate-700 text-xs font-semibold rounded-md hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isCreating}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-md shadow-xs"
+                  >
+                    {isCreating ? 'Creating...' : 'Create Department'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>

@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { RequestService } from '../request/request.service';
 import { createRequestSchema, editRequestSchema, commentSchema, documentSchema } from '../validators/request.validators';
 import { AuthUser } from '../core/WorkflowEngine';
+import { AppError } from '../middleware/errorHandler';
 
 /**
  * Wraps an async controller function and forwards any thrown error to Express's
@@ -49,7 +50,7 @@ export const submitRequest = asyncHandler(async (req: Request, res: Response) =>
 
 export const cancelRequest = asyncHandler(async (req: Request, res: Response) => {
   const actor = getAuthUser(req);
-  const reason = req.body.reason;
+  const reason = req.body?.reason;
   const result = await RequestService.cancelRequest(req.params.id as string, reason, actor);
   return res.json({ success: true, message: 'Request cancelled.', data: result });
 });
@@ -106,15 +107,15 @@ export const uploadDocument = asyncHandler(async (req: Request, res: Response) =
 
 export const approve = asyncHandler(async (req: Request, res: Response) => {
   const actor = getAuthUser(req);
-  const comment = req.body.comment;
-  const result = await RequestService.approve(req.params.id as string, comment, actor);
+  const { comment, isOverride, overrideReason } = req.body;
+  const result = await RequestService.approve(req.params.id as string, comment, actor, { isOverride, overrideReason });
   return res.json({ success: true, message: 'Step approved.', data: result });
 });
 
 export const reject = asyncHandler(async (req: Request, res: Response) => {
   const actor = getAuthUser(req);
-  const comment = req.body.comment;
-  const result = await RequestService.reject(req.params.id as string, comment, actor);
+  const { comment, isOverride, overrideReason } = req.body;
+  const result = await RequestService.reject(req.params.id as string, comment, actor, { isOverride, overrideReason });
   return res.json({ success: true, message: 'Step rejected.', data: result });
 });
 
@@ -135,4 +136,20 @@ export const getDocuments = asyncHandler(async (req: Request, res: Response) => 
   const actor = getAuthUser(req);
   const documents = await RequestService.getDocuments(req.params.id as string, actor);
   return res.json({ success: true, data: documents });
+});
+
+export const forward = asyncHandler(async (req: Request, res: Response) => {
+  const actor = getAuthUser(req);
+  const { targetUserId, comment } = req.body;
+  if (!targetUserId) {
+    throw new AppError('Target recipient (targetUserId) is required.', 400);
+  }
+  const result = await RequestService.forward(req.params.id as string, targetUserId, comment, actor);
+  return res.json({ success: true, message: 'Request forwarded successfully.', data: result });
+});
+
+export const getEligibleRecipients = asyncHandler(async (req: Request, res: Response) => {
+  const actor = getAuthUser(req);
+  const recipients = await RequestService.getEligibleRecipients(req.params.id as string, actor);
+  return res.json({ success: true, data: recipients });
 });

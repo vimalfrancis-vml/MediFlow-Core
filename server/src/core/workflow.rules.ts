@@ -10,11 +10,31 @@ export interface RuleContext {
     leaveType?: string;         // LeaveDetail
     urgencyLevel?: string;      // MaintenanceDetail
     totalDays?: number;         // LeaveDetail
+    amount?: number;            // Generic financial amount for future types
+    totalCost?: number;         // Generic financial cost
   };
+}
+
+/**
+ * Request-type aware financial amount extractor.
+ * Avoids assuming every future request type uses `estimatedCost`.
+ */
+export function getRequestMonetaryAmount(ctx: RuleContext): number | null {
+  if (ctx.type === 'PURCHASE') {
+    return ctx.details.estimatedCost != null ? Number(ctx.details.estimatedCost) : null;
+  }
+  if (typeof ctx.details.amount === 'number') {
+    return ctx.details.amount;
+  }
+  if (typeof ctx.details.totalCost === 'number') {
+    return ctx.details.totalCost;
+  }
+  return null;
 }
 
 export type RuleEffect =
   | { type: 'ADD_STEP'; afterRole: UserRole; insertRole: UserRole; stepName: string }
+  | { type: 'INJECT_FIRST_STEP'; insertRole: UserRole; stepName: string }
   | { type: 'SET_PRIORITY'; priority: Priority };
 
 export interface WorkflowRule {
@@ -27,10 +47,21 @@ export interface WorkflowRule {
 
 export const workflowRules: WorkflowRule[] = [
   {
+    id: 'RULE_000',
+    name: 'Mandatory High-Value Finance Review (First Stage)',
+    appliesTo: 'PURCHASE',
+    condition: (ctx) => (getRequestMonetaryAmount(ctx) ?? 0) > 100000,
+    effect: {
+      type: 'INJECT_FIRST_STEP',
+      insertRole: UserRole.FINANCE_OFFICER,
+      stepName: 'Finance Review',
+    },
+  },
+  {
     id: 'RULE_001',
     name: 'High-Cost Purchase Requires Director Approval',
     appliesTo: 'PURCHASE',
-    condition: (ctx) => (ctx.details.estimatedCost ?? 0) > 100000,
+    condition: (ctx) => (getRequestMonetaryAmount(ctx) ?? 0) > 100000,
     effect: {
       type: 'ADD_STEP',
       afterRole: UserRole.PURCHASE_OFFICER,

@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useTerminology } from '../context/TerminologyContext';
 
 interface DataFilterBarProps {
   onFilterChange: (filters: { search: string; status: string; type: string }) => void;
 }
 
 export function DataFilterBar({ onFilterChange }: DataFilterBarProps) {
+  const { getStatusLabel, getRequestTypeLabel } = useTerminology();
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
   const [type, setType] = useState('');
@@ -24,45 +26,45 @@ export function DataFilterBar({ onFilterChange }: DataFilterBarProps) {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-200/80 flex flex-col sm:flex-row gap-3 items-center">
+    <div className="bg-white p-4 rounded-xl shadow-xs border border-slate-200/80 flex flex-col sm:flex-row gap-3 items-center">
       <div className="flex-1 w-full relative">
-        <svg className="w-4 h-4 absolute left-3 top-2.5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-4 h-4 absolute left-3 top-3 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <input 
           type="text" 
-          placeholder="Search by ID or Title..." 
+          placeholder="Search by reference ID or title..." 
           aria-label="Search requests by ID or Title"
-          className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-md text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-150"
+          className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 transition-all duration-150"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
       </div>
       
       <select 
-        className="w-full sm:w-auto bg-white border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-150"
+        className="w-full sm:w-auto bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 transition-all duration-150"
         value={status}
         onChange={(e) => setStatus(e.target.value)}
         aria-label="Filter by status"
       >
         <option value="">All Statuses</option>
-        <option value="DRAFT">Draft</option>
-        <option value="IN_REVIEW">In Review</option>
-        <option value="APPROVED">Approved</option>
-        <option value="REJECTED">Rejected</option>
-        <option value="RETURNED">Returned</option>
+        <option value="DRAFT">{getStatusLabel('DRAFT')}</option>
+        <option value="IN_REVIEW">{getStatusLabel('IN_REVIEW')}</option>
+        <option value="APPROVED">{getStatusLabel('APPROVED')}</option>
+        <option value="REJECTED">{getStatusLabel('REJECTED')}</option>
+        <option value="RETURNED">{getStatusLabel('RETURNED')}</option>
       </select>
 
       <select 
-        className="w-full sm:w-auto bg-white border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.1)] transition-all duration-150"
+        className="w-full sm:w-auto bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:border-indigo-500 focus:ring-3 focus:ring-indigo-100 transition-all duration-150"
         value={type}
         onChange={(e) => setType(e.target.value)}
         aria-label="Filter by request type"
       >
-        <option value="">All Types</option>
-        <option value="MAINTENANCE">Maintenance</option>
-        <option value="PURCHASE">Purchase</option>
-        <option value="LEAVE">Leave</option>
+        <option value="">All Request Types</option>
+        <option value="PURCHASE">{getRequestTypeLabel('PURCHASE')}</option>
+        <option value="MAINTENANCE">{getRequestTypeLabel('MAINTENANCE')}</option>
+        <option value="LEAVE">{getRequestTypeLabel('LEAVE')}</option>
       </select>
 
       {(search || status || type) && (

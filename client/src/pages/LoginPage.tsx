@@ -12,6 +12,7 @@ const ROLE_ROUTES: Record<string, string> = {
   HR: '/approver',
   PURCHASE_OFFICER: '/approver',
   MAINTENANCE_OFFICER: '/approver',
+  FINANCE_OFFICER: '/approver',
   EMPLOYEE: '/dashboard',
 };
 
@@ -186,6 +187,44 @@ export default function LoginPage() {
             )}
           </button>
         </form>
+
+        <div className="demo-accounts-panel">
+          <div className="demo-accounts-title">Quick Demo Sign-in</div>
+          <div className="demo-pills-grid">
+            <button
+              type="button"
+              className="demo-pill-btn"
+              onClick={() => { setEmail('dr.employee@mediflow.com'); setPassword('password123'); }}
+            >
+              <span className="demo-pill-name">Staff Doctor</span>
+              <span className="demo-pill-role">Requester · Cardio</span>
+            </button>
+            <button
+              type="button"
+              className="demo-pill-btn"
+              onClick={() => { setEmail('hod.cardio@mediflow.com'); setPassword('password123'); }}
+            >
+              <span className="demo-pill-name">Dr. Cardio Head</span>
+              <span className="demo-pill-role">HOD Approver</span>
+            </button>
+            <button
+              type="button"
+              className="demo-pill-btn"
+              onClick={() => { setEmail('finance@mediflow.com'); setPassword('password123'); }}
+            >
+              <span className="demo-pill-name">Finance Officer</span>
+              <span className="demo-pill-role">Finance Approver</span>
+            </button>
+            <button
+              type="button"
+              className="demo-pill-btn"
+              onClick={() => { setEmail('admin@mediflow.com'); setPassword('password123'); }}
+            >
+              <span className="demo-pill-name">System Admin</span>
+              <span className="demo-pill-role">Administrator</span>
+            </button>
+          </div>
+        </div>
 
         <div className="login-footer">
           <p>Jubilee Hospital &middot; MediFlow v1.0</p>
