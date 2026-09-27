@@ -862,4 +862,84 @@ describe('MediFlow Phase 3 — End-to-End Lifecycle, Security & Invariants', { t
       await prisma.request.delete({ where: { id: maintReq.id } });
     }
   });
+
+  // 19. Dynamic Cross-Department Forwarding: Department A HOD -> Maintenance Officer
+  it('19. Dynamic Cross-Department Forwarding: HOD forwards across departments and new assignee acts', async () => {
+    const template = await resolveActiveWorkflowTemplate(RequestType.PURCHASE);
+    const req = await prisma.request.create({
+      data: {
+        referenceNumber: `REQ-P3-TEST19-${Date.now()}`,
+        title: 'Cardiac Ultrasound Transducer Probe',
+        type: RequestType.PURCHASE,
+        priority: Priority.HIGH,
+        status: RequestStatus.DRAFT,
+        requestedById: employeeCardio.id,
+        departmentId: employeeCardio.departmentId,
+        workflowTemplateId: template.id,
+        purchaseDetail: {
+          create: {
+            itemDescription: 'Transthoracic echocardiography probe',
+            quantity: 1,
+            estimatedCost: 65000, // < 100k -> normal HOD first
+            justification: 'Probe replacement for cardiology echo room',
+          },
+        },
+      },
+    });
+
+    try {
+      await WorkflowEngine.submitRequest(req.id, toAuthUser(employeeCardio, 'CARD'));
+
+      // 1. Get eligible recipients: should include approvers across departments
+      const recipients = await WorkflowEngine.getEligibleRecipients(req.id, toAuthUser(hodCardio, 'CARD'));
+      expect(recipients.length).toBeGreaterThan(0);
+      const maintRecipient = recipients.find(r => r.id === maintenanceUser.id);
+      expect(maintRecipient).toBeDefined();
+
+      // 2. Requester (employeeCardio) and current actor (hodCardio) must NOT be in eligible list
+      expect(recipients.some(r => r.id === employeeCardio.id)).toBe(false);
+      expect(recipients.some(r => r.id === hodCardio.id)).toBe(false);
+
+      // 3. Forward across departments from HOD (Cardiology) to Maintenance Officer (Facilities)
+      const forwarded = await WorkflowEngine.forward(
+        req.id,
+        maintenanceUser.id,
+        'Cross-department technical assessment required',
+        toAuthUser(hodCardio, 'CARD')
+      );
+
+      expect(forwarded.status).toBe(RequestStatus.IN_REVIEW);
+      expect(forwarded.assignedToUserId).toBe(maintenanceUser.id);
+
+      // 4. Verify audit log entry
+      const auditLogs = await prisma.auditLog.findMany({
+        where: { requestId: req.id, action: 'FORWARDED' },
+      });
+      expect(auditLogs.length).toBe(1);
+      expect(auditLogs[0].description).toContain('Forwarded from');
+      expect(auditLogs[0].description).toContain(maintenanceUser.firstName);
+      expect(auditLogs[0].description).toContain('Cross-department technical assessment required');
+
+      // 5. Verify permissions: Maintenance Officer can act, old HOD and Requester cannot
+      expect(await WorkflowEngine.canUserActOnRequest(req.id, maintenanceUser.id)).toBe(true);
+      expect(await WorkflowEngine.canUserActOnRequest(req.id, hodCardio.id)).toBe(false);
+      expect(await WorkflowEngine.canUserActOnRequest(req.id, employeeCardio.id)).toBe(false);
+
+      // 6. Maintenance Officer can approve the reassigned step
+      const afterApprove = await WorkflowEngine.approve(
+        req.id,
+        'Technical assessment completed and approved',
+        toAuthUser(maintenanceUser, 'FAC')
+      );
+
+      // 7. Verify step completed or advanced, and assignedToUserId was reset
+      expect(afterApprove.assignedToUserId).toBeNull();
+    } finally {
+      await prisma.auditLog.deleteMany({ where: { requestId: req.id } });
+      await prisma.approvalAction.deleteMany({ where: { requestId: req.id } });
+      await prisma.notification.deleteMany({ where: { requestId: req.id } });
+      await prisma.purchaseDetail.deleteMany({ where: { requestId: req.id } });
+      await prisma.request.delete({ where: { id: req.id } });
+    }
+  });
 });

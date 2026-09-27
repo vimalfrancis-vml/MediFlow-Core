@@ -21,6 +21,16 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
+  // Bind stream to video element whenever stream changes
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(() => {
+        /* autoplay policy handling */
+      });
+    }
+  }, [stream, capturedImage]);
+
   // Initialize camera stream on open
   useEffect(() => {
     let activeStream: MediaStream | null = null;
@@ -39,21 +49,25 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
       }
 
       try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: 'environment' },
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
-        });
+        let mediaStream: MediaStream;
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          });
+        } catch {
+          // Fallback to any available video constraint
+          mediaStream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          });
+        }
 
         activeStream = mediaStream;
         setStream(mediaStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-          videoRef.current.play().catch(() => { /* autoplay handling */ });
-        }
       } catch (err: any) {
         if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
           setError('Camera permission was denied. Please allow camera access in your browser settings.');
@@ -111,10 +125,6 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
   const handleRetake = () => {
     setCapturedImage(null);
     setCapturedBlob(null);
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
-      videoRef.current.play().catch(() => { /* ignore */ });
-    }
   };
 
   const handleConfirmUpload = () => {
@@ -184,10 +194,6 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 You can still attach existing files or scanned documents using the regular file upload button.
               </p>
             </div>
-          ) : isInitializing ? (
-            <div className="camera-error-container">
-              <p>Initializing camera device...</p>
-            </div>
           ) : capturedImage ? (
             <img
               src={capturedImage}
@@ -195,13 +201,23 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
               className="camera-captured-image"
             />
           ) : (
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              muted
-              className="camera-video-preview"
-            />
+            <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {isInitializing && (
+                <div className="camera-error-container" style={{ position: 'absolute', zIndex: 10 }}>
+                  <p>Initializing camera device...</p>
+                </div>
+              )}
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                onLoadedMetadata={() => {
+                  videoRef.current?.play().catch(() => {});
+                }}
+                className="camera-video-preview"
+              />
+            </div>
           )}
 
           <canvas ref={canvasRef} className="camera-canvas-hidden" />

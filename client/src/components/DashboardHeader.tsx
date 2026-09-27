@@ -1,4 +1,4 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { NotificationCenter } from './NotificationCenter';
 
@@ -9,6 +9,12 @@ interface DashboardHeaderProps {
 
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title = "MediFlow", brandPrefix }) => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <header className="dashboard-header bg-white border-b border-slate-200 shadow-2xs px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between sticky top-0 z-40">
@@ -43,14 +49,15 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title = "MediF
             {user?.firstName} {user?.lastName}
           </span>
           <span className="user-role text-[10px] text-slate-500 font-semibold uppercase tracking-wider">
-            {user?.role.replace(/_/g, ' ')}
+            {user?.role ? user.role.replace(/_/g, ' ') : ''}
           </span>
         </div>
 
         <button 
+          type="button"
           className="logout-button text-xs font-semibold text-slate-600 hover:text-slate-900 px-2.5 sm:px-3 py-1.5 rounded-md border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-150 flex-shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600" 
           id="logout-button" 
-          onClick={logout}
+          onClick={handleLogout}
           aria-label="Sign out of MediFlow"
         >
           Sign out

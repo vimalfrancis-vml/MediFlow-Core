@@ -159,16 +159,17 @@ export default function ApproverDetailsPage() {
                   <>
                     <span>•</span>
                     {request.assignedToUser ? (
-                      <span className="px-2.5 py-0.5 bg-amber-50 text-amber-900 text-xs font-semibold rounded border border-amber-200 inline-flex items-center gap-1">
-                        Assigned: {request.assignedToUser.firstName} {request.assignedToUser.lastName} ({request.assignedToUser.roleRef?.displayName || request.assignedToUser.role.replace(/_/g, ' ')})
+                      <span className="px-2.5 py-1 bg-amber-50 text-amber-900 text-xs font-semibold rounded-md border border-amber-200 inline-flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        Assigned: <strong>{request.assignedToUser.firstName} {request.assignedToUser.lastName}</strong> ({request.assignedToUser.roleRef?.displayName || request.assignedToUser.role.replace(/_/g, ' ')}{request.assignedToUser.department ? ` - ${request.assignedToUser.department.displayName || request.assignedToUser.department.name}` : ''})
                         {lastForwardLog && (
-                          <span className="text-[10px] bg-amber-200 text-amber-900 px-1 rounded uppercase tracking-wider font-bold">
+                          <span className="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded uppercase tracking-wider font-bold">
                             Forwarded
                           </span>
                         )}
                       </span>
                     ) : (
-                      <span className="px-2.5 py-0.5 bg-blue-50 text-blue-900 text-xs font-semibold rounded border border-blue-200">
+                      <span className="px-2.5 py-1 bg-blue-50 text-blue-900 text-xs font-semibold rounded-md border border-blue-200">
                         Awaiting: {request.currentStep?.stepName} ({request.currentStep?.approverRole.replace(/_/g, ' ')} Pool)
                       </span>
                     )}
@@ -322,7 +323,7 @@ export default function ApproverDetailsPage() {
                   requestId={request.id}
                   initialAttachments={request.attachments || []}
                   canUpload={request.status === 'IN_REVIEW'}
-                  canDelete={user?.role === 'ADMIN'}
+                  canDelete={request.status === 'IN_REVIEW' || user?.role === 'ADMIN'}
                   currentUser={user}
                   onAttachmentsChanged={(newAtts) => {
                     setRequest((prev) => (prev ? { ...prev, attachments: newAtts } : null));

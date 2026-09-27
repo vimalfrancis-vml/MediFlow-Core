@@ -103,6 +103,9 @@ export default function NewRequestPage() {
   }, [id, isEditMode]);
 
   // 2. Live calculated leave days calculation
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
   const calculatedDays = (() => {
     if (!startDate || !endDate) return 0;
     const start = new Date(startDate);
@@ -196,6 +199,11 @@ export default function NewRequestPage() {
         return;
       }
 
+      if (startDate < todayStr) {
+        setError('Leave start date cannot be in the past.');
+        return;
+      }
+
       detailsPayload = {
         leaveType: leaveType.trim(),
         startDate,
@@ -269,6 +277,10 @@ export default function NewRequestPage() {
 
         {/* Form card */}
         <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+          <p className="text-xs text-slate-500 mb-5 font-medium">
+            Fields marked with <span className="text-red-500 font-bold">*</span> are required.
+          </p>
+
           {error && (
             <div className="flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 rounded-md text-sm font-medium text-red-700 mb-6">
               <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
@@ -289,7 +301,7 @@ export default function NewRequestPage() {
 
               <div className="mb-4">
                 <label htmlFor="title" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Request Title
+                  Request Title <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                 </label>
                 <input
                   id="title"
@@ -306,7 +318,7 @@ export default function NewRequestPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="type" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Request Type
+                    Request Type <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                   </label>
                   <select
                     id="type"
@@ -322,7 +334,7 @@ export default function NewRequestPage() {
                 </div>
                 <div>
                   <label htmlFor="priority" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Priority
+                    Priority <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                   </label>
                   <select
                     id="priority"
@@ -347,7 +359,7 @@ export default function NewRequestPage() {
 
                 <div className="mb-4">
                   <label htmlFor="itemDescription" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Item Description
+                    Item Description <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                   </label>
                   <input
                     id="itemDescription"
@@ -364,7 +376,7 @@ export default function NewRequestPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label htmlFor="quantity" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Quantity
+                      Quantity <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                     </label>
                     <input
                       id="quantity"
@@ -379,7 +391,7 @@ export default function NewRequestPage() {
                   </div>
                   <div>
                     <label htmlFor="estimatedCost" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Estimated Cost (₹)
+                      Estimated Cost (₹) <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                     </label>
                     <input
                       id="estimatedCost"
@@ -406,7 +418,7 @@ export default function NewRequestPage() {
 
                 <div>
                   <label htmlFor="justification" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Business Justification
+                    Business Justification <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                   </label>
                   <textarea
                     id="justification"
@@ -430,7 +442,7 @@ export default function NewRequestPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label htmlFor="equipmentName" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Equipment / Asset Name
+                      Equipment / Asset Name <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                     </label>
                     <input
                       id="equipmentName"
@@ -445,7 +457,7 @@ export default function NewRequestPage() {
                   </div>
                   <div>
                     <label htmlFor="location" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Location / Department
+                      Location / Department <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                     </label>
                     <input
                       id="location"
@@ -465,7 +477,7 @@ export default function NewRequestPage() {
 
                 <div className="mb-4">
                   <label htmlFor="issueDescription" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Issue Description
+                    Issue Description <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                   </label>
                   <textarea
                     id="issueDescription"
@@ -504,7 +516,7 @@ export default function NewRequestPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label htmlFor="leaveType" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Leave Type
+                      Leave Type <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                     </label>
                     <select
                       id="leaveType"
@@ -534,11 +546,12 @@ export default function NewRequestPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label htmlFor="startDate" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      Start Date
+                      Start Date <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                     </label>
                     <input
                       id="startDate"
                       type="date"
+                      min={todayStr}
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
                       disabled={isSubmitting}
@@ -548,13 +561,13 @@ export default function NewRequestPage() {
                   </div>
                   <div>
                     <label htmlFor="endDate" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                      End Date
+                      End Date <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                     </label>
                     <input
                       id="endDate"
                       type="date"
+                      min={startDate || todayStr}
                       value={endDate}
-                      min={startDate || undefined}
                       onChange={(e) => setEndDate(e.target.value)}
                       disabled={isSubmitting}
                       required
@@ -580,7 +593,7 @@ export default function NewRequestPage() {
 
                 <div>
                   <label htmlFor="leaveReason" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                    Reason for Leave
+                    Reason for Leave <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
                   </label>
                   <textarea
                     id="leaveReason"

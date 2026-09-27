@@ -59,35 +59,74 @@ export const AttachmentManager: React.FC<AttachmentManagerProps> = ({
     return '📁';
   };
 
-  const handleFileUpload = async (file: File) => {
+  const handleFilesUpload = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    // Frontend validation check
+    const fileList = Array.from(files);
     const maxSizeBytes = 10 * 1024 * 1024;
-    if (file.size > maxSizeBytes) {
-      setErrorMessage(`File size (${(file.size / (1024 * 1024)).toFixed(1)} MB) exceeds the 10MB maximum limit.`);
-      return;
+    const allowed = ['pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'csv'];
+
+    const validFiles: File[] = [];
+    const errors: string[] = [];
+
+    for (const file of fileList) {
+      if (file.size > maxSizeBytes) {
+        errors.push(`"${file.name}" exceeds 10MB limit (${(file.size / (1024 * 1024)).toFixed(1)} MB).`);
+        continue;
+      }
+      const ext = file.name.split('.').pop()?.toLowerCase() || '';
+      if (!allowed.includes(ext)) {
+        errors.push(`"${file.name}" has unsupported format .${ext}.`);
+        continue;
+      }
+      validFiles.push(file);
     }
 
-    const ext = file.name.split('.').pop()?.toLowerCase() || '';
-    const allowed = ['pdf', 'png', 'jpg', 'jpeg', 'doc', 'docx', 'xls', 'xlsx', 'txt', 'csv'];
-    if (!allowed.includes(ext)) {
-      setErrorMessage(`File extension .${ext} is not supported. Allowed formats: PDF, PNG, JPG, DOC, DOCX, XLS, XLSX, TXT, CSV.`);
+    if (errors.length > 0 && validFiles.length === 0) {
+      setErrorMessage(errors.join(' '));
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      if (mobileCameraInputRef.current) mobileCameraInputRef.current.value = '';
       return;
     }
 
     try {
       setIsUploading(true);
-      const res = await api.uploadAttachment(requestId, file);
-      if (res.success && res.data) {
-        const updated = [res.data, ...attachments];
-        setAttachments(updated);
-        onAttachmentsChanged?.(updated);
-        setSuccessMessage(`"${file.name}" uploaded successfully.`);
+      const newlyUploaded: AttachmentItem[] = [];
+      const uploadErrors: string[] = [];
+
+      for (const file of validFiles) {
+        try {
+          const res = await api.uploadAttachment(requestId, file);
+          if (res.success && res.data) {
+            newlyUploaded.push(res.data);
+          }
+        } catch (err: any) {
+          uploadErrors.push(`"${file.name}": ${err.message || 'Upload failed'}`);
+        }
       }
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to upload attachment. Please try again.');
+
+      if (newlyUploaded.length > 0) {
+        setAttachments((prev) => {
+          const updated = [...newlyUploaded, ...prev];
+          onAttachmentsChanged?.(updated);
+          return updated;
+        });
+
+        if (errors.length === 0 && uploadErrors.length === 0) {
+          setSuccessMessage(
+            newlyUploaded.length === 1
+              ? `"${newlyUploaded[0].originalName}" uploaded successfully.`
+              : `${newlyUploaded.length} files uploaded successfully.`
+          );
+        } else {
+          setSuccessMessage(`${newlyUploaded.length} file(s) uploaded successfully.`);
+          setErrorMessage([...errors, ...uploadErrors].join(' '));
+        }
+      } else if (errors.length > 0 || uploadErrors.length > 0) {
+        setErrorMessage([...errors, ...uploadErrors].join(' '));
+      }
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -95,10 +134,14 @@ export const AttachmentManager: React.FC<AttachmentManagerProps> = ({
     }
   };
 
+  const handleFileUpload = (file: File) => {
+    handleFilesUpload([file]);
+  };
+
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      handleFileUpload(files[0]);
+      handleFilesUpload(files);
     }
   };
 
@@ -119,7 +162,7 @@ export const AttachmentManager: React.FC<AttachmentManagerProps> = ({
     e.stopPropagation();
     setIsDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFileUpload(e.dataTransfer.files[0]);
+      handleFilesUpload(e.dataTransfer.files);
     }
   };
 
@@ -148,9 +191,11 @@ export const AttachmentManager: React.FC<AttachmentManagerProps> = ({
       setIsDeletingId(att.id);
       setErrorMessage(null);
       await api.deleteAttachment(requestId, att.id);
-      const updated = attachments.filter((a) => a.id !== att.id);
-      setAttachments(updated);
-      onAttachmentsChanged?.(updated);
+      setAttachments((prev) => {
+        const updated = prev.filter((a) => a.id !== att.id);
+        onAttachmentsChanged?.(updated);
+        return updated;
+      });
       setSuccessMessage(`"${att.originalName}" deleted successfully.`);
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to delete attachment.');
@@ -163,8 +208,10 @@ export const AttachmentManager: React.FC<AttachmentManagerProps> = ({
     if (!canDelete) return false;
     if (!currentUser) return true;
     if (currentUser.role === 'ADMIN') return true;
-    if (att.uploadedBy && att.uploadedBy.id === currentUser.id) return true;
-    return false;
+    const isOwner =
+      (att.uploadedBy && att.uploadedBy.id === currentUser.id) ||
+      (att as any).uploadedById === currentUser.id;
+    return Boolean(isOwner);
   };
 
   return (
@@ -184,6 +231,7 @@ export const AttachmentManager: React.FC<AttachmentManagerProps> = ({
               onChange={handleFileInputChange}
               className="attachment-hidden-input"
               accept=".pdf,.png,.jpg,.jpeg,.doc,.docx,.xls,.xlsx,.txt,.csv"
+              multiple
               aria-label="Upload document file"
             />
             <button

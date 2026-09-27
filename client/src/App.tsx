@@ -23,14 +23,50 @@ const APPROVER_ROLES = ['HOD', 'DIRECTOR', 'MEDICAL_SUPERINTENDENT', 'HR', 'PURC
 
 /**
  * Guards a route by allowed roles.
- * If the user's role does not match, redirects them to their correct dashboard.
+ * If unauthenticated, immediately redirects to /login.
+ * If authenticated but role does not match, redirects them to their correct dashboard.
  */
 function RoleRoute({ roles, children }: { roles: string[]; children: React.ReactNode }) {
-  const { user } = useAuth();
-  if (!user) return null;
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   if (!roles.includes(user.role)) {
     // Redirect to the correct dashboard for this role
+    if (ADMIN_ROLES.includes(user.role)) return <Navigate to="/admin" replace />;
+    if (APPROVER_ROLES.includes(user.role)) return <Navigate to="/approver" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+/**
+ * Route guard for public-only pages (e.g. /login).
+ * If the user is already authenticated, redirects them to their corresponding dashboard.
+ */
+function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
+  const { user, isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="loading-screen">
+        <div className="loading-spinner" />
+      </div>
+    );
+  }
+
+  if (isAuthenticated && user) {
     if (ADMIN_ROLES.includes(user.role)) return <Navigate to="/admin" replace />;
     if (APPROVER_ROLES.includes(user.role)) return <Navigate to="/approver" replace />;
     return <Navigate to="/dashboard" replace />;
@@ -45,7 +81,14 @@ function App() {
       <AuthProvider>
         <TerminologyProvider>
           <Routes>
-          <Route path="/login" element={<LoginPage />} />
+          <Route
+            path="/login"
+            element={
+              <PublicOnlyRoute>
+                <LoginPage />
+              </PublicOnlyRoute>
+            }
+          />
 
           {/* Protected routes — require authentication */}
           <Route element={<ProtectedRoute />}>

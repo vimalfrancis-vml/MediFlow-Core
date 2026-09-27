@@ -99,6 +99,18 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
             throw new AppError('End date cannot be before the start date.', 400);
         }
 
+        // Validate that startDate is not in the past
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const dateMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(details.startDate);
+        const checkStartDate = dateMatch
+          ? new Date(parseInt(dateMatch[1], 10), parseInt(dateMatch[2], 10) - 1, parseInt(dateMatch[3], 10))
+          : new Date(startDate);
+        checkStartDate.setHours(0, 0, 0, 0);
+        if (checkStartDate < today) {
+            throw new AppError('Leave start date cannot be in the past.', 400);
+        }
+
         const diffTime = endDate.getTime() - startDate.getTime();
         const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
         if (totalDays <= 0) {
@@ -226,6 +238,19 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         }
         if (endDate < startDate) {
           throw new AppError('End date cannot be before the start date.', 400);
+        }
+
+        if (details.startDate !== undefined) {
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          const dateMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(details.startDate));
+          const checkStartDate = dateMatch
+            ? new Date(parseInt(dateMatch[1], 10), parseInt(dateMatch[2], 10) - 1, parseInt(dateMatch[3], 10))
+            : new Date(startDate);
+          checkStartDate.setHours(0, 0, 0, 0);
+          if (checkStartDate < today) {
+            throw new AppError('Leave start date cannot be in the past.', 400);
+          }
         }
 
         const diffTime = endDate.getTime() - startDate.getTime();
@@ -512,13 +537,12 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
     if (actor.role === UserRole.ADMIN) {
       rawRequests = await prisma.request.findMany({ include: { workflowTemplate: true } });
     } else {
-      // Fetch own requests, actionable requests, and previously-actioned requests in three
-      // efficient queries so that analytics/statistics are always accurate:
+      // Fetch own requests, actionable requests, and previously-actioned requests:
       //   - own: requests the user submitted
-      //   - actionable: requests currently waiting for this user's approval
-      //   - participated: requests this user has already approved/rejected/returned
-      //     (needed so dashboard KPIs stay accurate after an action is taken)
-      const [own, actionable, participated] = await Promise.all([
+      //   - assignedToMe: requests currently waiting for this user via direct forward/assignment
+      //   - unassignedActionable: requests in review with no specific assignee, matching actor's role & dept
+      //   - participated: requests this user has already actioned (APPROVED, REJECTED, RETURNED, FORWARDED)
+      const [own, assignedToMe, unassignedActionable, participated] = await Promise.all([
         prisma.request.findMany({
           where: { requestedById: actor.id },
           include: { workflowTemplate: true },
@@ -526,16 +550,25 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         prisma.request.findMany({
           where: {
             status: RequestStatus.IN_REVIEW,
+            assignedToUserId: actor.id,
+          },
+          include: { workflowTemplate: true },
+        }),
+        prisma.request.findMany({
+          where: {
+            status: RequestStatus.IN_REVIEW,
+            assignedToUserId: null,
             currentStep: {
               approverRole: actor.role,
             },
             // For HOD, additionally filter by department at the request level
             ...(actor.role === UserRole.HOD ? { departmentId: actor.departmentId } : {}),
+            // For Finance, filter by department code FIN
+            ...(actor.role === UserRole.FINANCE_OFFICER ? { department: { code: 'FIN' } } : {}),
           },
           include: { workflowTemplate: true },
         }),
         // Fetch requests where this user has taken at least one approval action
-        // (excludes COMMENTED — only meaningful approval actions count)
         prisma.request.findMany({
           where: {
             approvalActions: {
@@ -546,6 +579,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
                     ApprovalActionType.APPROVED,
                     ApprovalActionType.REJECTED,
                     ApprovalActionType.RETURNED,
+                    ApprovalActionType.FORWARDED,
                   ],
                 },
               },
@@ -557,7 +591,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
 
       // Merge and deduplicate by id
       const seen = new Map<string, (typeof own)[number]>();
-      for (const r of [...own, ...actionable, ...participated]) {
+      for (const r of [...own, ...assignedToMe, ...unassignedActionable, ...participated]) {
         seen.set(r.id, r);
       }
       rawRequests = Array.from(seen.values());

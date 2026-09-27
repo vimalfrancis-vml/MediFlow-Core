@@ -340,6 +340,14 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
   })();
 
   if (!response.ok) {
+    if (response.status === 401 && endpoint !== '/auth/login') {
+      localStorage.removeItem('mediflow_token');
+      localStorage.removeItem('mediflow_user');
+      sessionStorage.clear();
+      if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+        window.location.replace('/login');
+      }
+    }
     throw {
       status: response.status,
       message: data.message || 'An unexpected error occurred.',

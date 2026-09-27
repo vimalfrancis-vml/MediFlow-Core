@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { api, type RequestItem } from '../services/api';
 import { AnalyticsCards } from '../components/AnalyticsCards';
 import { SimpleChart } from '../components/SimpleChart';
@@ -13,6 +14,7 @@ import './DashboardPage.css';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const { user, isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,6 +24,7 @@ export default function DashboardPage() {
   const limit = 10;
 
   async function fetchRequests() {
+    if (!isAuthenticated || !user) return;
     try {
       setIsLoading(true);
       const [reqRes, analyticsRes] = await Promise.all([
@@ -39,8 +42,18 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    fetchRequests();
-  }, [filters, page]);
+    if (isAuthenticated && user) {
+      fetchRequests();
+    }
+  }, [filters, page, isAuthenticated, user]);
+
+  if (isAuthLoading) {
+    return <LoadingState message="Verifying session..." />;
+  }
+
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <DashboardLayout title="MediFlow">

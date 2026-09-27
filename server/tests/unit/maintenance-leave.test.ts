@@ -137,8 +137,8 @@ describe('Maintenance & Leave Request Integration and Edge Cases', () => {
     };
 
     // 15 days leave (triggers RULE_002)
-    const startDate = '2026-08-01';
-    const endDate = '2026-08-15';
+    const startDate = '2027-08-01';
+    const endDate = '2027-08-15';
 
     const details = {
       leaveType: 'Annual',
@@ -222,8 +222,8 @@ describe('Maintenance & Leave Request Integration and Edge Cases', () => {
     // End date before start date
     const details = {
       leaveType: 'Annual',
-      startDate: '2026-08-10',
-      endDate: '2026-08-05',
+      startDate: '2027-08-10',
+      endDate: '2027-08-05',
       reason: 'Vacation',
     };
 
@@ -321,8 +321,8 @@ describe('Maintenance & Leave Request Integration and Edge Cases', () => {
       priority: Priority.NORMAL,
       details: {
         leaveType: 'Casual',
-        startDate: '2026-09-01',
-        endDate: '2026-09-01',
+        startDate: '2027-09-01',
+        endDate: '2027-09-01',
         reason: 'Personal work.',
       },
     }, actorEmployee);
@@ -350,8 +350,8 @@ describe('Maintenance & Leave Request Integration and Edge Cases', () => {
       priority: Priority.NORMAL,
       details: {
         leaveType: 'Annual',
-        startDate: '2026-01-31',
-        endDate: '2026-02-01',
+        startDate: '2027-01-31',
+        endDate: '2027-02-01',
         reason: 'Rest.',
       },
     }, actorEmployee);
@@ -439,12 +439,39 @@ describe('Maintenance & Leave Request Integration and Edge Cases', () => {
         priority: Priority.NORMAL,
         details: {
           leaveType: 'Annual',
-          startDate: '2026-08-10',
-          endDate: '2026-08-05',
+          startDate: '2027-08-10',
+          endDate: '2027-08-05',
           reason: 'Test.',
         },
       }, actorEmployee)
     ).rejects.toThrow('End date cannot be before the start date.');
+  });
+
+  it('Leave date validation — past start date must be rejected by backend', async () => {
+    const actorEmployee: AuthUser = {
+      id: employeeUser.id,
+      email: employeeUser.email,
+      role: employeeUser.role,
+      departmentId: employeeUser.departmentId,
+      departmentCode: 'CARD',
+      firstName: employeeUser.firstName,
+      lastName: employeeUser.lastName,
+    };
+
+    // Attempting to select a date in 2020 (in the past)
+    await expect(
+      RequestService.createRequest({
+        title: 'Past Date Leave',
+        type: RequestType.LEAVE,
+        priority: Priority.NORMAL,
+        details: {
+          leaveType: 'Annual',
+          startDate: '2020-01-01',
+          endDate: '2020-01-05',
+          reason: 'Past leave attempt.',
+        },
+      }, actorEmployee)
+    ).rejects.toThrow('Leave start date cannot be in the past.');
   });
 
   it('Leave date validation — invalid date format must be rejected by backend', async () => {

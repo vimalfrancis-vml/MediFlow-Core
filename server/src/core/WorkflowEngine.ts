@@ -494,25 +494,39 @@ export class WorkflowEngine {
       throw new AppError('Target recipient not found or is inactive.', 404);
     }
 
-    // 4. Role validation: target user must match current step's required approver role
-    if (targetUser.role !== request.currentStep.approverRole) {
-      throw new AppError(`Target recipient must have role ${request.currentStep.approverRole}.`, 400);
+    // 4. Role and authorization validation:
+    // A. Prohibit forwarding to Admin (Admins are not operational business approvers)
+    if (targetUser.role === UserRole.ADMIN) {
+      throw new AppError('Cannot forward request to an Administrator.', 400);
     }
 
-    // 5. Department validation:
-    // A. HOD step: must belong to request department
-    if (request.currentStep.approverRole === UserRole.HOD && targetUser.departmentId !== request.departmentId) {
-      throw new AppError('HOD approval can only be forwarded to a HOD of the requesting department.', 400);
+    // B. Prohibit forwarding to employees who have no approver role
+    const validApproverRoles = [
+      UserRole.HOD,
+      UserRole.PURCHASE_OFFICER,
+      UserRole.MAINTENANCE_OFFICER,
+      UserRole.DIRECTOR,
+      UserRole.MEDICAL_SUPERINTENDENT,
+      UserRole.FINANCE_OFFICER,
+      UserRole.HR,
+    ];
+    if (!validApproverRoles.includes(targetUser.role as UserRole)) {
+      throw new AppError('Target recipient must hold an authorized approver role.', 400);
     }
 
-    // B. Department-scoped step (approverDepartmentId is set)
-    if (request.currentStep.approverDepartmentId && targetUser.departmentId !== request.currentStep.approverDepartmentId) {
-      throw new AppError('Target recipient does not belong to the required department for this step.', 400);
-    }
+    // 5. Mandatory Business Rules & Invariants:
+    // Finance-first invariant: If current step is Finance, target MUST be Finance Department personnel
+    const isFinanceStep =
+      request.currentStep.approverRole === UserRole.FINANCE_OFFICER ||
+      request.currentStep.approverDepartment?.code === 'FIN';
 
-    // C. Finance-first invariant: If current step is Finance, target must belong to Finance Department
-    if (request.currentStep.approverRole === UserRole.FINANCE_OFFICER && targetUser.department.code !== 'FIN') {
-      throw new AppError('Finance review can only be forwarded to Finance Department personnel.', 400);
+    if (isFinanceStep) {
+      if (targetUser.role !== UserRole.FINANCE_OFFICER) {
+        throw new AppError('Target recipient must have role FINANCE_OFFICER.', 400);
+      }
+      if (targetUser.department.code !== 'FIN') {
+        throw new AppError('Finance review can only be forwarded to Finance Department personnel.', 400);
+      }
     }
 
     // Atomic transaction: record FORWARDED action + update assignedToUserId + log audit (C-01)
@@ -547,7 +561,7 @@ export class WorkflowEngine {
           actorId: actor.id,
           requestId: request.id,
           action: 'FORWARDED',
-          description: `Forwarded to ${targetUser.firstName} ${targetUser.lastName} (${targetUser.role}) by ${actor.firstName} ${actor.lastName}${comment ? `. Note: ${comment}` : ''}`,
+          description: `Forwarded from ${request.currentStep!.stepName} to ${targetUser.firstName} ${targetUser.lastName} (${targetUser.role}${targetUser.department ? `, ${targetUser.department.name}` : ''}) by ${actor.firstName} ${actor.lastName}${comment ? `. Note: ${comment}` : ''}`,
         },
       });
 
@@ -559,12 +573,16 @@ export class WorkflowEngine {
 
   /**
    * Retrieves list of eligible users to whom the request can be forwarded at its current step.
+   * Dynamic forwarding allows reassigning to authorized approvers across departments,
+   * while strictly preserving Finance-first invariants for Finance steps and prohibiting self-approval.
    */
   public static async getEligibleRecipients(requestId: string, actor: AuthUser) {
     const request = await prisma.request.findUniqueOrThrow({
       where: { id: requestId },
       include: {
-        currentStep: true,
+        currentStep: {
+          include: { approverDepartment: true },
+        },
       },
     });
 
@@ -572,19 +590,31 @@ export class WorkflowEngine {
       return [];
     }
 
+    const isFinanceStep =
+      request.currentStep.approverRole === UserRole.FINANCE_OFFICER ||
+      request.currentStep.approverDepartment?.code === 'FIN';
+
     const whereClause: any = {
       isActive: true,
-      role: request.currentStep.approverRole,
+      role: isFinanceStep
+        ? UserRole.FINANCE_OFFICER
+        : {
+            in: [
+              UserRole.HOD,
+              UserRole.PURCHASE_OFFICER,
+              UserRole.MAINTENANCE_OFFICER,
+              UserRole.DIRECTOR,
+              UserRole.MEDICAL_SUPERINTENDENT,
+              UserRole.FINANCE_OFFICER,
+              UserRole.HR,
+            ],
+          },
       id: {
         notIn: [request.requestedById, actor.id, ...(request.assignedToUserId ? [request.assignedToUserId] : [])],
       },
     };
 
-    if (request.currentStep.approverRole === UserRole.HOD) {
-      whereClause.departmentId = request.departmentId;
-    } else if (request.currentStep.approverDepartmentId) {
-      whereClause.departmentId = request.currentStep.approverDepartmentId;
-    } else if (request.currentStep.approverRole === UserRole.FINANCE_OFFICER) {
+    if (isFinanceStep) {
       whereClause.department = { code: 'FIN' };
     }
 
@@ -610,6 +640,10 @@ export class WorkflowEngine {
           },
         },
       },
+      orderBy: [
+        { department: { name: 'asc' } },
+        { firstName: 'asc' },
+      ],
     });
 
     return eligible;
@@ -643,8 +677,8 @@ export class WorkflowEngine {
     }
 
     // If request has been specifically forwarded/assigned to another user
-    if (request.assignedToUserId && request.assignedToUserId !== userId) {
-      return false;
+    if (request.assignedToUserId) {
+      return request.assignedToUserId === userId;
     }
 
     // Role check
@@ -714,9 +748,12 @@ export class WorkflowEngine {
       return;
     }
 
-    // If specifically assigned to another user, only that user can act
-    if (request.assignedToUserId && request.assignedToUserId !== actor.id) {
-      throw new AppError('This request has been specifically assigned to another reviewer.', 403);
+    // If specifically assigned to another user, only that assigned user can act
+    if (request.assignedToUserId) {
+      if (request.assignedToUserId !== actor.id) {
+        throw new AppError('This request has been specifically assigned to another reviewer.', 403);
+      }
+      return; // Actor is the assigned user, authorized to act on this forwarded request
     }
 
     if (actor.role !== request.currentStep.approverRole) {

@@ -152,6 +152,23 @@ export default function RequestDetailsPage() {
                 <span className="request-date text-xs sm:text-sm text-slate-500 mt-1 block">
                   Created on {formatDate(request.createdAt)} by {request.requestedBy ? `${request.requestedBy.firstName} ${request.requestedBy.lastName}` : 'Requester'}
                 </span>
+                {request.status === 'IN_REVIEW' && (
+                  <div className="mt-2 text-xs flex flex-wrap items-center gap-2">
+                    {request.assignedToUser ? (
+                      <span className="px-2.5 py-1 bg-amber-50 text-amber-900 font-semibold rounded-md border border-amber-200 inline-flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                        Reassigned / Assigned to: <strong>{request.assignedToUser.firstName} {request.assignedToUser.lastName}</strong>
+                        <span className="text-amber-700 font-normal">
+                          ({request.assignedToUser.roleRef?.displayName || request.assignedToUser.role.replace(/_/g, ' ')}{request.assignedToUser.department ? ` - ${request.assignedToUser.department.displayName || request.assignedToUser.department.name}` : ''})
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 bg-blue-50 text-blue-900 font-semibold rounded-md border border-blue-200 inline-flex items-center gap-1.5">
+                        Awaiting Review: <strong>{request.currentStep?.stepName || 'Current Stage'}</strong> ({request.currentStep?.approverRole.replace(/_/g, ' ')} Pool)
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Status Alert Banners */}
