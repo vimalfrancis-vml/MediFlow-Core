@@ -103,8 +103,8 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const dateMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(details.startDate);
-        const checkStartDate = dateMatch
-          ? new Date(parseInt(dateMatch[1], 10), parseInt(dateMatch[2], 10) - 1, parseInt(dateMatch[3], 10))
+        const checkStartDate = (dateMatch && dateMatch[1] && dateMatch[2] && dateMatch[3])
+          ? new Date(Number(dateMatch[1]), Number(dateMatch[2]) - 1, Number(dateMatch[3]))
           : new Date(startDate);
         checkStartDate.setHours(0, 0, 0, 0);
         if (checkStartDate < today) {
@@ -244,8 +244,8 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
           const today = new Date();
           today.setHours(0, 0, 0, 0);
           const dateMatch = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(details.startDate));
-          const checkStartDate = dateMatch
-            ? new Date(parseInt(dateMatch[1], 10), parseInt(dateMatch[2], 10) - 1, parseInt(dateMatch[3], 10))
+          const checkStartDate = (dateMatch && dateMatch[1] && dateMatch[2] && dateMatch[3])
+            ? new Date(Number(dateMatch[1]), Number(dateMatch[2]) - 1, Number(dateMatch[3]))
             : new Date(startDate);
           checkStartDate.setHours(0, 0, 0, 0);
           if (checkStartDate < today) {

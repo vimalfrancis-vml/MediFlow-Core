@@ -501,7 +501,7 @@ export class WorkflowEngine {
     }
 
     // B. Prohibit forwarding to employees who have no approver role
-    const validApproverRoles = [
+    const validApproverRoles: UserRole[] = [
       UserRole.HOD,
       UserRole.PURCHASE_OFFICER,
       UserRole.MAINTENANCE_OFFICER,
@@ -510,7 +510,7 @@ export class WorkflowEngine {
       UserRole.FINANCE_OFFICER,
       UserRole.HR,
     ];
-    if (!validApproverRoles.includes(targetUser.role as UserRole)) {
+    if (!validApproverRoles.includes(targetUser.role)) {
       throw new AppError('Target recipient must hold an authorized approver role.', 400);
     }
 
