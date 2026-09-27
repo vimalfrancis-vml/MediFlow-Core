@@ -216,16 +216,14 @@ export default function ApproverDetailsPage() {
                   >
                     ✓ Approve Request
                   </button>
-                  {request.currentStep?.allowDynamicForwarding && (
-                    <button
-                      id="btn-forward"
-                      className="btn-primary bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-md shadow-xs transition-colors flex items-center gap-1.5 text-sm"
-                      onClick={() => setShowForwardModal(true)}
-                      disabled={isActionLoading}
-                    >
-                      ↗ Forward / Reassign
-                    </button>
-                  )}
+                  <button
+                    id="btn-forward"
+                    className="btn-primary bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2 rounded-md shadow-xs transition-colors flex items-center gap-1.5 text-sm"
+                    onClick={() => setShowForwardModal(true)}
+                    disabled={isActionLoading}
+                  >
+                    ↗ Forward / Reassign
+                  </button>
                   <button
                     id="btn-return"
                     className="btn-secondary border-orange-300 text-orange-800 hover:bg-orange-50 font-semibold px-4 py-2 rounded-md shadow-xs transition-colors flex items-center gap-1.5 text-sm"

@@ -532,10 +532,41 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
     actor: AuthUser, 
     filters?: { search?: string; status?: string; type?: string; page?: number; limit?: number }
   ) {
+    const requestInclude = {
+      workflowTemplate: true,
+      department: true,
+      currentStep: true,
+      purchaseDetail: true,
+      leaveDetail: true,
+      maintenanceDetail: true,
+      requestedBy: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+          roleRef: { select: { displayName: true } },
+          department: { select: { id: true, name: true, code: true, displayName: true } },
+        },
+      },
+      assignedToUser: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+          roleRef: { select: { displayName: true } },
+          department: { select: { id: true, name: true, code: true, displayName: true } },
+        },
+      },
+    };
+
     let rawRequests;
     
     if (actor.role === UserRole.ADMIN) {
-      rawRequests = await prisma.request.findMany({ include: { workflowTemplate: true } });
+      rawRequests = await prisma.request.findMany({ include: requestInclude });
     } else {
       // Fetch own requests, actionable requests, and previously-actioned requests:
       //   - own: requests the user submitted
@@ -545,14 +576,14 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       const [own, assignedToMe, unassignedActionable, participated] = await Promise.all([
         prisma.request.findMany({
           where: { requestedById: actor.id },
-          include: { workflowTemplate: true },
+          include: requestInclude,
         }),
         prisma.request.findMany({
           where: {
             status: RequestStatus.IN_REVIEW,
             assignedToUserId: actor.id,
           },
-          include: { workflowTemplate: true },
+          include: requestInclude,
         }),
         prisma.request.findMany({
           where: {
@@ -566,7 +597,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
             // For Finance, filter by department code FIN
             ...(actor.role === UserRole.FINANCE_OFFICER ? { department: { code: 'FIN' } } : {}),
           },
-          include: { workflowTemplate: true },
+          include: requestInclude,
         }),
         // Fetch requests where this user has taken at least one approval action
         prisma.request.findMany({
@@ -585,7 +616,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
               },
             },
           },
-          include: { workflowTemplate: true },
+          include: requestInclude,
         }),
       ]);
 

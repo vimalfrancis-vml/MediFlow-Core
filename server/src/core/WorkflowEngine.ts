@@ -461,6 +461,11 @@ export class WorkflowEngine {
           },
         },
         department: true,
+        assignedToUser: {
+          include: {
+            department: true,
+          },
+        },
       },
     });
 
@@ -487,7 +492,7 @@ export class WorkflowEngine {
     // 3. Fetch target user and validate active status
     const targetUser = await prisma.user.findUnique({
       where: { id: targetUserId, isActive: true },
-      include: { department: true },
+      include: { department: true, roleRef: true },
     });
 
     if (!targetUser) {
@@ -556,12 +561,18 @@ export class WorkflowEngine {
         },
       });
 
+      const previousInfo = request.assignedToUser
+        ? `${request.currentStep!.stepName} (reassigned from ${request.assignedToUser.firstName} ${request.assignedToUser.lastName})`
+        : request.currentStep!.stepName;
+      const recipientDept = targetUser.department?.name || 'Department';
+      const recipientRole = targetUser.roleRef?.displayName || targetUser.role.replace(/_/g, ' ');
+
       await tx.auditLog.create({
         data: {
           actorId: actor.id,
           requestId: request.id,
           action: 'FORWARDED',
-          description: `Forwarded from ${request.currentStep!.stepName} to ${targetUser.firstName} ${targetUser.lastName} (${targetUser.role}${targetUser.department ? `, ${targetUser.department.name}` : ''}) by ${actor.firstName} ${actor.lastName}${comment ? `. Note: ${comment}` : ''}`,
+          description: `Forwarded from ${previousInfo} to ${targetUser.firstName} ${targetUser.lastName} (${recipientRole}, Department: ${recipientDept}) by ${actor.firstName} ${actor.lastName}${comment ? `. Note: ${comment}` : ''}`,
         },
       });
 

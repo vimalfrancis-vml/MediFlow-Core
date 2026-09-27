@@ -53,7 +53,7 @@ describe('MediFlow Phase 6 — Attachment Storage, Camera & Security', () => {
     // Create users
     adminUser = await prisma.user.upsert({
       where: { employeeId: 'P6_ADMIN' },
-      update: { isActive: true },
+      update: { isActive: true, firstName: 'Phase6', lastName: 'Admin' },
       create: {
         employeeId: 'P6_ADMIN',
         email: 'p6_admin@mediflow.local',
@@ -67,7 +67,7 @@ describe('MediFlow Phase 6 — Attachment Storage, Camera & Security', () => {
 
     employeeUser = await prisma.user.upsert({
       where: { employeeId: 'P6_EMP1' },
-      update: { isActive: true },
+      update: { isActive: true, firstName: 'Phase6', lastName: 'Requester' },
       create: {
         employeeId: 'P6_EMP1',
         email: 'p6_emp1@mediflow.local',
@@ -81,7 +81,7 @@ describe('MediFlow Phase 6 — Attachment Storage, Camera & Security', () => {
 
     otherEmployeeUser = await prisma.user.upsert({
       where: { employeeId: 'P6_EMP2' },
-      update: { isActive: true },
+      update: { isActive: true, firstName: 'Phase6', lastName: 'Unrelated' },
       create: {
         employeeId: 'P6_EMP2',
         email: 'p6_emp2@mediflow.local',
@@ -95,7 +95,7 @@ describe('MediFlow Phase 6 — Attachment Storage, Camera & Security', () => {
 
     hodUser = await prisma.user.upsert({
       where: { employeeId: 'P6_HOD' },
-      update: { isActive: true },
+      update: { isActive: true, firstName: 'Phase6', lastName: 'HOD' },
       create: {
         employeeId: 'P6_HOD',
         email: 'p6_hod@mediflow.local',

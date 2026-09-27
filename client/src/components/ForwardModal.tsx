@@ -96,6 +96,17 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
     return true;
   });
 
+  useEffect(() => {
+    if (filteredRecipients.length > 0) {
+      const exists = filteredRecipients.some((r) => r.id === selectedUserId);
+      if (!exists) {
+        setSelectedUserId(filteredRecipients[0].id);
+      }
+    } else {
+      setSelectedUserId('');
+    }
+  }, [filteredRecipients, selectedUserId]);
+
   const selectedRecipient = recipients.find((r) => r.id === selectedUserId);
 
   const handleSubmit = async (e: React.FormEvent) => {
