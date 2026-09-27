@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { api, type RecipientItem } from '../services/api';
 
 interface ForwardModalProps {
@@ -35,6 +35,7 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
       setError(null);
       setSearchQuery('');
       setDepartmentFilter('ALL');
+      setSelectedUserId('');
       try {
         const res = await api.getEligibleRecipients(requestId);
         if (isMounted) {
@@ -69,58 +70,62 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, isSubmitting, onClose]);
 
-  if (!isOpen) return null;
-
   // Extract distinct departments for filtering
-  const departments = Array.from(
-    new Set(
-      recipients
-        .map((r) => r.department?.displayName || r.department?.name || r.department?.code)
-        .filter(Boolean) as string[]
-    )
-  ).sort();
+  const departments = useMemo(() => {
+    return Array.from(
+      new Set(
+        recipients
+          .map((r) => r.department?.displayName || r.department?.name || r.department?.code)
+          .filter(Boolean) as string[]
+      )
+    ).sort();
+  }, [recipients]);
 
   // Filtered recipients based on search query and department filter
-  const filteredRecipients = recipients.filter((r) => {
-    const deptName = r.department?.displayName || r.department?.name || r.department?.code || '';
-    if (departmentFilter !== 'ALL' && deptName !== departmentFilter) {
-      return false;
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const fullName = `${r.firstName} ${r.lastName}`.toLowerCase();
-      const roleStr = (r.roleRef?.displayName || r.role).toLowerCase();
-      const deptStr = deptName.toLowerCase();
-      return fullName.includes(q) || roleStr.includes(q) || deptStr.includes(q);
-    }
-    return true;
-  });
-
-  useEffect(() => {
-    if (filteredRecipients.length > 0) {
-      const exists = filteredRecipients.some((r) => r.id === selectedUserId);
-      if (!exists) {
-        setSelectedUserId(filteredRecipients[0].id);
+  const filteredRecipients = useMemo(() => {
+    return recipients.filter((r) => {
+      const deptName = r.department?.displayName || r.department?.name || r.department?.code || '';
+      if (departmentFilter !== 'ALL' && deptName !== departmentFilter) {
+        return false;
       }
-    } else {
-      setSelectedUserId('');
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const fullName = `${r.firstName || ''} ${r.lastName || ''}`.toLowerCase();
+        const roleStr = (r.roleRef?.displayName || (r.role ? r.role.replace(/_/g, ' ') : '')).toLowerCase();
+        const deptStr = deptName.toLowerCase();
+        return fullName.includes(q) || roleStr.includes(q) || deptStr.includes(q);
+      }
+      return true;
+    });
+  }, [recipients, departmentFilter, searchQuery]);
+
+  // Dynamically derive effective selected user ID without triggering infinite re-render loops
+  const effectiveUserId = useMemo(() => {
+    if (filteredRecipients.length === 0) return '';
+    if (filteredRecipients.some((r) => r.id === selectedUserId)) {
+      return selectedUserId;
     }
+    return filteredRecipients[0].id;
   }, [filteredRecipients, selectedUserId]);
 
-  const selectedRecipient = recipients.find((r) => r.id === selectedUserId);
+  const selectedRecipient = useMemo(() => {
+    return recipients.find((r) => r.id === effectiveUserId) || null;
+  }, [recipients, effectiveUserId]);
+
+  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedUserId) {
-      setError('Please select a recipient.');
+    if (!effectiveUserId) {
+      setError('Please select an eligible recipient.');
       return;
     }
 
     setIsSubmitting(true);
     setError(null);
     try {
-      await api.forwardRequest(requestId, selectedUserId, comment.trim() || undefined);
-      const chosen = recipients.find((r) => r.id === selectedUserId)!;
+      await api.forwardRequest(requestId, effectiveUserId, comment.trim() || undefined);
+      const chosen = recipients.find((r) => r.id === effectiveUserId)!;
       onSuccess(chosen);
       onClose();
     } catch (err: any) {
@@ -132,7 +137,7 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
       onClick={() => { if (!isSubmitting) onClose(); }}
     >
       <div 
@@ -160,8 +165,8 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
         </div>
 
         <p className="text-xs text-slate-600 mb-4">
-          Select an authorized hospital officer or department recipient for information, action, quotation, or review. 
-          The request will be reassigned at the current stage without advancing or approving the workflow.
+          Select an authorized hospital officer or department recipient for technical opinion, quotation, or review. 
+          The request will be reassigned at the current stage without advancing or completing the workflow.
         </p>
 
         {error && (
@@ -225,7 +230,7 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
                 Select Recipient <span className="text-red-500">*</span>
               </label>
               <select
-                value={selectedUserId}
+                value={effectiveUserId}
                 onChange={(e) => setSelectedUserId(e.target.value)}
                 required
                 className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 bg-white"
@@ -235,7 +240,7 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
                 ) : (
                   filteredRecipients.map((r) => (
                     <option key={r.id} value={r.id}>
-                      {r.firstName} {r.lastName} — {r.roleRef?.displayName || r.role.replace(/_/g, ' ')} ({r.department?.displayName || r.department?.name || r.department?.code})
+                      {r.firstName} {r.lastName} — {r.roleRef?.displayName || (r.role ? r.role.replace(/_/g, ' ') : '')} ({r.department?.displayName || r.department?.name || r.department?.code || ''})
                     </option>
                   ))
                 )}
@@ -248,11 +253,11 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
                 <div className="font-semibold text-indigo-950 flex items-center justify-between">
                   <span>Selected Assignee:</span>
                   <span className="font-mono text-[11px] text-indigo-700 bg-indigo-100/70 px-1.5 py-0.5 rounded">
-                    {selectedRecipient.department?.displayName || selectedRecipient.department?.name || selectedRecipient.department?.code}
+                    {selectedRecipient.department?.displayName || selectedRecipient.department?.name || selectedRecipient.department?.code || 'Department'}
                   </span>
                 </div>
                 <div className="mt-1 text-slate-800 font-medium">
-                  {selectedRecipient.firstName} {selectedRecipient.lastName} — {selectedRecipient.roleRef?.displayName || selectedRecipient.role.replace(/_/g, ' ')}
+                  {selectedRecipient.firstName} {selectedRecipient.lastName} — {selectedRecipient.roleRef?.displayName || (selectedRecipient.role ? selectedRecipient.role.replace(/_/g, ' ') : '')}
                 </div>
                 <p className="mt-1.5 text-[11px] text-indigo-800">
                   This request will appear in <strong>{selectedRecipient.firstName} {selectedRecipient.lastName}&apos;s</strong> pending review queue.
@@ -267,7 +272,7 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Reason or instructions for forwarding (e.g., Please review specification and provide quotation)..."
+                placeholder="Reason or instructions for forwarding (e.g., Please review technical specification and provide quotation)..."
                 rows={3}
                 className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500"
               />
@@ -284,7 +289,7 @@ export const ForwardModal: React.FC<ForwardModalProps> = ({
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || !selectedUserId}
+                disabled={isSubmitting || !effectiveUserId}
                 className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-md shadow-xs transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Forwarding...' : 'Confirm Forward'}
