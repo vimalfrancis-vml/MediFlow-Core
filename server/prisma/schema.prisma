@@ -32,11 +32,12 @@ model User {
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   deletedAt        DateTime?
-  departmentHods   Department[] @relation("HodDepartment")
-  requests         Request[]    @relation("RequestedBy")
-  assignedRequests Request[]    @relation("AssignedTo")
-  department       Department   @relation(fields: [departmentId], references: [id])
-  roleRef          Role?        @relation(fields: [roleId], references: [id])
+  departmentHods          Department[]    @relation("HodDepartment")
+  requests                Request[]       @relation("RequestedBy")
+  assignedRequests        Request[]       @relation("AssignedTo")
+  generalRequestsTargeted GeneralDetail[] @relation("GeneralRequestTargetUser")
+  department              Department      @relation(fields: [departmentId], references: [id])
+  roleRef                 Role?           @relation(fields: [roleId], references: [id])
 }
 
 model Department {
@@ -50,9 +51,10 @@ model Department {
   updatedAt         DateTime       @updatedAt
   deletedAt         DateTime?
   hod               User?          @relation("HodDepartment", fields: [hodId], references: [id])
-  requests          Request[]
-  users             User[]
-  stepApproverSteps WorkflowStep[] @relation("StepApproverDepartment")
+  requests                Request[]
+  users                   User[]
+  stepApproverSteps       WorkflowStep[]  @relation("StepApproverDepartment")
+  generalRequestsTargeted GeneralDetail[] @relation("GeneralRequestTargetDepartment")
 }
 
 model Request {
@@ -76,6 +78,7 @@ model Request {
   attachments        Attachment[]
   auditLogs          AuditLog[]
   comments           Comment[]
+  generalDetail      GeneralDetail?
   leaveDetail        LeaveDetail?
   maintenanceDetail  MaintenanceDetail?
   notifications      Notification[]
@@ -127,6 +130,20 @@ model LeaveDetail {
   reason        String
   coveringStaff String?
   request       Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+}
+
+model GeneralDetail {
+  id                 String      @id @default(uuid())
+  requestId          String      @unique
+  subject            String
+  description        String
+  targetDepartmentId String?
+  targetUserId       String?
+  requiredDate       DateTime?
+  endDate            DateTime?
+  request            Request     @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  targetDepartment   Department? @relation("GeneralRequestTargetDepartment", fields: [targetDepartmentId], references: [id])
+  targetUser         User?       @relation("GeneralRequestTargetUser", fields: [targetUserId], references: [id])
 }
 
 model WorkflowTemplate {
@@ -247,6 +264,7 @@ enum RequestType {
   MAINTENANCE
   PURCHASE
   LEAVE
+  GENERAL
 }
 
 enum RequestStatus {

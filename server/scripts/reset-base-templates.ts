@@ -10,6 +10,7 @@ async function main() {
   await prisma.approvalAction.deleteMany({});
   await prisma.notification.deleteMany({});
   await prisma.maintenanceDetail.deleteMany({});
+  await prisma.generalDetail.deleteMany({});
   await prisma.purchaseDetail.deleteMany({});
   await prisma.leaveDetail.deleteMany({});
   await prisma.request.deleteMany({});
@@ -51,6 +52,14 @@ async function main() {
   await prisma.workflowTemplate.updateMany({
     where: {
       name: 'Standard Leave Request',
+      version: 1,
+    },
+    data: { isActive: true },
+  });
+
+  await prisma.workflowTemplate.updateMany({
+    where: {
+      name: 'General Operational Request',
       version: 1,
     },
     data: { isActive: true },

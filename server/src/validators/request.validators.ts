@@ -3,7 +3,10 @@ import { z } from 'zod';
 
 export const createRequestSchema = z.object({
   title: z.string().min(1, { message: 'Title is required.' }),
-  type: z.enum(['PURCHASE', 'LEAVE', 'MAINTENANCE']),
+  type: z.preprocess(
+    (val) => (val === 'GENERAL_REQUEST' ? 'GENERAL' : val),
+    z.enum(['PURCHASE', 'LEAVE', 'MAINTENANCE', 'GENERAL'])
+  ),
   priority: z.enum(['LOW', 'NORMAL', 'HIGH', 'EMERGENCY']).optional(),
   details: z.object({
     // Purchase fields
@@ -28,6 +31,13 @@ export const createRequestSchema = z.object({
     totalDays: z.number().optional(),
     reason: z.string().optional(),
     coveringStaff: z.string().optional(),
+
+    // General fields
+    subject: z.string().optional(),
+    description: z.string().optional(),
+    targetDepartmentId: z.string().optional(),
+    targetUserId: z.string().optional(),
+    requiredDate: z.string().optional(),
   }).optional(),
 });
 

@@ -3,7 +3,7 @@
 import { WorkflowEngine } from '../core/WorkflowEngine';
 import { resolveActiveWorkflowTemplate } from '../core/StepResolver';
 import { prisma } from '../db';
-import { Request, RequestStatus, ApprovalActionType, UserRole } from '@prisma/client';
+import { Request, RequestStatus, ApprovalActionType, UserRole, RequestType } from '@prisma/client';
 import { AuthUser } from '../core/WorkflowEngine'; // reuse interface
 import { AppError } from '../middleware/errorHandler';
 
@@ -126,6 +126,83 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
                 reason: details.reason.trim(),
                 coveringStaff: details.coveringStaff ? details.coveringStaff.trim() : null,
             }
+        };
+    } else if (cleanData.type === 'GENERAL') {
+        if (!details) {
+            throw new AppError('Details are required for General requests.', 400);
+        }
+        const description = (details.description || details.requirement || '').trim();
+        if (!description) {
+            throw new AppError('Description / requirement is required.', 400);
+        }
+        if (!details.targetDepartmentId && !details.targetUserId) {
+            throw new AppError('Please select a target department or specific recipient.', 400);
+        }
+
+        let targetUserId = details.targetUserId ? details.targetUserId.trim() : null;
+        let targetDeptId = details.targetDepartmentId ? details.targetDepartmentId.trim() : null;
+
+        if (targetUserId) {
+            if (targetUserId === actor.id) {
+                throw new AppError('Requester cannot assign a General Request to themselves.', 400);
+            }
+            const targetUser = await prisma.user.findUnique({
+                where: { id: targetUserId, isActive: true },
+                include: { department: true },
+            });
+            if (!targetUser) {
+                throw new AppError('Target recipient not found or is inactive.', 404);
+            }
+            if (targetUser.role === UserRole.ADMIN) {
+                throw new AppError('Cannot assign request to an Administrator.', 400);
+            }
+            if (!targetDeptId) {
+                targetDeptId = targetUser.departmentId;
+            }
+            requestData.assignedToUser = { connect: { id: targetUser.id } };
+        }
+
+        if (targetDeptId) {
+            const targetDept = await prisma.department.findUnique({
+                where: { id: targetDeptId, isActive: true },
+            });
+            if (!targetDept) {
+                throw new AppError('Target department not found or is inactive.', 404);
+            }
+        }
+
+        let requiredDate: Date | null = null;
+        let endDate: Date | null = null;
+
+        if (details.requiredDate) {
+            requiredDate = new Date(details.requiredDate);
+            if (isNaN(requiredDate.getTime())) {
+                throw new AppError('Invalid required date format.', 400);
+            }
+        }
+
+        if (details.endDate) {
+            endDate = new Date(details.endDate);
+            if (isNaN(endDate.getTime())) {
+                throw new AppError('Invalid end date format.', 400);
+            }
+        }
+
+        if (requiredDate && endDate && endDate < requiredDate) {
+            throw new AppError('End date cannot be before the required date.', 400);
+        }
+
+        const subject = (details.subject || cleanData.title || 'General Request').trim();
+
+        requestData.generalDetail = {
+            create: {
+                subject,
+                description,
+                targetDepartmentId: targetDeptId,
+                targetUserId,
+                requiredDate,
+                endDate,
+            },
         };
     }
     const newRequest = await prisma.request.create({ data: requestData });
@@ -268,6 +345,52 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
             reason: details.reason !== undefined ? details.reason.trim() : undefined,
             coveringStaff: details.coveringStaff !== undefined ? (details.coveringStaff ? details.coveringStaff.trim() : null) : undefined,
           }
+        };
+      } else if (request.type === 'GENERAL') {
+        const updateDetailData: any = {};
+        if (details.subject !== undefined) updateDetailData.subject = details.subject.trim();
+        if (details.description !== undefined) {
+          if (!details.description.trim()) {
+            throw new AppError('Description / requirement is required.', 400);
+          }
+          updateDetailData.description = details.description.trim();
+        }
+        if (details.targetUserId !== undefined) {
+          if (details.targetUserId) {
+            if (details.targetUserId === actor.id) {
+              throw new AppError('Requester cannot assign a General Request to themselves.', 400);
+            }
+            const targetUser = await prisma.user.findUnique({
+              where: { id: details.targetUserId, isActive: true },
+            });
+            if (!targetUser) throw new AppError('Target recipient not found or is inactive.', 404);
+            if (targetUser.role === UserRole.ADMIN) throw new AppError('Cannot assign request to an Administrator.', 400);
+            updateDetailData.targetUserId = targetUser.id;
+            updateData.assignedToUserId = targetUser.id;
+          } else {
+            updateDetailData.targetUserId = null;
+            updateData.assignedToUserId = null;
+          }
+        }
+        if (details.targetDepartmentId !== undefined) {
+          if (details.targetDepartmentId) {
+            const targetDept = await prisma.department.findUnique({
+              where: { id: details.targetDepartmentId, isActive: true },
+            });
+            if (!targetDept) throw new AppError('Target department not found or is inactive.', 404);
+            updateDetailData.targetDepartmentId = targetDept.id;
+          } else {
+            updateDetailData.targetDepartmentId = null;
+          }
+        }
+        if (details.requiredDate !== undefined) {
+          updateDetailData.requiredDate = details.requiredDate ? new Date(details.requiredDate) : null;
+        }
+        if (details.endDate !== undefined) {
+          updateDetailData.endDate = details.endDate ? new Date(details.endDate) : null;
+        }
+        updateData.generalDetail = {
+          update: updateDetailData,
         };
       }
     }
@@ -438,6 +561,22 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         purchaseDetail: true,
         leaveDetail: true,
         maintenanceDetail: true,
+        generalDetail: {
+          include: {
+            targetDepartment: true,
+            targetUser: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+                role: true,
+                roleRef: { select: { displayName: true } },
+                department: { select: { id: true, name: true, code: true, displayName: true } },
+              },
+            },
+          },
+        },
         department: true,
         requestedBy: {
           select: {
@@ -510,11 +649,17 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
     const isHodAuthorized = actor.role !== UserRole.HOD || actor.departmentId === request.departmentId;
     const canAct = await WorkflowEngine.canUserActOnRequest(id, actor.id);
 
+    const isGeneralTargetAuthorized = request.type === 'GENERAL' && (
+      (request.generalDetail?.targetDepartmentId && actor.departmentId === request.generalDetail.targetDepartmentId) ||
+      request.assignedToUserId === actor.id
+    );
+
     if (
       request.requestedById !== actor.id &&
       actor.role !== UserRole.ADMIN &&
       !canAct &&
       !hasParticipated &&
+      !isGeneralTargetAuthorized &&
       !(isInWorkflow && isHodAuthorized)
     ) {
       throw new AppError('You are not allowed to view this request.', 403);
@@ -539,6 +684,22 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       purchaseDetail: true,
       leaveDetail: true,
       maintenanceDetail: true,
+      generalDetail: {
+        include: {
+          targetDepartment: true,
+          targetUser: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+              role: true,
+              roleRef: { select: { displayName: true } },
+              department: { select: { id: true, name: true, code: true, displayName: true } },
+            },
+          },
+        },
+      },
       requestedBy: {
         select: {
           id: true,
@@ -571,7 +732,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       // Fetch own requests, actionable requests, and previously-actioned requests:
       //   - own: requests the user submitted
       //   - assignedToMe: requests currently waiting for this user via direct forward/assignment
-      //   - unassignedActionable: requests in review with no specific assignee, matching actor's role & dept
+      //   - unassignedActionable: requests in review with no specific assignee, matching actor's role & dept, or general department queue
       //   - participated: requests this user has already actioned (APPROVED, REJECTED, RETURNED, FORWARDED)
       const [own, assignedToMe, unassignedActionable, participated] = await Promise.all([
         prisma.request.findMany({
@@ -589,13 +750,24 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
           where: {
             status: RequestStatus.IN_REVIEW,
             assignedToUserId: null,
-            currentStep: {
-              approverRole: actor.role,
-            },
-            // For HOD, additionally filter by department at the request level
-            ...(actor.role === UserRole.HOD ? { departmentId: actor.departmentId } : {}),
-            // For Finance, filter by department code FIN
-            ...(actor.role === UserRole.FINANCE_OFFICER ? { department: { code: 'FIN' } } : {}),
+            OR: [
+              {
+                type: { not: RequestType.GENERAL },
+                currentStep: {
+                  approverRole: actor.role,
+                },
+                // For HOD, additionally filter by department at the request level
+                ...(actor.role === UserRole.HOD ? { departmentId: actor.departmentId } : {}),
+                // For Finance, filter by department code FIN
+                ...(actor.role === UserRole.FINANCE_OFFICER ? { department: { code: 'FIN' } } : {}),
+              },
+              {
+                type: RequestType.GENERAL,
+                generalDetail: {
+                  targetDepartmentId: actor.departmentId,
+                },
+              },
+            ],
           },
           include: requestInclude,
         }),
@@ -802,5 +974,56 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       },
       recentActivity,
     };
+  }
+
+  /**
+   * Return recipient directory of active departments and active authorized personnel.
+   */
+  static async getRecipientDirectory(actor: AuthUser) {
+    const [departments, users] = await Promise.all([
+      prisma.department.findMany({
+        where: { isActive: true },
+        select: {
+          id: true,
+          name: true,
+          code: true,
+          displayName: true,
+        },
+        orderBy: { name: 'asc' },
+      }),
+      prisma.user.findMany({
+        where: {
+          isActive: true,
+          role: { not: UserRole.ADMIN },
+          id: { not: actor.id },
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          role: true,
+          departmentId: true,
+          department: {
+            select: {
+              id: true,
+              name: true,
+              code: true,
+              displayName: true,
+            },
+          },
+          roleRef: {
+            select: {
+              displayName: true,
+            },
+          },
+        },
+        orderBy: [
+          { department: { name: 'asc' } },
+          { firstName: 'asc' },
+        ],
+      }),
+    ]);
+    return { departments, users };
   }
 }

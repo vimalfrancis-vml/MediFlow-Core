@@ -153,3 +153,9 @@ export const getEligibleRecipients = asyncHandler(async (req: Request, res: Resp
   const recipients = await RequestService.getEligibleRecipients(req.params.id as string, actor);
   return res.json({ success: true, data: recipients });
 });
+
+export const getRecipientDirectory = asyncHandler(async (req: Request, res: Response) => {
+  const actor = getAuthUser(req);
+  const directory = await RequestService.getRecipientDirectory(actor);
+  return res.json({ success: true, data: directory });
+});

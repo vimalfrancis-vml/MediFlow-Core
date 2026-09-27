@@ -8,6 +8,7 @@ const REQUEST_TYPES = [
   { value: 'PURCHASE', label: 'Purchase Request' },
   { value: 'MAINTENANCE', label: 'Maintenance Request' },
   { value: 'LEAVE', label: 'Leave Request' },
+  { value: 'GENERAL', label: 'General Request' },
 ];
 
 export default function WorkflowsPage() {

@@ -212,6 +212,37 @@ export interface LeaveDetailItem {
   coveringStaff?: string | null;
 }
 
+export interface GeneralDetailItem {
+  id: string;
+  requestId: string;
+  subject: string;
+  description: string;
+  targetDepartmentId?: string | null;
+  targetUserId?: string | null;
+  requiredDate?: string | null;
+  endDate?: string | null;
+  targetDepartment?: {
+    id: string;
+    name: string;
+    code: string;
+    displayName?: string;
+  } | null;
+  targetUser?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    role: string;
+    roleRef?: { displayName: string };
+    department?: { id: string; name: string; code: string; displayName?: string };
+  } | null;
+}
+
+export interface RecipientDirectory {
+  departments: DepartmentItem[];
+  users: RecipientItem[];
+}
+
 export interface AttachmentItem {
   id: string;
   requestId: string;
@@ -270,6 +301,7 @@ export interface RequestItem {
   purchaseDetail?: PurchaseDetailItem | null;
   maintenanceDetail?: MaintenanceDetailItem | null;
   leaveDetail?: LeaveDetailItem | null;
+  generalDetail?: GeneralDetailItem | null;
   canAct?: boolean;
 }
 
@@ -651,6 +683,10 @@ export const api = {
   },
 
   // --- Dynamic Forwarding API ---
+  getRecipientDirectory() {
+    return request<{ success: boolean; data: RecipientDirectory }>('/requests/recipients/directory');
+  },
+
   getEligibleRecipients(requestId: string) {
     return request<{ success: boolean; data: RecipientItem[] }>(`/requests/${requestId}/recipients`);
   },

@@ -13,8 +13,9 @@ router.put('/requests/:id', requireAuth, requestController.editRequest);
 router.post('/requests/:id/submit', requireAuth, requestController.submitRequest);
 router.post('/requests/:id/cancel', requireAuth, requestController.cancelRequest);
 router.get('/requests/analytics', requireAuth, requestController.getAnalytics);
-router.get('/requests/:id', requireAuth, requestController.getRequestById);
+router.get('/requests/recipients/directory', requireAuth, requestController.getRecipientDirectory);
 router.get('/requests', requireAuth, requestController.listRequests);
+router.get('/requests/:id', requireAuth, requestController.getRequestById);
 
 // Comments endpoints
 router.post('/requests/:id/comments', requireAuth, requestController.addComment);

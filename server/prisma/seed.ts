@@ -18,6 +18,7 @@ async function main() {
   await prisma.attachment.deleteMany();
   await prisma.comment.deleteMany();
   await prisma.approvalAction.deleteMany();
+  await prisma.generalDetail.deleteMany();
   await prisma.maintenanceDetail.deleteMany();
   await prisma.purchaseDetail.deleteMany();
   await prisma.leaveDetail.deleteMany();
@@ -186,11 +187,35 @@ async function main() {
     include: { steps: { orderBy: { order: 'asc' } } },
   });
 
+  // D. General Request Flow (Direct Routing / Operational Processing)
+  const tmplGeneral = await prisma.workflowTemplate.create({
+    data: {
+      name: 'General Operational Request',
+      requestType: RequestType.GENERAL,
+      version: 1,
+      isActive: true,
+      description: 'Dynamic direct routing for miscellaneous operational requests and inter-departmental needs',
+      steps: {
+        create: [
+          {
+            stepName: 'Operational Review & Fulfillment',
+            order: 1,
+            approverRole: UserRole.EMPLOYEE,
+            isFinal: true,
+            allowDynamicForwarding: true,
+          },
+        ],
+      },
+    },
+    include: { steps: { orderBy: { order: 'asc' } } },
+  });
+
   // 5. System Terminology Defaults
   const terminologies = [
     { category: 'REQUEST_TYPE', key: 'REQUEST_TYPE_PURCHASE', label: 'Purchase Request', description: 'Requisition for hospital equipment, drugs, or consumables' },
     { category: 'REQUEST_TYPE', key: 'REQUEST_TYPE_MAINTENANCE', label: 'Maintenance Work Order', description: 'Repair or servicing request for hospital infrastructure' },
     { category: 'REQUEST_TYPE', key: 'REQUEST_TYPE_LEAVE', label: 'Leave Application', description: 'Staff absence and leave requisition' },
+    { category: 'REQUEST_TYPE', key: 'REQUEST_TYPE_GENERAL', label: 'General Request', description: 'Miscellaneous operational needs and dynamic department requisitions' },
     { category: 'STATUS', key: 'STATUS_DRAFT', label: 'Draft', description: 'Request created but not yet submitted' },
     { category: 'STATUS', key: 'STATUS_SUBMITTED', label: 'Submitted', description: 'Request submitted and queued for review' },
     { category: 'STATUS', key: 'STATUS_IN_REVIEW', label: 'Under Review', description: 'Request currently pending action by an approver' },
@@ -788,7 +813,65 @@ async function main() {
     },
   });
 
-  console.log('Seed completed successfully! 8 realistic demo scenarios created.');
+  // =========================================================================
+  // SCENARIO 9: General Request (Inter-Departmental Camera Rental for 3 Days)
+  // Dynamic direct assignment to IT Head without fixed hierarchy!
+  // =========================================================================
+  const req9 = await prisma.request.create({
+    data: {
+      referenceNumber: 'REQ-GEN-2026-009',
+      title: '3 HD Video Cameras for Clinical CME Conference Workshop (3 Days Rental)',
+      type: RequestType.GENERAL,
+      priority: Priority.NORMAL,
+      status: RequestStatus.IN_REVIEW,
+      requestedById: drEmployee.id,
+      departmentId: getDep('CARD'),
+      workflowTemplateId: tmplGeneral.id,
+      currentStepId: tmplGeneral.steps[0].id,
+      assignedToUserId: hodIt.id,
+      submittedAt: new Date(Date.now() - 3600 * 1000 * 5),
+      generalDetail: {
+        create: {
+          subject: '3 HD Video Cameras for Clinical CME Conference Workshop (3 Days Rental)',
+          description: 'Cardiology Department requires 3 cameras for rent for 3 days to record and broadcast live transcatheter aortic valve replacement (TAVR) procedures during the upcoming clinical symposium.',
+          targetDepartmentId: getDep('IT'),
+          targetUserId: hodIt.id,
+          requiredDate: new Date('2026-10-15T08:00:00Z'),
+          endDate: new Date('2026-10-17T18:00:00Z'),
+        },
+      },
+      auditLogs: {
+        create: [
+          {
+            actorId: drEmployee.id,
+            action: 'SUBMITTED',
+            description: `Submitted by Dr. Staff Doctor and assigned directly to IT Head (IT & Bio-Medical Engineering)`,
+            timestamp: new Date(Date.now() - 3600 * 1000 * 5),
+          },
+        ],
+      },
+      comments: {
+        create: [
+          {
+            authorId: drEmployee.id,
+            content: 'Tripods and HDMI capture cards also required if available in IT inventory.',
+            createdAt: new Date(Date.now() - 3600 * 1000 * 4),
+          },
+        ],
+      },
+      notifications: {
+        create: [
+          {
+            recipientId: hodIt.id,
+            message: 'A new general request "3 HD Video Cameras for Clinical CME Conference Workshop (3 Days Rental)" was assigned to you by Dr. Staff Doctor.',
+            createdAt: new Date(Date.now() - 3600 * 1000 * 5),
+          },
+        ],
+      },
+    },
+  });
+
+  console.log('Seed completed successfully! 9 realistic demo scenarios created.');
 }
 
 main()

@@ -1,14 +1,16 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api } from '../services/api';
+import { api, type DepartmentItem, type RecipientItem } from '../services/api';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { useTerminology } from '../context/TerminologyContext';
+import { useAuth } from '../context/AuthContext';
 import './NewRequestPage.css';
 
 export default function NewRequestPage() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { getRequestTypeLabel } = useTerminology();
+  const { user } = useAuth();
   const isEditMode = !!id;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,6 +21,20 @@ export default function NewRequestPage() {
   const [title, setTitle] = useState('');
   const [type, setType] = useState('PURCHASE');
   const [priority, setPriority] = useState('NORMAL');
+
+  // General Request Specific Details State
+  const [generalSubject, setGeneralSubject] = useState('');
+  const [generalDescription, setGeneralDescription] = useState('');
+  const [targetDepartmentId, setTargetDepartmentId] = useState('');
+  const [targetUserId, setTargetUserId] = useState('');
+  const [requiredDate, setRequiredDate] = useState('');
+  const [generalEndDate, setGeneralEndDate] = useState('');
+
+  // Recipient Directory for General Requests
+  const [recipientDirectory, setRecipientDirectory] = useState<{
+    departments: DepartmentItem[];
+    users: RecipientItem[];
+  }>({ departments: [], users: [] });
 
   // Purchase Details State
   const [itemDescription, setItemDescription] = useState('');
@@ -89,6 +105,13 @@ export default function NewRequestPage() {
           setEndDate(req.leaveDetail.endDate ? req.leaveDetail.endDate.substring(0, 10) : '');
           setLeaveReason(req.leaveDetail.reason || '');
           setCoveringStaff(req.leaveDetail.coveringStaff || '');
+        } else if (req.type === 'GENERAL' && req.generalDetail) {
+          setGeneralSubject(req.generalDetail.subject || req.title);
+          setGeneralDescription(req.generalDetail.description || '');
+          setTargetDepartmentId(req.generalDetail.targetDepartmentId || '');
+          setTargetUserId(req.generalDetail.targetUserId || '');
+          setRequiredDate(req.generalDetail.requiredDate ? req.generalDetail.requiredDate.substring(0, 10) : '');
+          setGeneralEndDate(req.generalDetail.endDate ? req.generalDetail.endDate.substring(0, 10) : '');
         }
       } catch (err: any) {
         setError(err.message || 'Failed to load request for editing.');
@@ -101,6 +124,21 @@ export default function NewRequestPage() {
       loadDraftData();
     }
   }, [id, isEditMode]);
+
+  // Load Recipient Directory for General Requests
+  useEffect(() => {
+    async function loadDirectory() {
+      try {
+        const res = await api.getRecipientDirectory();
+        if (res.data) {
+          setRecipientDirectory(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to load recipient directory:', err);
+      }
+    }
+    loadDirectory();
+  }, []);
 
   // 2. Live calculated leave days calculation
   const now = new Date();
@@ -116,14 +154,23 @@ export default function NewRequestPage() {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
   })();
 
+  // Filter users eligible for assignment (active, non-admin, non-self, matching target dept if selected)
+  const eligibleUsers = recipientDirectory.users.filter((u) => {
+    if (user && u.id === user.id) return false;
+    if (targetDepartmentId && u.department?.id !== targetDepartmentId) return false;
+    return true;
+  });
+
   // 3. Isolated Form Submission Flow
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
+    const finalTitle = (type === 'GENERAL' ? (generalSubject || title) : title).trim();
+
     // Client-side validations with descriptive messages
-    if (!title.trim()) {
-      setError('Request title is required.');
+    if (!finalTitle) {
+      setError(type === 'GENERAL' ? 'Subject is required.' : 'Request title is required.');
       return;
     }
 
@@ -211,13 +258,43 @@ export default function NewRequestPage() {
         reason: leaveReason.trim(),
         coveringStaff: coveringStaff.trim() || undefined,
       };
+    } else if (type === 'GENERAL') {
+      if (!generalDescription.trim()) {
+        setError('Description / Requirement is required.');
+        return;
+      }
+      if (!targetDepartmentId && !targetUserId) {
+        setError('Please select a target department or specific recipient.');
+        return;
+      }
+      if (targetUserId && user?.id === targetUserId) {
+        setError('You cannot assign a General Request to yourself.');
+        return;
+      }
+      if (requiredDate && generalEndDate) {
+        const reqD = new Date(requiredDate);
+        const endD = new Date(generalEndDate);
+        if (endD < reqD) {
+          setError('End / Return date cannot be before the required date.');
+          return;
+        }
+      }
+
+      detailsPayload = {
+        subject: finalTitle,
+        description: generalDescription.trim(),
+        targetDepartmentId: targetDepartmentId || undefined,
+        targetUserId: targetUserId || undefined,
+        requiredDate: requiredDate || undefined,
+        endDate: generalEndDate || undefined,
+      };
     }
 
     setIsSubmitting(true);
     try {
       if (isEditMode && id) {
         await api.editRequest(id, {
-          title: title.trim(),
+          title: finalTitle,
           type,
           priority,
           details: detailsPayload,
@@ -225,7 +302,7 @@ export default function NewRequestPage() {
         navigate(`/request/${id}`, { replace: true });
       } else {
         const res = await api.createRequest({
-          title: title.trim(),
+          title: finalTitle,
           type,
           priority,
           details: detailsPayload,
@@ -299,21 +376,23 @@ export default function NewRequestPage() {
             <div className="pb-6 border-b border-slate-100">
               <h2 className="text-sm font-bold text-slate-800 tracking-tight mb-4">General Information</h2>
 
-              <div className="mb-4">
-                <label htmlFor="title" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
-                  Request Title <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
-                </label>
-                <input
-                  id="title"
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Briefly describe your request..."
-                  disabled={isSubmitting}
-                  required
-                  className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
-                />
-              </div>
+              {type !== 'GENERAL' && (
+                <div className="mb-4">
+                  <label htmlFor="title" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Request Title <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
+                  </label>
+                  <input
+                    id="title"
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Briefly describe your request..."
+                    disabled={isSubmitting}
+                    required
+                    className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -330,6 +409,7 @@ export default function NewRequestPage() {
                     <option value="PURCHASE">{getRequestTypeLabel('PURCHASE')}</option>
                     <option value="MAINTENANCE">{getRequestTypeLabel('MAINTENANCE')}</option>
                     <option value="LEAVE">{getRequestTypeLabel('LEAVE')}</option>
+                    <option value="GENERAL">{getRequestTypeLabel('GENERAL')}</option>
                   </select>
                 </div>
                 <div>
@@ -605,6 +685,151 @@ export default function NewRequestPage() {
                     required
                     className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all resize-y"
                   />
+                </div>
+              </div>
+            )}
+
+            {/* GENERAL SECTION */}
+            {type === 'GENERAL' && (
+              <div className="pb-6 border-b border-slate-100 fade-in">
+                <h2 className="text-sm font-bold text-slate-800 tracking-tight mb-4">General Request Details</h2>
+
+                <div className="mb-4">
+                  <label htmlFor="generalSubject" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Subject <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
+                  </label>
+                  <input
+                    id="generalSubject"
+                    type="text"
+                    value={generalSubject || title}
+                    onChange={(e) => {
+                      setGeneralSubject(e.target.value);
+                      setTitle(e.target.value);
+                    }}
+                    placeholder="e.g. 3 HD Cameras for 3-Day Workshop Rental"
+                    disabled={isSubmitting}
+                    required
+                    className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label htmlFor="targetDepartment" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                      Target Department
+                    </label>
+                    <select
+                      id="targetDepartment"
+                      value={targetDepartmentId}
+                      onChange={(e) => {
+                        const newDeptId = e.target.value;
+                        setTargetDepartmentId(newDeptId);
+                        if (targetUserId) {
+                          const selectedUser = recipientDirectory.users.find((u) => u.id === targetUserId);
+                          if (newDeptId && selectedUser?.department?.id !== newDeptId) {
+                            setTargetUserId('');
+                          }
+                        }
+                      }}
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
+                    >
+                      <option value="">Select Target Department...</option>
+                      {recipientDirectory.departments.map((dept) => (
+                        <option key={dept.id} value={dept.id}>
+                          {dept.displayName || dept.name} ({dept.code})
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Target department queue for processing this operational request.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label htmlFor="targetUser" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                      Specific Recipient (Optional)
+                    </label>
+                    <select
+                      id="targetUser"
+                      value={targetUserId}
+                      onChange={(e) => {
+                        const newUserId = e.target.value;
+                        setTargetUserId(newUserId);
+                        if (newUserId) {
+                          const foundUser = recipientDirectory.users.find((u) => u.id === newUserId);
+                          if (foundUser?.department?.id) {
+                            setTargetDepartmentId(foundUser.department.id);
+                          }
+                        }
+                      }}
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
+                    >
+                      <option value="">Department Queue (Any Authorized Personnel)</option>
+                      {eligibleUsers.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.firstName} {u.lastName} — {u.roleRef?.displayName || u.role} ({u.department?.displayName || u.department?.name || 'Staff'})
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      Directly assigns to this person. Cannot assign to yourself.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label htmlFor="requiredDate" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                      Required Date (Optional)
+                    </label>
+                    <input
+                      id="requiredDate"
+                      type="date"
+                      value={requiredDate}
+                      onChange={(e) => setRequiredDate(e.target.value)}
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="generalEndDate" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                      End / Return Date (Optional)
+                    </label>
+                    <input
+                      id="generalEndDate"
+                      type="date"
+                      min={requiredDate || undefined}
+                      value={generalEndDate}
+                      onChange={(e) => setGeneralEndDate(e.target.value)}
+                      disabled={isSubmitting}
+                      className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all"
+                    />
+                  </div>
+                </div>
+
+                <div className="mb-4">
+                  <label htmlFor="generalDescription" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+                    Description / Requirement <span className="text-red-500 font-bold ml-0.5" title="Required">*</span>
+                  </label>
+                  <textarea
+                    id="generalDescription"
+                    value={generalDescription}
+                    onChange={(e) => setGeneralDescription(e.target.value)}
+                    placeholder="Provide full requirement details, e.g. item specifications, purpose, rental terms..."
+                    disabled={isSubmitting}
+                    rows={4}
+                    required
+                    className="w-full px-3 py-2 text-sm text-slate-900 bg-white border border-slate-300 rounded-md placeholder:text-slate-400 focus:outline-none focus:border-indigo-500 focus:shadow-[0_0_0_3px_rgba(99,102,241,0.12)] transition-all resize-y"
+                  />
+                </div>
+
+                <div className="p-3 bg-indigo-50/70 border border-indigo-100 rounded-lg text-xs text-indigo-900 flex items-start gap-2.5">
+                  <span className="font-bold text-indigo-600 text-sm">📎</span>
+                  <div>
+                    <span className="font-bold text-indigo-950">Supporting Documents &amp; Attachments:</span> Supporting specifications, rental estimates, or invoices can be attached directly from the Request Details page upon saving.
+                  </div>
                 </div>
               </div>
             )}

@@ -65,6 +65,7 @@ export function DataFilterBar({ onFilterChange }: DataFilterBarProps) {
         <option value="PURCHASE">{getRequestTypeLabel('PURCHASE')}</option>
         <option value="MAINTENANCE">{getRequestTypeLabel('MAINTENANCE')}</option>
         <option value="LEAVE">{getRequestTypeLabel('LEAVE')}</option>
+        <option value="GENERAL">{getRequestTypeLabel('GENERAL')}</option>
       </select>
 
       {(search || status || type) && (

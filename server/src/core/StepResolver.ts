@@ -82,6 +82,7 @@ export class StepResolver {
         purchaseDetail: true,
         leaveDetail: true,
         maintenanceDetail: true,
+        generalDetail: true,
       },
     });
 

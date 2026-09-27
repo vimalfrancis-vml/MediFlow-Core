@@ -27,6 +27,7 @@ const DEFAULT_TYPE_MAP: Record<string, string> = {
   PURCHASE: 'Purchase Request',
   MAINTENANCE: 'Maintenance Work Order',
   LEAVE: 'Leave Application',
+  GENERAL: 'General Request',
 };
 
 export const TerminologyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

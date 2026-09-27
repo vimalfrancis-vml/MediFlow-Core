@@ -1,5 +1,5 @@
 import { prisma } from '../db';
-import { Request, RequestStatus, ApprovalActionType, UserRole } from '@prisma/client';
+import { Request, RequestStatus, ApprovalActionType, UserRole, RequestType } from '@prisma/client';
 import { StepResolver } from './StepResolver';
 import { AppError } from '../middleware/errorHandler';
 
@@ -33,6 +33,7 @@ export class WorkflowEngine {
     // Fetch to validate current state
     const existing = await prisma.request.findUniqueOrThrow({
       where: { id: requestId },
+      include: { generalDetail: true },
     });
 
     if (
@@ -46,6 +47,44 @@ export class WorkflowEngine {
       throw new AppError('You are not allowed to submit this request.', 403);
     }
 
+    let initialAssigneeId: string | null = null;
+    let auditDesc = `Submitted for approval by ${actor.firstName} ${actor.lastName}`;
+
+    if (existing.type === RequestType.GENERAL) {
+      const gen = existing.generalDetail;
+      if (!gen) {
+        throw new AppError('General request details are missing.', 400);
+      }
+      if (gen.targetUserId) {
+        if (gen.targetUserId === actor.id) {
+          throw new AppError('Cannot assign request to yourself.', 400);
+        }
+        const targetUser = await prisma.user.findUnique({
+          where: { id: gen.targetUserId, isActive: true },
+          include: { department: true },
+        });
+        if (!targetUser) {
+          throw new AppError('Target recipient not found or is inactive.', 404);
+        }
+        if (targetUser.role === UserRole.ADMIN) {
+          throw new AppError('Cannot assign request to an Administrator.', 400);
+        }
+        initialAssigneeId = targetUser.id;
+        auditDesc = `Submitted by ${actor.firstName} ${actor.lastName} and assigned directly to ${targetUser.firstName} ${targetUser.lastName} (${targetUser.department?.name || 'Department'})`;
+      } else if (gen.targetDepartmentId) {
+        const targetDept = await prisma.department.findUnique({
+          where: { id: gen.targetDepartmentId, isActive: true },
+        });
+        if (!targetDept) {
+          throw new AppError('Target department not found or is inactive.', 404);
+        }
+        initialAssigneeId = null;
+        auditDesc = `Submitted by ${actor.firstName} ${actor.lastName} and routed to ${targetDept.name} Department queue`;
+      } else {
+        throw new AppError('Please specify a target department or specific recipient.', 400);
+      }
+    }
+
     // Atomic transaction: update status + audit log (C-01)
     const updatedRequest = await prisma.$transaction(async (tx) => {
       const updated = await tx.request.update({
@@ -53,7 +92,7 @@ export class WorkflowEngine {
         data: {
           status: RequestStatus.IN_REVIEW,
           currentStepId: firstStep.id,
-          assignedToUserId: null,
+          assignedToUserId: initialAssigneeId,
           submittedAt: new Date(),
         },
       });
@@ -63,7 +102,7 @@ export class WorkflowEngine {
           actorId: actor.id,
           requestId: requestId,
           action: 'SUBMITTED',
-          description: `Submitted for approval by ${actor.firstName} ${actor.lastName}`,
+          description: auditDesc,
         },
       });
 
@@ -505,32 +544,34 @@ export class WorkflowEngine {
       throw new AppError('Cannot forward request to an Administrator.', 400);
     }
 
-    // B. Prohibit forwarding to employees who have no approver role
-    const validApproverRoles: UserRole[] = [
-      UserRole.HOD,
-      UserRole.PURCHASE_OFFICER,
-      UserRole.MAINTENANCE_OFFICER,
-      UserRole.DIRECTOR,
-      UserRole.MEDICAL_SUPERINTENDENT,
-      UserRole.FINANCE_OFFICER,
-      UserRole.HR,
-    ];
-    if (!validApproverRoles.includes(targetUser.role)) {
-      throw new AppError('Target recipient must hold an authorized approver role.', 400);
-    }
-
-    // 5. Mandatory Business Rules & Invariants:
-    // Finance-first invariant: If current step is Finance, target MUST be Finance Department personnel
-    const isFinanceStep =
-      request.currentStep.approverRole === UserRole.FINANCE_OFFICER ||
-      request.currentStep.approverDepartment?.code === 'FIN';
-
-    if (isFinanceStep) {
-      if (targetUser.role !== UserRole.FINANCE_OFFICER) {
-        throw new AppError('Target recipient must have role FINANCE_OFFICER.', 400);
+    if (request.type !== RequestType.GENERAL) {
+      // B. Prohibit forwarding to employees who have no approver role for standard workflows
+      const validApproverRoles: UserRole[] = [
+        UserRole.HOD,
+        UserRole.PURCHASE_OFFICER,
+        UserRole.MAINTENANCE_OFFICER,
+        UserRole.DIRECTOR,
+        UserRole.MEDICAL_SUPERINTENDENT,
+        UserRole.FINANCE_OFFICER,
+        UserRole.HR,
+      ];
+      if (!validApproverRoles.includes(targetUser.role)) {
+        throw new AppError('Target recipient must hold an authorized approver role.', 400);
       }
-      if (targetUser.department.code !== 'FIN') {
-        throw new AppError('Finance review can only be forwarded to Finance Department personnel.', 400);
+
+      // 5. Mandatory Business Rules & Invariants:
+      // Finance-first invariant: If current step is Finance, target MUST be Finance Department personnel
+      const isFinanceStep =
+        request.currentStep.approverRole === UserRole.FINANCE_OFFICER ||
+        request.currentStep.approverDepartment?.code === 'FIN';
+
+      if (isFinanceStep) {
+        if (targetUser.role !== UserRole.FINANCE_OFFICER) {
+          throw new AppError('Target recipient must have role FINANCE_OFFICER.', 400);
+        }
+        if (targetUser.department.code !== 'FIN') {
+          throw new AppError('Finance review can only be forwarded to Finance Department personnel.', 400);
+        }
       }
     }
 
@@ -552,6 +593,16 @@ export class WorkflowEngine {
           assignedToUserId: targetUser.id,
         },
       });
+
+      if (request.type === RequestType.GENERAL) {
+        await tx.generalDetail.updateMany({
+          where: { requestId: request.id },
+          data: {
+            targetUserId: targetUser.id,
+            targetDepartmentId: targetUser.departmentId,
+          },
+        });
+      }
 
       await tx.notification.create({
         data: {
@@ -602,31 +653,35 @@ export class WorkflowEngine {
     }
 
     const isFinanceStep =
-      request.currentStep.approverRole === UserRole.FINANCE_OFFICER ||
-      request.currentStep.approverDepartment?.code === 'FIN';
+      request.type !== RequestType.GENERAL &&
+      (request.currentStep.approverRole === UserRole.FINANCE_OFFICER ||
+        request.currentStep.approverDepartment?.code === 'FIN');
 
     const whereClause: any = {
       isActive: true,
-      role: isFinanceStep
-        ? UserRole.FINANCE_OFFICER
-        : {
-            in: [
-              UserRole.HOD,
-              UserRole.PURCHASE_OFFICER,
-              UserRole.MAINTENANCE_OFFICER,
-              UserRole.DIRECTOR,
-              UserRole.MEDICAL_SUPERINTENDENT,
-              UserRole.FINANCE_OFFICER,
-              UserRole.HR,
-            ],
-          },
+      role: { not: UserRole.ADMIN },
       id: {
         notIn: [request.requestedById, actor.id, ...(request.assignedToUserId ? [request.assignedToUserId] : [])],
       },
     };
 
-    if (isFinanceStep) {
-      whereClause.department = { code: 'FIN' };
+    if (request.type !== RequestType.GENERAL) {
+      if (isFinanceStep) {
+        whereClause.role = UserRole.FINANCE_OFFICER;
+        whereClause.department = { code: 'FIN' };
+      } else {
+        whereClause.role = {
+          in: [
+            UserRole.HOD,
+            UserRole.PURCHASE_OFFICER,
+            UserRole.MAINTENANCE_OFFICER,
+            UserRole.DIRECTOR,
+            UserRole.MEDICAL_SUPERINTENDENT,
+            UserRole.FINANCE_OFFICER,
+            UserRole.HR,
+          ],
+        };
+      }
     }
 
     const eligible = await prisma.user.findMany({
@@ -666,7 +721,7 @@ export class WorkflowEngine {
   public static async canUserActOnRequest(requestId: string, userId: string): Promise<boolean> {
     const request = await prisma.request.findUnique({
       where: { id: requestId },
-      include: { currentStep: true },
+      include: { currentStep: true, generalDetail: true },
     });
 
     if (!request || request.status !== RequestStatus.IN_REVIEW || !request.currentStep) {
@@ -687,9 +742,23 @@ export class WorkflowEngine {
       return false;
     }
 
+    // Admin visibility/administration must remain separate from being an automatic business approver
+    if (user.role === UserRole.ADMIN) {
+      return false;
+    }
+
     // If request has been specifically forwarded/assigned to another user
     if (request.assignedToUserId) {
       return request.assignedToUserId === userId;
+    }
+
+    // General Request: if unassigned, route to authorized users of target department
+    if (request.type === RequestType.GENERAL) {
+      const targetDeptId = request.generalDetail?.targetDepartmentId;
+      if (targetDeptId) {
+        return user.departmentId === targetDeptId;
+      }
+      return false;
     }
 
     // Role check
@@ -767,6 +836,22 @@ export class WorkflowEngine {
       return; // Actor is the assigned user, authorized to act on this forwarded request
     }
 
+    // General Request department routing check
+    if (request.type === RequestType.GENERAL) {
+      const reqGen = await prisma.request.findUnique({
+        where: { id: request.id },
+        include: { generalDetail: true },
+      });
+      const targetDeptId = reqGen?.generalDetail?.targetDepartmentId;
+      if (!targetDeptId || actor.departmentId !== targetDeptId) {
+        throw new AppError('You do not belong to the target department for this general request.', 403);
+      }
+      if (actor.role === UserRole.ADMIN) {
+        throw new AppError('Administrators cannot act as operational business approvers.', 403);
+      }
+      return;
+    }
+
     if (actor.role !== request.currentStep.approverRole) {
       throw new AppError('You cannot take action on this step.', 403);
     }
@@ -795,6 +880,23 @@ export class WorkflowEngine {
 
     if (request.assignedToUserId) {
       approverIds = [request.assignedToUserId];
+    } else if (request.type === RequestType.GENERAL) {
+      const reqGen = await prisma.request.findUnique({
+        where: { id: request.id },
+        include: { generalDetail: true },
+      });
+      if (reqGen?.generalDetail?.targetDepartmentId) {
+        const approvers = await prisma.user.findMany({
+          where: {
+            departmentId: reqGen.generalDetail.targetDepartmentId,
+            isActive: true,
+            role: { not: UserRole.ADMIN },
+            id: { not: request.requestedById },
+          },
+          select: { id: true },
+        });
+        approverIds = approvers.map((a) => a.id);
+      }
     } else {
       const whereClause: any = {
         role: step.approverRole,
