@@ -19,6 +19,9 @@ import rateLimit from 'express-rate-limit';
 
 const app = express();
 
+// Trust reverse proxy headers (Render, Vercel, Nginx, Cloudflare)
+app.set('trust proxy', 1);
+
 // Security Headers Middleware
 app.use((_req: Request, res: Response, next: NextFunction) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
