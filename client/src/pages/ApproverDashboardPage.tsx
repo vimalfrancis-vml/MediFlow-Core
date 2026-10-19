@@ -24,19 +24,12 @@ export default function ApproverDashboardPage() {
   async function fetchRequests() {
     try {
       setIsLoading(true);
+      const queryStatus = filters.status || (viewMode === 'pending' ? 'IN_REVIEW' : 'APPROVED,REJECTED,RETURNED');
       const [reqRes, analyticsRes] = await Promise.all([
-        api.getRequests({ ...filters, page, limit }),
+        api.getRequests({ ...filters, status: queryStatus, page, limit }),
         api.getAnalytics()
       ]);
-      let fetchedRequests = reqRes.data || [];
-      if (viewMode === 'pending') {
-        fetchedRequests = fetchedRequests.filter((r) => r.status === 'IN_REVIEW');
-      } else if (viewMode === 'history') {
-        fetchedRequests = fetchedRequests.filter(
-          (r) => r.status === 'APPROVED' || r.status === 'REJECTED' || r.status === 'RETURNED'
-        );
-      }
-      setRequests(fetchedRequests);
+      setRequests(reqRes.data || []);
       setAnalytics(analyticsRes.data);
       setError(null);
     } catch (err: any) {

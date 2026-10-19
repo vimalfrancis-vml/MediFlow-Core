@@ -528,17 +528,24 @@ export const api = {
     });
   },
 
-  approveRequest(requestId: string, comment?: string) {
-    return request<{ success: boolean; data: RequestItem }>(`/requests/${requestId}/approve`, {
+  cancelRequest(requestId: string, reason?: string) {
+    return request<{ success: boolean; message: string; data: RequestItem }>(`/requests/${requestId}/cancel`, {
       method: 'POST',
-      body: JSON.stringify({ comment })
+      body: JSON.stringify({ reason })
     });
   },
 
-  rejectRequest(requestId: string, comment: string) {
+  approveRequest(requestId: string, comment?: string, options?: { isOverride?: boolean; overrideReason?: string }) {
+    return request<{ success: boolean; data: RequestItem }>(`/requests/${requestId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ comment, ...options })
+    });
+  },
+
+  rejectRequest(requestId: string, comment: string, options?: { isOverride?: boolean; overrideReason?: string }) {
     return request<{ success: boolean; data: RequestItem }>(`/requests/${requestId}/reject`, {
       method: 'POST',
-      body: JSON.stringify({ comment })
+      body: JSON.stringify({ comment, ...options })
     });
   },
 

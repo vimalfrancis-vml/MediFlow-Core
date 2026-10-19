@@ -28,6 +28,12 @@ export default function RequestDetailsPage() {
   const [newComment, setNewComment] = useState('');
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  // Admin Override & Cancellation State
+  const [showOverrideModal, setShowOverrideModal] = useState<'approve' | 'reject' | null>(null);
+  const [overrideReason, setOverrideReason] = useState('');
+  const [overrideComment, setOverrideComment] = useState('');
 
   const loadData = useCallback(async () => {
     if (!id) return;
@@ -78,10 +84,68 @@ export default function RequestDetailsPage() {
       setIsActionLoading(true);
       setActionError(null);
       await api.submitRequest(id);
+      setActionSuccess('Request submitted for approval.');
       await loadData();
       window.dispatchEvent(new Event(NOTIFICATIONS_REFRESH_EVENT));
+      setTimeout(() => setActionSuccess(null), 5000);
     } catch (err: any) {
       setActionError(err.message || 'Failed to submit request.');
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleCancelRequest = async () => {
+    if (!id) return;
+    const reason = window.prompt('Please provide a reason for cancelling this request (optional):');
+    if (reason === null) return; // user cancelled prompt
+
+    try {
+      setIsActionLoading(true);
+      setActionError(null);
+      await api.cancelRequest(id, reason.trim() || undefined);
+      setActionSuccess('Request has been cancelled successfully.');
+      await loadData();
+      window.dispatchEvent(new Event(NOTIFICATIONS_REFRESH_EVENT));
+      setTimeout(() => setActionSuccess(null), 5000);
+    } catch (err: any) {
+      setActionError(err.message || 'Failed to cancel request.');
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleExecuteOverride = async () => {
+    if (!id || !showOverrideModal) return;
+    if (!overrideReason.trim()) {
+      setActionError('Administrative override requires an explicit justification reason.');
+      return;
+    }
+
+    try {
+      setIsActionLoading(true);
+      setActionError(null);
+      if (showOverrideModal === 'approve') {
+        await api.approveRequest(id, overrideComment.trim() || undefined, {
+          isOverride: true,
+          overrideReason: overrideReason.trim(),
+        });
+        setActionSuccess('Administrative override: step approved.');
+      } else if (showOverrideModal === 'reject') {
+        await api.rejectRequest(id, overrideComment.trim() || overrideReason.trim(), {
+          isOverride: true,
+          overrideReason: overrideReason.trim(),
+        });
+        setActionSuccess('Administrative override: request rejected.');
+      }
+      setShowOverrideModal(null);
+      setOverrideReason('');
+      setOverrideComment('');
+      await loadData();
+      window.dispatchEvent(new Event(NOTIFICATIONS_REFRESH_EVENT));
+      setTimeout(() => setActionSuccess(null), 5000);
+    } catch (err: any) {
+      setActionError(err.message || 'Administrative override failed.');
     } finally {
       setIsActionLoading(false);
     }
@@ -225,27 +289,146 @@ export default function RequestDetailsPage() {
                 </div>
               )}
 
-              {/* Action Bar for Requester */}
-              {(request.status === 'DRAFT' || request.status === 'RETURNED') && request.requestedById === user?.id && (
-                <div className="flex flex-wrap gap-3 mt-4 mb-2">
-                  <button
-                    className="btn-primary"
-                    onClick={handleSubmitRequest}
-                    disabled={isActionLoading}
-                  >
-                    {isActionLoading
-                      ? 'Submitting…'
-                      : request.status === 'RETURNED'
-                      ? '✓ Resubmit for Approval'
-                      : '✓ Submit for Approval'}
-                  </button>
-                  <button
-                    className="btn-secondary"
-                    onClick={() => navigate(`/edit-request/${request.id}`)}
-                    disabled={isActionLoading}
-                  >
-                    ✎ Edit Request
-                  </button>
+              {/* Requester / Admin Action Bar */}
+              <div className="flex flex-wrap items-center gap-3 mt-4 mb-2">
+                {(request.status === 'DRAFT' || request.status === 'RETURNED') && request.requestedById === user?.id && (
+                  <>
+                    <button
+                      className="btn-primary"
+                      onClick={handleSubmitRequest}
+                      disabled={isActionLoading}
+                    >
+                      {isActionLoading
+                        ? 'Submitting…'
+                        : request.status === 'RETURNED'
+                        ? '✓ Resubmit for Approval'
+                        : '✓ Submit for Approval'}
+                    </button>
+                    <button
+                      className="btn-secondary"
+                      onClick={() => navigate(`/edit-request/${request.id}`)}
+                      disabled={isActionLoading}
+                    >
+                      ✎ Edit Request
+                    </button>
+                  </>
+                )}
+
+                {/* Cancel Request (Requester or Admin for DRAFT, IN_REVIEW, RETURNED) */}
+                {(request.status === 'DRAFT' || request.status === 'IN_REVIEW' || request.status === 'RETURNED') &&
+                  (request.requestedById === user?.id || user?.role === 'ADMIN') && (
+                    <button
+                      className="px-3.5 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-md transition-colors"
+                      onClick={handleCancelRequest}
+                      disabled={isActionLoading}
+                    >
+                      ✕ Cancel Request
+                    </button>
+                )}
+              </div>
+
+              {/* Administrative Override Panel (Admin Only & Request IN_REVIEW) */}
+              {user?.role === 'ADMIN' && request.status === 'IN_REVIEW' && (
+                <div className="mt-4 mb-4 p-4.5 bg-slate-900 text-slate-100 rounded-xl border border-slate-800 shadow-md">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-800">
+                    <div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                        Administrative Override Governance
+                      </span>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Resolve reviewer unavailability, hospital deadlocks, or operational emergencies with explicit audit tracking.
+                      </p>
+                    </div>
+                  </div>
+
+                  {isHighValuePurchase && request.currentStep?.approverRole === 'FINANCE_OFFICER' && (
+                    <div className="my-3 p-3 bg-amber-950/70 border border-amber-800/80 rounded-lg text-amber-200 text-xs flex items-start gap-2">
+                      <span className="text-amber-400 font-bold">⚠️</span>
+                      <span>
+                        <strong>Finance-First Policy Protection:</strong> Administrative override is restricted from bypassing Step 1 Finance clearance for high-value purchases exceeding ₹1,00,000. Finance officers must review budget allocation first.
+                      </span>
+                    </div>
+                  )}
+
+                  {!showOverrideModal ? (
+                    <div className="flex flex-wrap gap-2.5 mt-3">
+                      <button
+                        className="px-3 py-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isHighValuePurchase && request.currentStep?.approverRole === 'FINANCE_OFFICER'}
+                        onClick={() => setShowOverrideModal('approve')}
+                      >
+                        ⚡ Override &amp; Approve Step
+                      </button>
+                      <button
+                        className="px-3 py-1.5 text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white rounded-md transition-colors"
+                        onClick={() => setShowOverrideModal('reject')}
+                      >
+                        ⚡ Override &amp; Reject Request
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-3.5 p-3.5 bg-slate-800/90 rounded-lg border border-slate-700">
+                      <div className="text-xs font-bold text-white mb-2">
+                        {showOverrideModal === 'approve'
+                          ? `Confirm Administrative Override Approval for "${request.currentStep?.stepName || 'Current Stage'}"`
+                          : 'Confirm Administrative Override Rejection'}
+                      </div>
+                      <div className="space-y-2 mb-3">
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">
+                            Mandatory Justification Reason (Required for Compliance Audit)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Authorized per Medical Director instruction during clinical emergency..."
+                            value={overrideReason}
+                            onChange={(e) => setOverrideReason(e.target.value)}
+                            className="w-full px-3 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-md text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-400"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">
+                            Additional Comment (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="Notes recorded in request timeline..."
+                            value={overrideComment}
+                            onChange={(e) => setOverrideComment(e.target.value)}
+                            className="w-full px-3 py-1.5 text-xs bg-slate-900 border border-slate-700 rounded-md text-slate-100 placeholder:text-slate-500 focus:outline-none focus:border-indigo-400"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          className={`px-3 py-1.5 text-xs font-semibold text-white rounded-md transition-colors ${
+                            showOverrideModal === 'approve' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-rose-600 hover:bg-rose-500'
+                          } disabled:opacity-50`}
+                          disabled={!overrideReason.trim() || isActionLoading}
+                          onClick={handleExecuteOverride}
+                        >
+                          {isActionLoading ? 'Executing Override…' : `Confirm Override ${showOverrideModal === 'approve' ? 'Approve' : 'Reject'}`}
+                        </button>
+                        <button
+                          className="px-3 py-1.5 text-xs font-semibold bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-md transition-colors"
+                          onClick={() => {
+                            setShowOverrideModal(null);
+                            setOverrideReason('');
+                            setOverrideComment('');
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {actionSuccess && (
+                <div className="mb-4 p-3 bg-emerald-50 text-emerald-800 text-xs rounded-md border border-emerald-200 font-semibold" role="alert">
+                  ✓ {actionSuccess}
                 </div>
               )}
 

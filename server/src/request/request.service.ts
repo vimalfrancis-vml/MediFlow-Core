@@ -755,11 +755,15 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
                 type: { not: RequestType.GENERAL },
                 currentStep: {
                   approverRole: actor.role,
+                  OR: [
+                    { approverDepartmentId: null },
+                    { approverDepartmentId: actor.departmentId },
+                  ],
                 },
                 // For HOD, additionally filter by department at the request level
                 ...(actor.role === UserRole.HOD ? { departmentId: actor.departmentId } : {}),
-                // For Finance, filter by department code FIN
-                ...(actor.role === UserRole.FINANCE_OFFICER ? { department: { code: 'FIN' } } : {}),
+                // Finance Officer must be in the Finance department to review
+                ...(actor.role === UserRole.FINANCE_OFFICER && actor.departmentCode !== 'FIN' ? { id: '__NEVER_MATCH__' } : {}),
               },
               {
                 type: RequestType.GENERAL,
@@ -805,7 +809,8 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
 
     if (filters) {
       if (filters.status) {
-        results = results.filter(r => r.status === filters.status);
+        const statuses = filters.status.split(',').map(s => s.trim()).filter(Boolean);
+        results = results.filter(r => statuses.includes(r.status));
       }
       if (filters.type) {
         results = results.filter(r => r.type === filters.type);

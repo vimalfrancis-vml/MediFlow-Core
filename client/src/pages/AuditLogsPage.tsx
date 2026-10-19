@@ -89,6 +89,10 @@ export default function AuditLogsPage() {
               <option value="REJECTED">REJECTED</option>
               <option value="FORWARDED">FORWARDED</option>
               <option value="RETURNED">RETURNED</option>
+              <option value="CANCELLED">CANCELLED</option>
+              <option value="ADMIN_OVERRIDE_STEP_APPROVAL">ADMIN_OVERRIDE_STEP_APPROVAL</option>
+              <option value="ADMIN_OVERRIDE_FINAL_APPROVAL">ADMIN_OVERRIDE_FINAL_APPROVAL</option>
+              <option value="ADMIN_OVERRIDE_REJECTION">ADMIN_OVERRIDE_REJECTION</option>
               <option value="USER_UPDATED">USER_UPDATED</option>
             </select>
           </div>

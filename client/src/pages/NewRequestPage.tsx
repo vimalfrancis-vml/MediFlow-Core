@@ -185,8 +185,8 @@ export default function NewRequestPage() {
         setError('Quantity must be greater than zero.');
         return;
       }
-      if (Number(estimatedCost) < 0) {
-        setError('Estimated cost cannot be negative.');
+      if (!estimatedCost || isNaN(Number(estimatedCost)) || Number(estimatedCost) <= 0) {
+        setError('Estimated cost must be greater than zero.');
         return;
       }
       if (!justification.trim()) {

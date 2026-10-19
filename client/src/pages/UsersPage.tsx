@@ -14,6 +14,7 @@ const ROLES = [
   { value: 'HR', label: 'HR Officer' },
   { value: 'PURCHASE_OFFICER', label: 'Procurement Officer' },
   { value: 'MAINTENANCE_OFFICER', label: 'Maintenance Officer' },
+  { value: 'FINANCE_OFFICER', label: 'Finance Officer' },
   { value: 'ADMIN', label: 'System Administrator' },
 ];
 

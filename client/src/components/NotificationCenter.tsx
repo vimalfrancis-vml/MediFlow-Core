@@ -76,8 +76,9 @@ const { user } = useAuth();
     setIsOpen(false);
     const requestId = notif.requestId ?? notif.request?.id;
     if (requestId) {
+      const isRequesterNotif = notif.message.toLowerCase().startsWith('your request');
       const isApprover = user && APPROVER_ROLES.includes(user.role);
-      navigate(isApprover ? `/approver/request/${requestId}` : `/request/${requestId}`);
+      navigate(isApprover && !isRequesterNotif ? `/approver/request/${requestId}` : `/request/${requestId}`);
     }
   };
 
