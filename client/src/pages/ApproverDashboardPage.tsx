@@ -44,7 +44,7 @@ export default function ApproverDashboardPage() {
   }, [filters, page, viewMode]);
 
   return (
-    <DashboardLayout title="MediFlow" brandPrefix="Approver">
+    <DashboardLayout title="E-Office" brandPrefix="Approver">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Approver Dashboard</h1>

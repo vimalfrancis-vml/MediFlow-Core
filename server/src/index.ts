@@ -1,4 +1,16 @@
 import 'dotenv/config';
+import net from 'net';
+import dns from 'dns';
+
+// Fix Node 24 Happy Eyeballs IPv6 hanging on networks without outbound IPv6 routing
+if (typeof net.setDefaultAutoSelectFamily === 'function') {
+  net.setDefaultAutoSelectFamily(false);
+}
+if (typeof dns.setDefaultResultOrder === 'function') {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
+// Jubilee Mission E-Office Server
 import app from './app';
 import { logger } from './utils/logger';
 

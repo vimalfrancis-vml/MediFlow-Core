@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 :root {
-  /* --- BRAND ACCENT --- */
-  --brand-primary: #6366f1;
-  --brand-hover: #4f46e5;
-  --brand-active: #4338ca;
-  --brand-light: #e0e7ff;
-  --brand-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  /* --- BRAND ACCENT (Hospital Medical Blue) --- */
+  --brand-primary: #2457A7;
+  --brand-hover: #1D4ED8;
+  --brand-active: #1E40AF;
+  --brand-light: #EFF6FF;
+  --brand-gradient: linear-gradient(135deg, #2457A7 0%, #1D4ED8 100%);
 
   /* --- NEUTRAL PALETTE --- */
   --bg-main: #f8fafc;

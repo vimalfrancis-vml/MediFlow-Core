@@ -1,60 +1,64 @@
 /* ============================================================
-   DashboardPage.css — MediFlow Dashboard (Light Mode)
+   DashboardPage.css — E-Office Hospital Dashboard
    ============================================================ */
 
-/* --- Main Layout (handled by DashboardLayout via Tailwind) --- */
+/* --- Main Layout --- */
 .dashboard-main {
   flex: 1;
 }
 
-/* --- New Request Button (override gradient from old CSS) --- */
+/* --- New Request Button (Solid Hospital Medical Blue) --- */
 .new-request-btn {
-  background: #6366f1;
-  color: white;
+  background: #2457A7;
+  color: #ffffff;
   border: none;
   padding: 0.5rem 1.25rem;
-  border-radius: var(--radius-md);
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-sm);
+  border-radius: var(--radius-md, 8px);
+  font-weight: 600;
+  font-size: 0.875rem;
   cursor: pointer;
-  box-shadow: var(--shadow-sm);
-  transition: background var(--transition-fast);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 
 .new-request-btn:hover {
-  background: #4f46e5;
+  background: #1D4ED8;
 }
 
-/* --- State Cards (light mode) --- */
+.new-request-btn:active {
+  background: #1E40AF;
+}
+
+/* --- State Cards (Restrained Hospital Theme) --- */
 .state-card {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 4rem 2rem;
+  padding: 3.5rem 1.5rem;
   background: #ffffff;
-  border: 1px dashed #cbd5e1;
-  border-radius: var(--radius-lg);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
   text-align: center;
   color: #64748b;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
 .state-card svg {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 1rem;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 0.75rem;
   color: #94a3b8;
-  opacity: 1;
 }
 
 .loading-spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid rgba(99, 102, 241, 0.1);
-  border-top-color: #6366f1;
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(36, 87, 167, 0.15);
+  border-top-color: #2457A7;
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
 @keyframes spin {
@@ -62,50 +66,54 @@
 }
 
 .error-state {
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: #fecaca;
   color: #b91c1c;
-  background: rgba(239, 68, 68, 0.02);
+  background: #fffafa;
 }
 
 .error-state svg {
   color: #ef4444;
-  opacity: 1;
 }
 
 .retry-btn {
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
   padding: 0.5rem 1.25rem;
-  background: rgba(239, 68, 68, 0.05);
-  color: #b91c1c;
-  border: 1px solid rgba(239, 68, 68, 0.2);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: all 0.15s ease;
 }
 
 .retry-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
+  background: #f8fafc;
+  border-color: #94a3b8;
 }
 
-/* --- Status Badge (light mode — used in RequestTable + Dashboard) --- */
+/* --- Status Badges --- */
 .request-status {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
   font-size: 11px;
-  font-weight: var(--weight-bold);
+  font-weight: 700;
   padding: 0.2rem 0.6rem;
-  border-radius: var(--radius-full);
+  border-radius: 9999px;
   text-transform: uppercase;
-  letter-spacing: var(--tracking-wider);
+  letter-spacing: 0.05em;
   white-space: nowrap;
+  border: 1px solid transparent;
 }
 
-/* Status Colors — Light Mode */
-.status-draft     { background: #f1f5f9; color: #475569; }
-.status-submitted { background: #e0e7ff; color: #4338ca; }
-.status-in_review { background: #fef3c7; color: #b45309; }
-.status-approved  { background: #d1fae5; color: #047857; }
-.status-rejected  { background: #fee2e2; color: #b91c1c; }
-.status-returned  { background: #ffedd5; color: #c2410c; }
-.status-cancelled { background: #f1f5f9; color: #64748b; }
+/* Status Colors — Accessible Muted Hospital Tones */
+.status-draft     { background: #f1f5f9; color: #475569; border-color: #cbd5e1; }
+.status-submitted { background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe; }
+.status-in_review { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.status-approved  { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.status-rejected  { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+.status-returned  { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+.status-cancelled { background: #f8fafc; color: #64748b; border-color: #e2e8f0; }
