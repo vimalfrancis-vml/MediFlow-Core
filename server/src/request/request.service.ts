@@ -6,6 +6,7 @@ import { prisma } from '../db';
 import { Request, RequestStatus, ApprovalActionType, UserRole, RequestType } from '@prisma/client';
 import { AuthUser } from '../core/WorkflowEngine'; // reuse interface
 import { AppError } from '../middleware/errorHandler';
+import { assertActiveRequest, ACTIVE_REQUEST_FILTER } from '../utils/requestFilter';
 
 /**
  * Service layer for request operations. All business logic is delegated to the
@@ -245,7 +246,8 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
    * @returns Updated Request record.
    */
   static async editRequest(id: string, data: any, actor: AuthUser): Promise<Request> {
-    const request = await prisma.request.findUniqueOrThrow({ where: { id } });
+    const request = await prisma.request.findUnique({ where: { id } });
+    assertActiveRequest(request);
     if (request.requestedById !== actor.id && actor.role !== UserRole.ADMIN) {
       throw new AppError('You are not allowed to edit this request.', 403);
     }
@@ -588,7 +590,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
    * @returns Full Request record with related workflow data.
    */
   static async getRequestById(id: string, actor: AuthUser) {
-    const request = await prisma.request.findUniqueOrThrow({
+    const request = await prisma.request.findUnique({
       where: { id },
       include: { 
         workflowTemplate: {
@@ -645,6 +647,8 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         },
       },
     });
+
+    assertActiveRequest(request);
 
     // Enrich audit logs & attachments with user information
     const userIds = [
@@ -770,7 +774,10 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
     let rawRequests;
     
     if (actor.role === UserRole.ADMIN) {
-      rawRequests = await prisma.request.findMany({ include: requestInclude });
+      rawRequests = await prisma.request.findMany({
+        where: { ...ACTIVE_REQUEST_FILTER },
+        include: requestInclude,
+      });
     } else {
       // Fetch own requests, actionable requests, and previously-actioned requests:
       //   - own: requests the user submitted
@@ -779,13 +786,14 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       //   - participated: requests this user has already actioned (APPROVED, REJECTED, RETURNED, FORWARDED)
       const [own, assignedToMe, unassignedActionable, participated] = await Promise.all([
         prisma.request.findMany({
-          where: { requestedById: actor.id },
+          where: { requestedById: actor.id, ...ACTIVE_REQUEST_FILTER },
           include: requestInclude,
         }),
         prisma.request.findMany({
           where: {
             status: RequestStatus.IN_REVIEW,
             assignedToUserId: actor.id,
+            ...ACTIVE_REQUEST_FILTER,
           },
           include: requestInclude,
         }),
@@ -793,6 +801,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
           where: {
             status: RequestStatus.IN_REVIEW,
             assignedToUserId: null,
+            ...ACTIVE_REQUEST_FILTER,
             OR: [
               {
                 type: { not: RequestType.GENERAL },
@@ -821,6 +830,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         // Fetch requests where this user has taken at least one approval action
         prisma.request.findMany({
           where: {
+            ...ACTIVE_REQUEST_FILTER,
             approvalActions: {
               some: {
                 actorId: actor.id,
@@ -847,8 +857,8 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       rawRequests = Array.from(seen.values());
     }
 
-    // Apply in-memory filtering
-    let results = rawRequests;
+    // Apply in-memory filtering (including defensive active check)
+    let results = rawRequests.filter(r => r.deletedAt === null);
 
     if (filters) {
       if (filters.status) {

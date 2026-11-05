@@ -5,6 +5,7 @@ import { WorkflowStep, Request, RequestType } from '@prisma/client';
 import { evaluateRules } from './RuleEvaluator';
 import { RuleContext } from './workflow.rules';
 import { AppError } from '../middleware/errorHandler';
+import { assertActiveRequest } from '../utils/requestFilter';
 
 /**
  * Authoritative resolver for active/effective base workflow templates.
@@ -64,7 +65,7 @@ export class StepResolver {
    */
   public static async getStepsForRequest(requestId: string): Promise<WorkflowStep[]> {
     // 1. Fetch request with detail tables and current template steps
-    const request = await prisma.request.findUniqueOrThrow({
+    const request = await prisma.request.findUnique({
       where: { id: requestId },
       include: {
         workflowTemplate: {
@@ -85,6 +86,8 @@ export class StepResolver {
         generalDetail: true,
       },
     });
+
+    assertActiveRequest(request);
 
     // 2. In-flight stability safeguard:
     // If the request is already active or closed, it MUST strictly follow its already
