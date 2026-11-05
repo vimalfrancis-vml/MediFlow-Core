@@ -7,6 +7,7 @@ import { Request, RequestStatus, ApprovalActionType, UserRole, RequestType } fro
 import { AuthUser } from '../core/WorkflowEngine'; // reuse interface
 import { AppError } from '../middleware/errorHandler';
 import { assertActiveRequest, ACTIVE_REQUEST_FILTER } from '../utils/requestFilter';
+import { generateReferenceNumber, isReferenceUniqueConstraintError } from '../utils/referenceNumber';
 
 /**
  * Service layer for request operations. All business logic is delegated to the
@@ -22,7 +23,6 @@ export class RequestService {
    * @returns Created Request record.
    */
 static async createRequest(data: any, actor: AuthUser): Promise<Request> {
-    const referenceNumber = `REQ-${Date.now()}`;
     const { requestedById, departmentId, workflowTemplateId, details, ...cleanData } = data;
     
     // Resolve workflowTemplateId: use provided or fallback to authoritative active template
@@ -33,7 +33,6 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         requestedBy: { connect: { id: actor.id } },
         department: { connect: { id: actor.departmentId } },
         workflowTemplate: { connect: { id: templateId } },
-        referenceNumber,
         status: RequestStatus.DRAFT,
     };
     if (cleanData.type === 'PURCHASE') {
@@ -224,22 +223,42 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
             },
         };
     }
-    const newRequest = await prisma.$transaction(async (tx) => {
-      const created = await tx.request.create({ data: requestData });
+    const MAX_RETRIES = 3;
+    let lastError: any = null;
 
-      await tx.auditLog.create({
-        data: {
-          actorId: actor.id,
-          requestId: created.id,
-          action: 'CREATED',
-          description: `Request created by ${actor.firstName} ${actor.lastName}`,
-        },
-      });
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      requestData.referenceNumber = generateReferenceNumber();
 
-      return created;
-    });
+      try {
+        const newRequest = await prisma.$transaction(async (tx) => {
+          const created = await tx.request.create({ data: requestData });
 
-    return newRequest;
+          await tx.auditLog.create({
+            data: {
+              actorId: actor.id,
+              requestId: created.id,
+              action: 'CREATED',
+              description: `Request created by ${actor.firstName} ${actor.lastName}`,
+            },
+          });
+
+          return created;
+        });
+
+        return newRequest;
+      } catch (err: any) {
+        if (isReferenceUniqueConstraintError(err) && attempt < MAX_RETRIES) {
+          lastError = err;
+          continue;
+        }
+        if (isReferenceUniqueConstraintError(err)) {
+          throw new AppError('Unable to generate a unique request reference. Please try again.', 500);
+        }
+        throw err;
+      }
+    }
+
+    throw lastError || new AppError('Unable to generate a unique request reference. Please try again.', 500);
   }
 
   /** Edit an existing draft request */
