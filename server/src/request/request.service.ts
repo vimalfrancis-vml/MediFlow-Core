@@ -224,16 +224,21 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
             },
         };
     }
-    const newRequest = await prisma.request.create({ data: requestData });
+    const newRequest = await prisma.$transaction(async (tx) => {
+      const created = await tx.request.create({ data: requestData });
 
-    await prisma.auditLog.create({
-      data: {
-        actorId: actor.id,
-        requestId: newRequest.id,
-        action: 'CREATED',
-        description: `Request created by ${actor.firstName} ${actor.lastName}`,
-      },
+      await tx.auditLog.create({
+        data: {
+          actorId: actor.id,
+          requestId: created.id,
+          action: 'CREATED',
+          description: `Request created by ${actor.firstName} ${actor.lastName}`,
+        },
+      });
+
+      return created;
     });
+
     return newRequest;
   }
 
@@ -440,18 +445,24 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       }
     }
 
-    const updated = await prisma.request.update({
-      where: { id },
-      data: updateData,
+    const updated = await prisma.$transaction(async (tx) => {
+      const res = await tx.request.update({
+        where: { id },
+        data: updateData,
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: actor.id,
+          requestId: id,
+          action: 'UPDATED',
+          description: `Request edited by ${actor.firstName} ${actor.lastName}`,
+        },
+      });
+
+      return res;
     });
-    await prisma.auditLog.create({
-      data: {
-        actorId: actor.id,
-        requestId: id,
-        action: 'UPDATED',
-        description: `Request edited by ${actor.firstName} ${actor.lastName}`,
-      },
-    });
+
     return updated;
   }
 
