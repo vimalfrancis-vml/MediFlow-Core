@@ -1,7 +1,7 @@
 // Resolves workflow steps, applying dynamic rules to generate request-specific step sequences
 // Evaluates workflow rules to dynamically modify step sequences based on request context
 import { prisma } from '../db';
-import { WorkflowStep, Request, RequestType } from '@prisma/client';
+import { WorkflowStep, Request, RequestType, Priority, UserRole } from '@prisma/client';
 import { evaluateRules } from './RuleEvaluator';
 import { RuleContext } from './workflow.rules';
 import { AppError } from '../middleware/errorHandler';
@@ -85,6 +85,120 @@ export class StepResolver {
     return promise;
   }
 
+  /**
+   * Resolves the base template and evaluates workflow rules in-memory for a request.
+   * This is a pure read operation: NO database mutations or dynamic template creations.
+   */
+  public static async evaluateWorkflowForRequest(request: {
+    type: RequestType;
+    priority: Priority;
+    status: string;
+    workflowTemplate: {
+      name: string;
+      version: number;
+      steps: WorkflowStep[];
+    };
+    requestedBy: {
+      role: UserRole;
+      department: { code: string };
+    };
+    purchaseDetail?: { estimatedCost?: any } | null;
+    leaveDetail?: { leaveType?: string; totalDays?: number } | null;
+    maintenanceDetail?: { urgencyLevel?: string } | null;
+  }): Promise<{
+    baseTemplate: any;
+    baseSteps: WorkflowStep[];
+    adjustedSteps: WorkflowStep[];
+    stepsModified: boolean;
+  }> {
+    let baseTemplate: (typeof request.workflowTemplate) | null = null;
+    if (!request.workflowTemplate.name.startsWith('Dynamic:')) {
+      baseTemplate = request.workflowTemplate;
+    } else {
+      // It is dynamic: resolve the base template matching the request's original template version.
+      baseTemplate = await prisma.workflowTemplate.findFirst({
+        where: {
+          requestType: request.type,
+          version: request.workflowTemplate.version,
+          deletedAt: null,
+          NOT: { name: { startsWith: 'Dynamic:' } },
+        },
+        include: {
+          steps: { orderBy: { order: 'asc' } },
+        },
+      });
+
+      // If no matching version is found, fallback to the latest active base template
+      if (!baseTemplate) {
+        baseTemplate = await prisma.workflowTemplate.findFirst({
+          where: {
+            requestType: request.type,
+            isActive: true,
+            deletedAt: null,
+            NOT: { name: { startsWith: 'Dynamic:' } },
+          },
+          orderBy: { version: 'desc' },
+          include: {
+            steps: { orderBy: { order: 'asc' } },
+          },
+        });
+      }
+    }
+
+    const baseSteps = baseTemplate ? baseTemplate.steps : request.workflowTemplate.steps;
+
+    // Construct rule context with requesterRole & numerical cost
+    const ctx: RuleContext = {
+      type: request.type,
+      priority: request.priority,
+      departmentCode: request.requestedBy.department.code,
+      requesterRole: request.requestedBy.role,
+      details: {
+        estimatedCost:
+          request.purchaseDetail?.estimatedCost != null
+            ? Number(request.purchaseDetail.estimatedCost)
+            : undefined,
+        leaveType: request.leaveDetail?.leaveType,
+        urgencyLevel: request.maintenanceDetail?.urgencyLevel,
+        totalDays: request.leaveDetail?.totalDays,
+      },
+    };
+
+    const adjustedSteps = evaluateRules(ctx, baseSteps);
+
+    const stepsModified =
+      adjustedSteps.length !== baseSteps.length ||
+      adjustedSteps.some((step, idx) => step.approverRole !== baseSteps[idx]?.approverRole);
+
+    return {
+      baseTemplate,
+      baseSteps,
+      adjustedSteps,
+      stepsModified,
+    };
+  }
+
+  /**
+   * Calculates a read-only preview of workflow steps for draft and returned requests
+   * using the authoritative business rules without persisting any changes or dynamic
+   * templates to the database.
+   *
+   * For in-flight or completed requests, it preserves their persisted materialized steps.
+   */
+  public static async previewStepsForRequest(request: any): Promise<WorkflowStep[]> {
+    if (
+      request.status !== 'DRAFT' &&
+      request.status !== 'RETURNED' &&
+      request.workflowTemplate?.steps &&
+      request.workflowTemplate.steps.length > 0
+    ) {
+      return request.workflowTemplate.steps;
+    }
+
+    const { adjustedSteps } = await this.evaluateWorkflowForRequest(request);
+    return adjustedSteps;
+  }
+
   private static async resolveStepsInternal(requestId: string): Promise<WorkflowStep[]> {
     // 1. Fetch request with detail tables and current template steps
     const request = await prisma.request.findUnique({
@@ -123,68 +237,8 @@ export class StepResolver {
       return request.workflowTemplate.steps;
     }
 
-    // 3. Determine base template for draft/returned requests:
-    // If request already has a fixed template (not dynamic), preserve that exact template as base.
-    // This guarantees that activating a new version never alters existing requests!
-    let baseTemplate: (typeof request.workflowTemplate) | null = null;
-    if (!request.workflowTemplate.name.startsWith('Dynamic:')) {
-      baseTemplate = request.workflowTemplate;
-    } else {
-      // It is dynamic: resolve the base template matching the request's original template version.
-      baseTemplate = await prisma.workflowTemplate.findFirst({
-        where: {
-          requestType: request.type,
-          version: request.workflowTemplate.version,
-          deletedAt: null,
-          NOT: { name: { startsWith: 'Dynamic:' } },
-        },
-        include: {
-          steps: { orderBy: { order: 'asc' } },
-        },
-      });
-
-      // If no matching version is found, fallback to the latest active base template
-      if (!baseTemplate) {
-        baseTemplate = await prisma.workflowTemplate.findFirst({
-          where: {
-            requestType: request.type,
-            isActive: true,
-            deletedAt: null,
-            NOT: { name: { startsWith: 'Dynamic:' } },
-          },
-          orderBy: { version: 'desc' },
-          include: {
-            steps: { orderBy: { order: 'asc' } },
-          },
-        });
-      }
-    }
-
-    const baseSteps = baseTemplate ? baseTemplate.steps : request.workflowTemplate.steps;
-
-    // 3. Construct rule context with requesterRole & numerical cost
-    const ctx: RuleContext = {
-      type: request.type,
-      priority: request.priority,
-      departmentCode: request.requestedBy.department.code,
-      requesterRole: request.requestedBy.role,
-      details: {
-        estimatedCost:
-          request.purchaseDetail?.estimatedCost != null
-            ? Number(request.purchaseDetail.estimatedCost)
-            : undefined,
-        leaveType: request.leaveDetail?.leaveType,
-        urgencyLevel: request.maintenanceDetail?.urgencyLevel,
-        totalDays: request.leaveDetail?.totalDays,
-      },
-    };
-
-    const adjustedSteps = evaluateRules(ctx, baseSteps);
-
-    // 4. Check if rules modified the steps relative to baseSteps
-    const stepsModified =
-      adjustedSteps.length !== baseSteps.length ||
-      adjustedSteps.some((step, idx) => step.approverRole !== baseSteps[idx]?.approverRole);
+    const { baseTemplate, baseSteps, adjustedSteps, stepsModified } =
+      await this.evaluateWorkflowForRequest(request);
 
     if (!stepsModified) {
       // If request was previously linked to a dynamic template, revert to base template

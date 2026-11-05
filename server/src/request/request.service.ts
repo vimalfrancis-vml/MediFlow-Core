@@ -1,7 +1,7 @@
 // src/request/request.service.ts
 
 import { WorkflowEngine } from '../core/WorkflowEngine';
-import { resolveActiveWorkflowTemplate } from '../core/StepResolver';
+import { StepResolver, resolveActiveWorkflowTemplate } from '../core/StepResolver';
 import { prisma } from '../db';
 import { Request, RequestStatus, ApprovalActionType, UserRole, RequestType } from '@prisma/client';
 import { AuthUser } from '../core/WorkflowEngine'; // reuse interface
@@ -703,14 +703,28 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       uploadedBy: att.uploadedById ? userMap[att.uploadedById] : null
     }));
 
+    // In-memory workflow preview for editable (draft/returned) requests without database persistence
+    let workflowTemplate = request.workflowTemplate;
+    if (
+      request.status === RequestStatus.DRAFT ||
+      request.status === RequestStatus.RETURNED
+    ) {
+      const previewSteps = await StepResolver.previewStepsForRequest(request);
+      workflowTemplate = {
+        ...request.workflowTemplate,
+        steps: previewSteps,
+      };
+    }
+
     const enrichedRequest = {
       ...request,
+      workflowTemplate,
       auditLogs: enrichedAuditLogs,
-      attachments: enrichedAttachments
+      attachments: enrichedAttachments,
     };
 
     // Authorization – requester, admins, current/past approvers, or anyone in the workflow steps can view
-    const isInWorkflow = request.workflowTemplate?.steps.some(
+    const isInWorkflow = workflowTemplate?.steps.some(
       (step: any) => step.approverRole === actor.role
     ) ?? false;
 
