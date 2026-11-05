@@ -35,14 +35,32 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         referenceNumber,
         status: RequestStatus.DRAFT,
     };
-    if (cleanData.type === 'PURCHASE' && details) {
+    if (cleanData.type === 'PURCHASE') {
+        if (!details) {
+            throw new AppError('Details are required for Purchase requests.', 400);
+        }
+        if (!details.itemDescription || typeof details.itemDescription !== 'string' || !details.itemDescription.trim()) {
+            throw new AppError('Item description is required.', 400);
+        }
+        if (details.estimatedCost === undefined || details.estimatedCost === null || details.estimatedCost === '') {
+            throw new AppError('Estimated cost is required.', 400);
+        }
+        const costNum = Number(details.estimatedCost);
+        if (isNaN(costNum) || !isFinite(costNum) || costNum <= 0) {
+            throw new AppError('Estimated cost must be greater than zero.', 400);
+        }
+        const quantityNum = details.quantity !== undefined ? Number(details.quantity) : 1;
+        if (isNaN(quantityNum) || !isFinite(quantityNum) || quantityNum < 1 || !Number.isInteger(quantityNum)) {
+            throw new AppError('Quantity must be at least 1.', 400);
+        }
+
         const purchaseDetailData = {
-            itemDescription: details.itemDescription || 'Default Item',
-            quantity: details.quantity || 1,
-            justification: details.justification || 'N/A',
-            vendorName: details.vendorName,
-            estimatedCost: details.estimatedCost,
-            budgetCode: details.budgetCode,
+            itemDescription: details.itemDescription.trim(),
+            quantity: quantityNum,
+            justification: details.justification && details.justification.trim() ? details.justification.trim() : 'N/A',
+            vendorName: details.vendorName && details.vendorName.trim() ? details.vendorName.trim() : null,
+            estimatedCost: costNum,
+            budgetCode: details.budgetCode && details.budgetCode.trim() ? details.budgetCode.trim() : null,
         };
         requestData.purchaseDetail = { create: purchaseDetailData };
     } else if (cleanData.type === 'MAINTENANCE') {
@@ -241,7 +259,32 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
 
     if (details) {
       if (request.type === 'PURCHASE') {
-        updateData.purchaseDetail = { update: details };
+        if (details.itemDescription !== undefined && (!details.itemDescription || typeof details.itemDescription !== 'string' || !details.itemDescription.trim())) {
+          throw new AppError('Item description cannot be empty.', 400);
+        }
+        if (details.estimatedCost !== undefined) {
+          const costNum = Number(details.estimatedCost);
+          if (isNaN(costNum) || !isFinite(costNum) || costNum <= 0) {
+            throw new AppError('Estimated cost must be greater than zero.', 400);
+          }
+        }
+        if (details.quantity !== undefined) {
+          const qtyNum = Number(details.quantity);
+          if (isNaN(qtyNum) || !isFinite(qtyNum) || qtyNum < 1 || !Number.isInteger(qtyNum)) {
+            throw new AppError('Quantity must be at least 1.', 400);
+          }
+        }
+
+        updateData.purchaseDetail = {
+          update: {
+            itemDescription: details.itemDescription !== undefined ? details.itemDescription.trim() : undefined,
+            quantity: details.quantity !== undefined ? Number(details.quantity) : undefined,
+            justification: details.justification !== undefined ? details.justification.trim() : undefined,
+            vendorName: details.vendorName !== undefined ? (details.vendorName ? details.vendorName.trim() : null) : undefined,
+            estimatedCost: details.estimatedCost !== undefined ? Number(details.estimatedCost) : undefined,
+            budgetCode: details.budgetCode !== undefined ? (details.budgetCode ? details.budgetCode.trim() : null) : undefined,
+          }
+        };
       } else if (request.type === 'MAINTENANCE') {
         if (details.equipmentName !== undefined && !details.equipmentName.trim()) {
           throw new AppError('Equipment name is required.', 400);

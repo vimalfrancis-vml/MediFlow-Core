@@ -53,7 +53,7 @@ describe('Request API E2E Scenarios', () => {
       .send({
         title: 'Stationery Order',
         type: 'PURCHASE',
-        details: { estimatedCost: 2000 },
+        details: { itemDescription: 'Printer Paper and Pens', estimatedCost: 2000 },
         workflowTemplateId: (await prisma.workflowTemplate.findFirst({ where: { requestType: 'PURCHASE' } }))!.id,
       })
       .expect(201);
@@ -98,7 +98,7 @@ describe('Request API E2E Scenarios', () => {
       .send({
         title: 'Reject Test',
         type: 'PURCHASE',
-        details: { estimatedCost: 1500 },
+        details: { itemDescription: 'Cardiology Supplies', estimatedCost: 1500 },
         workflowTemplateId: (await prisma.workflowTemplate.findFirst({ where: { requestType: 'PURCHASE' } }))!.id,
       })
       .expect(201);
@@ -130,7 +130,7 @@ describe('Request API E2E Scenarios', () => {
       .send({
         title: 'Needs Correction',
         type: 'PURCHASE',
-        details: { estimatedCost: 1200 },
+        details: { itemDescription: 'Lab Reagents', estimatedCost: 1200 },
         workflowTemplateId: (await prisma.workflowTemplate.findFirst({ where: { requestType: 'PURCHASE' } }))!.id,
       })
       .expect(201);
@@ -189,7 +189,7 @@ describe('Request API E2E Scenarios', () => {
       .send({
         title: 'Cancel Test',
         type: 'PURCHASE',
-        details: { estimatedCost: 800 },
+        details: { itemDescription: 'Disposable Gloves', estimatedCost: 800 },
         workflowTemplateId: (await prisma.workflowTemplate.findFirst({ where: { requestType: 'PURCHASE' } }))!.id,
       })
       .expect(201);
