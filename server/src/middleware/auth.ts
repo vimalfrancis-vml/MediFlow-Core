@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { prisma } from '../db';
 import { AppError } from './errorHandler';
 import { UserRole } from '@prisma/client';
+import { getJwtConfig } from '../config/jwt';
 
 interface JwtPayload {
   userId: string;
@@ -28,18 +29,12 @@ export const requireAuth = async (
       return next(new AppError('Please sign in to access this page.', 401));
     }
 
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) {
-      if (process.env.NODE_ENV === 'production') {
-        throw new Error('JWT_SECRET environment variable is not set in production.');
-      }
-      console.warn('[WARN] JWT_SECRET env var is not set — using insecure default. Set it in production.');
-    }
+    const { secret, algorithm } = getJwtConfig();
 
     const decoded = jwt.verify(
       token,
-      jwtSecret || 'supersecretchangeinproduction',
-      { algorithms: ['HS256'] }
+      secret,
+      { algorithms: [algorithm] }
     ) as JwtPayload;
 
     const user = await prisma.user.findUnique({
@@ -69,7 +64,7 @@ export const requireAuth = async (
     if (error instanceof jwt.JsonWebTokenError) {
       return next(new AppError('Invalid authentication token. Please sign in again.', 401));
     }
-    return next(new AppError('Please sign in again to verify your identity.', 401));
+    return next(error);
   }
 };
 

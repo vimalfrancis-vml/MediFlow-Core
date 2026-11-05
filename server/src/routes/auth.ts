@@ -5,6 +5,7 @@ import rateLimit from 'express-rate-limit';
 import { prisma } from '../db';
 import { AppError } from '../middleware/errorHandler';
 import { requireAuth } from '../middleware/auth';
+import { getJwtConfig } from '../config/jwt';
 
 const router = Router();
 
@@ -43,17 +44,14 @@ router.post('/login', loginLimiter, async (req: Request, res: Response, next: Ne
       return next(new AppError('Your account has been deactivated. Please contact an administrator.', 403));
     }
 
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret && process.env.NODE_ENV === 'production') {
-      throw new Error('JWT_SECRET environment variable is not set in production.');
-    }
+    const { secret, expiresIn, algorithm } = getJwtConfig();
 
     const token = jwt.sign(
       { userId: user.id, role: user.role },
-      jwtSecret || 'supersecretchangeinproduction',
+      secret,
       {
-        algorithm: 'HS256',
-        expiresIn: (process.env.JWT_EXPIRES_IN || '1d') as any,
+        algorithm,
+        expiresIn: expiresIn as any,
       }
     );
 

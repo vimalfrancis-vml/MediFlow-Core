@@ -4,12 +4,14 @@ import app from '../../src/app';
 import { prisma } from '../../src/db';
 import jwt from 'jsonwebtoken';
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
+import { getJwtSecret } from '../../src/config/jwt';
 
 // Helper to generate a JWT for a given user record
 async function generateToken(userId: string) {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
   const payload = { userId: user.id, role: user.role } as any;
-  return jwt.sign(payload, process.env.JWT_SECRET || 'supersecretchangeinproduction', {
+  return jwt.sign(payload, getJwtSecret(), {
+    algorithm: 'HS256',
     expiresIn: '1h',
   });
 }

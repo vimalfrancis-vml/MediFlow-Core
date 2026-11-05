@@ -10,6 +10,7 @@ import { RequestService } from '../../src/request/request.service';
 import { documentSchema } from '../../src/validators/request.validators';
 import { UserRole, RequestType, Priority, RequestStatus } from '@prisma/client';
 import jwt from 'jsonwebtoken';
+import { getJwtSecret } from '../../src/config/jwt';
 
 describe('MediFlow Phase 4 — Security, Permissions, Edge Cases & Reliability', { timeout: 45000 }, () => {
   let activeAdmin: any;
@@ -292,7 +293,7 @@ describe('MediFlow Phase 4 — Security, Permissions, Edge Cases & Reliability',
     it('rejects expired JWT tokens with clear HTTP 401 error message', async () => {
       const expiredToken = jwt.sign(
         { userId: employeeCardio.id, role: employeeCardio.role },
-        process.env.JWT_SECRET || 'supersecretchangeinproduction',
+        getJwtSecret(),
         { algorithm: 'HS256', expiresIn: '-10s' }
       );
 
