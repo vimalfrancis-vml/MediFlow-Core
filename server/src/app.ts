@@ -50,10 +50,11 @@ const apiLimiter = rateLimit({
 /**
  * Safely normalizes and validates an origin string according to RFC 6454.
  * Returns the lowercased scheme + host + port, or null if the origin is malformed or invalid.
+ * Also strips surrounding quotes and whitespace.
  */
 export function normalizeOrigin(origin: string): string | null {
   if (!origin || typeof origin !== 'string') return null;
-  const trimmed = origin.trim();
+  const trimmed = origin.trim().replace(/^['"]+|['"]+$/g, '').trim();
   if (!trimmed || trimmed === 'null') return null;
 
   try {
@@ -84,7 +85,7 @@ const DEFAULT_DEV_ORIGINS = [
 export function getAllowedOrigins(): string[] {
   const configured = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
-        .map((o) => normalizeOrigin(o) || o.trim().replace(/\/+$/, ''))
+        .map((o) => normalizeOrigin(o) || o.trim().replace(/^['"]+|['"]+$/g, '').trim().replace(/\/+$/, ''))
         .filter(Boolean)
     : [];
 
@@ -93,6 +94,43 @@ export function getAllowedOrigins(): string[] {
   }
 
   return Array.from(new Set(configured));
+}
+
+/**
+ * Evaluates whether an incoming Origin is authorized.
+ * Checks against configured ALLOWED_ORIGINS (exact match and wildcard patterns),
+ * development localhost origins, and canonical project Vercel deployments.
+ */
+export function isOriginAllowed(origin: string | undefined): boolean {
+  if (!origin) return true;
+
+  const cleanOrigin = normalizeOrigin(origin);
+  if (!cleanOrigin) return false;
+
+  const allowed = getAllowedOrigins();
+
+  for (const item of allowed) {
+    if (item === cleanOrigin) return true;
+
+    // Wildcard matching (e.g. https://medi-flow-core-sxwq*.vercel.app or https://*-vimalfrancis-vmls-projects.vercel.app)
+    if (item.includes('*')) {
+      const escaped = item
+        .replace(/\/+$/, '')
+        .split('*')
+        .map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+        .join('[a-zA-Z0-9_-]+');
+      if (new RegExp(`^${escaped}$`, 'i').test(cleanOrigin)) {
+        return true;
+      }
+    }
+  }
+
+  // Canonical MediFlow Vercel deployment and review previews
+  if (/^https:\/\/medi-flow-core-sxwq(-[a-zA-Z0-9_-]+)?\.vercel\.app$/i.test(cleanOrigin)) {
+    return true;
+  }
+
+  return false;
 }
 
 export const corsOptions: cors.CorsOptions = {
@@ -108,12 +146,12 @@ export const corsOptions: cors.CorsOptions = {
       return callback(null, false);
     }
 
-    const allowed = getAllowedOrigins();
-    if (allowed.includes(cleanOrigin)) {
+    if (isOriginAllowed(origin)) {
       return callback(null, true);
     }
 
-    logger.warn(`CORS blocked for unauthorized origin: "${origin}". Normalized: "${cleanOrigin}". Allowed origins configured: ${allowed.length}`);
+    const allowed = getAllowedOrigins();
+    logger.warn(`CORS blocked for unauthorized origin: "${origin}". Normalized: "${cleanOrigin}". Configured: [${allowed.join(', ')}]`);
     return callback(null, false);
   },
   credentials: true,

@@ -173,4 +173,59 @@ describe('CORS Security & Origin Validation', () => {
       expect(res.headers['access-control-allow-origin']).toBeUndefined();
     });
   });
+
+  describe('7. MediFlow Vercel Deployments & Robust Wildcard/Quote Parsing', () => {
+    it('allows the primary MediFlow Vercel production deployment in production', async () => {
+      process.env.NODE_ENV = 'production';
+      const res = await request(app)
+        .get('/api/v1/health')
+        .set('Origin', 'https://medi-flow-core-sxwq.vercel.app');
+
+      expect(res.status).toBe(200);
+      expect(res.headers['access-control-allow-origin']).toBe('https://medi-flow-core-sxwq.vercel.app');
+      expect(res.headers['access-control-allow-credentials']).toBe('true');
+    });
+
+    it('allows MediFlow Vercel preview branch deployments', async () => {
+      process.env.NODE_ENV = 'production';
+      const previewOrigin = 'https://medi-flow-core-sxwq-hajww4jt6-vimalfrancis-vmls-projects.vercel.app';
+      const res = await request(app)
+        .options('/api/v1/health')
+        .set('Origin', previewOrigin)
+        .set('Access-Control-Request-Method', 'GET');
+
+      expect(res.status).toBe(204);
+      expect(res.headers['access-control-allow-origin']).toBe(previewOrigin);
+      expect(res.headers['access-control-allow-credentials']).toBe('true');
+    });
+
+    it('handles quoted and whitespace-padded origins in ALLOWED_ORIGINS', async () => {
+      process.env.NODE_ENV = 'production';
+      process.env.ALLOWED_ORIGINS = '"https://quoted-frontend.example.com", \'https://single-quoted.example.com\'';
+
+      const res1 = await request(app)
+        .get('/api/v1/health')
+        .set('Origin', 'https://quoted-frontend.example.com');
+      expect(res1.status).toBe(200);
+      expect(res1.headers['access-control-allow-origin']).toBe('https://quoted-frontend.example.com');
+
+      const res2 = await request(app)
+        .get('/api/v1/health')
+        .set('Origin', 'https://single-quoted.example.com');
+      expect(res2.status).toBe(200);
+      expect(res2.headers['access-control-allow-origin']).toBe('https://single-quoted.example.com');
+    });
+
+    it('supports wildcard patterns in ALLOWED_ORIGINS', async () => {
+      process.env.NODE_ENV = 'production';
+      process.env.ALLOWED_ORIGINS = 'https://*.hospital-intranet.org';
+
+      const res = await request(app)
+        .get('/api/v1/health')
+        .set('Origin', 'https://radiology.hospital-intranet.org');
+
+      expect(res.status).toBe(200);
+      expect(res.headers['access-control-allow-origin']).toBe('https://radiology.hospital-intranet.org');
+    });
+  });
 });
