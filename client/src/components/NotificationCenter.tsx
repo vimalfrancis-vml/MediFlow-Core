@@ -52,7 +52,7 @@ const { user } = useAuth();
       document.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener(NOTIFICATIONS_REFRESH_EVENT, refreshHandler);
     };
-  }, []);
+  }, [fetchNotifications]);
 
   const handleMarkAllRead = async () => {
     try {

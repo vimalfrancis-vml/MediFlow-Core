@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import rateLimit from 'express-rate-limit';
 import { prisma } from '../db';
 import { AppError } from '../middleware/errorHandler';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, setUserSessionCache } from '../middleware/auth';
 import { getJwtConfig } from '../config/jwt';
 
 const router = Router();
@@ -31,10 +31,23 @@ router.post('/login', loginLimiter, async (req: Request, res: Response, next: Ne
     }
 
     const cleanEmail = String(email).trim().toLowerCase();
-    const user = await prisma.user.findUnique({
-      where: { email: cleanEmail },
-      include: { department: { select: { code: true } } },
-    });
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email: cleanEmail },
+        include: { department: { select: { code: true } } },
+      });
+    } catch (dbErr: any) {
+      if (dbErr?.code === 'ETIMEDOUT' || dbErr?.message?.includes('timeout') || dbErr?.message?.includes('Connection')) {
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        user = await prisma.user.findUnique({
+          where: { email: cleanEmail },
+          include: { department: { select: { code: true } } },
+        });
+      } else {
+        throw dbErr;
+      }
+    }
 
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return next(new AppError('Invalid email or password.', 401));
@@ -54,6 +67,16 @@ router.post('/login', loginLimiter, async (req: Request, res: Response, next: Ne
         expiresIn: expiresIn as any,
       }
     );
+
+    setUserSessionCache({
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      departmentId: user.departmentId,
+      departmentCode: user.department.code,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    });
 
     res.status(200).json({
       status: 'success',

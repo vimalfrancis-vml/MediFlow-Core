@@ -5,13 +5,26 @@ interface DashboardLayoutProps {
   title?: string;
   brandPrefix?: string;
   nav?: React.ReactNode;
+  actionBar?: React.ReactNode;
+  isStickyHeader?: boolean;
+  contentClassName?: string;
   children: React.ReactNode;
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, brandPrefix, nav, children }) => {
+export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
+  title = "MediFlow",
+  brandPrefix,
+  nav,
+  actionBar,
+  isStickyHeader = true,
+  contentClassName,
+  children,
+}) => {
   return (
     <div className="dashboard-layout min-h-screen bg-slate-50 flex flex-col">
-      <DashboardHeader title={title} brandPrefix={brandPrefix} />
+      <DashboardHeader title={title} brandPrefix={brandPrefix} isSticky={isStickyHeader} />
+
+      {actionBar}
 
       {nav && (
         <div className="dashboard-subnav bg-white border-b border-slate-200 sticky top-[57px] z-30 shadow-2xs">
@@ -21,7 +34,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ title, brandPr
         </div>
       )}
 
-      <main className="dashboard-main flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 lg:px-10 py-6 sm:py-8">
+      <main className={contentClassName || "dashboard-main flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 lg:px-10 py-6 sm:py-8"}>
         {children}
       </main>
     </div>

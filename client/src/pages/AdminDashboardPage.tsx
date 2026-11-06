@@ -46,7 +46,7 @@ export default function AdminDashboardPage() {
 
   return (
     <DashboardLayout 
-      title="MediFlow" 
+      title="E-Office" 
       brandPrefix="Admin"
       nav={<AdminNav />}
     >

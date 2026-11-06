@@ -76,7 +76,7 @@ export default function TerminologyPage() {
 
   return (
     <DashboardLayout
-      title="MediFlow"
+      title="E-Office"
       brandPrefix="Admin"
       nav={<AdminNav />}
     >

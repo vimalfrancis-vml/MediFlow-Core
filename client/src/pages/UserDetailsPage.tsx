@@ -109,7 +109,7 @@ export default function UserDetailsPage() {
 
   return (
     <DashboardLayout
-      title="MediFlow"
+      title="E-Office"
       brandPrefix="Admin"
       nav={<AdminNav />}
     >

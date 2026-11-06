@@ -45,7 +45,7 @@ export default function AuditLogsPage() {
 
   return (
     <DashboardLayout
-      title="MediFlow"
+      title="E-Office"
       brandPrefix="Admin"
       nav={<AdminNav />}
     >
