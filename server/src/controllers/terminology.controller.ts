@@ -22,7 +22,7 @@ export async function getTerminologyByKey(req: Request, res: Response, next: Nex
 
 export async function updateTerminology(req: Request, res: Response, next: NextFunction) {
   try {
-    const term = await TerminologyService.updateTerminology(req.params.key as string, req.body);
+    const term = await TerminologyService.updateTerminology(req.params.key as string, req.body, req.user);
     return res.json({ success: true, message: 'Terminology label updated successfully', data: term });
   } catch (err) {
     next(err);

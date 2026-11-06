@@ -74,7 +74,11 @@ export class RoleService {
     return role;
   }
 
-  static async updateRole(id: string, data: { displayName?: string; description?: string; isActive?: boolean }) {
+  static async updateRole(
+    id: string,
+    data: { displayName?: string; description?: string; isActive?: boolean },
+    actor?: { id: string }
+  ) {
     const role = await prisma.role.findFirst({
       where: {
         OR: [{ id }, { code: id }],
@@ -90,21 +94,41 @@ export class RoleService {
     }
 
     const updateData: any = {};
-    if (data.displayName !== undefined && data.displayName.trim()) {
+    const changes: string[] = [];
+
+    if (data.displayName !== undefined && data.displayName.trim() && data.displayName.trim() !== role.displayName) {
+      changes.push(`Display name changed from "${role.displayName}" to "${data.displayName.trim()}"`);
       updateData.displayName = data.displayName.trim();
     }
     if (data.description !== undefined) {
-      updateData.description = data.description ? data.description.trim() : null;
+      const newDesc = data.description ? data.description.trim() : null;
+      if (newDesc !== role.description) {
+        changes.push('Description updated');
+        updateData.description = newDesc;
+      }
     }
-    if (data.isActive !== undefined) {
+    if (data.isActive !== undefined && data.isActive !== role.isActive) {
+      changes.push(`Status changed from ${role.isActive ? 'Active' : 'Inactive'} to ${data.isActive ? 'Active' : 'Inactive'}`);
       updateData.isActive = data.isActive;
     }
 
-    const updated = await prisma.role.update({
-      where: { id: role.id },
-      data: updateData,
-    });
+    return prisma.$transaction(async (tx) => {
+      const updated = await tx.role.update({
+        where: { id: role.id },
+        data: updateData,
+      });
 
-    return updated;
+      if (changes.length > 0) {
+        await tx.auditLog.create({
+          data: {
+            actorId: actor?.id,
+            action: 'ROLE_UPDATED',
+            description: `Role "${role.code}" updated: ${changes.join(', ')}.`,
+          },
+        });
+      }
+
+      return updated;
+    });
   }
 }

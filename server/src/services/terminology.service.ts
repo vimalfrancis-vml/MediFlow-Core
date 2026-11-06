@@ -29,7 +29,11 @@ export class TerminologyService {
     return term;
   }
 
-  static async updateTerminology(key: string, data: { label: string; description?: string }) {
+  static async updateTerminology(
+    key: string,
+    data: { label: string; description?: string },
+    actor?: { id: string }
+  ) {
     if (!data.label || !data.label.trim()) {
       throw new AppError('Display label is required', 400);
     }
@@ -39,14 +43,40 @@ export class TerminologyService {
       throw new AppError(`Terminology with key '${key}' not found`, 404);
     }
 
-    const updated = await prisma.systemTerminology.update({
-      where: { key },
-      data: {
-        label: data.label.trim(),
-        description: data.description !== undefined ? (data.description ? data.description.trim() : null) : existing.description,
-      },
-    });
+    const changes: string[] = [];
+    const newLabel = data.label.trim();
+    if (newLabel !== existing.label) {
+      changes.push(`Label changed from "${existing.label}" to "${newLabel}"`);
+    }
 
-    return updated;
+    let newDesc = existing.description;
+    if (data.description !== undefined) {
+      newDesc = data.description ? data.description.trim() : null;
+      if (newDesc !== existing.description) {
+        changes.push('Description updated');
+      }
+    }
+
+    return prisma.$transaction(async (tx) => {
+      const updated = await tx.systemTerminology.update({
+        where: { key },
+        data: {
+          label: newLabel,
+          description: newDesc,
+        },
+      });
+
+      if (changes.length > 0) {
+        await tx.auditLog.create({
+          data: {
+            actorId: actor?.id,
+            action: 'TERMINOLOGY_UPDATED',
+            description: `System terminology "${key}" updated: ${changes.join(', ')}.`,
+          },
+        });
+      }
+
+      return updated;
+    });
   }
 }

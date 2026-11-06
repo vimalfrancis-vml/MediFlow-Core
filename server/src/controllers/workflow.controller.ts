@@ -26,7 +26,7 @@ export async function getTemplateById(req: Request, res: Response, next: NextFun
 
 export async function createTemplate(req: Request, res: Response, next: NextFunction) {
   try {
-    const template = await WorkflowService.createTemplate(req.body);
+    const template = await WorkflowService.createTemplate(req.body, req.user);
     return res.status(201).json({ success: true, message: 'Workflow template created successfully', data: template });
   } catch (err) {
     next(err);
@@ -35,7 +35,7 @@ export async function createTemplate(req: Request, res: Response, next: NextFunc
 
 export async function createNewVersion(req: Request, res: Response, next: NextFunction) {
   try {
-    const template = await WorkflowService.createNewVersion(req.params.id as string, req.body);
+    const template = await WorkflowService.createNewVersion(req.params.id as string, req.body, req.user);
     return res.status(201).json({ success: true, message: 'New workflow version created successfully', data: template });
   } catch (err) {
     next(err);
@@ -44,7 +44,7 @@ export async function createNewVersion(req: Request, res: Response, next: NextFu
 
 export async function archiveTemplate(req: Request, res: Response, next: NextFunction) {
   try {
-    const template = await WorkflowService.archiveTemplate(req.params.id as string);
+    const template = await WorkflowService.archiveTemplate(req.params.id as string, req.user);
     return res.json({ success: true, message: 'Workflow template archived successfully', data: template });
   } catch (err) {
     next(err);
@@ -53,7 +53,7 @@ export async function archiveTemplate(req: Request, res: Response, next: NextFun
 
 export async function activateTemplate(req: Request, res: Response, next: NextFunction) {
   try {
-    const template = await WorkflowService.activateTemplate(req.params.id as string);
+    const template = await WorkflowService.activateTemplate(req.params.id as string, req.user);
     return res.json({ success: true, message: 'Workflow template activated successfully', data: template });
   } catch (err) {
     next(err);

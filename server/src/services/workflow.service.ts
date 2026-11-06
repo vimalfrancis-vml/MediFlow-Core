@@ -146,7 +146,7 @@ export class WorkflowService {
     requestType: RequestType;
     description?: string;
     steps: WorkflowStepInput[];
-  }) {
+  }, actor?: { id: string }) {
     if (!data.name || !data.name.trim()) {
       throw new AppError('Workflow template name is required', 400);
     }
@@ -203,6 +203,14 @@ export class WorkflowService {
         },
       });
 
+      await tx.auditLog.create({
+        data: {
+          actorId: actor?.id,
+          action: 'WORKFLOW_TEMPLATE_CREATED',
+          description: `Workflow template "${template.name}" (v${template.version}) created for request type ${template.requestType} with ${template.steps.length} steps.`,
+        },
+      });
+
       return template;
     });
   }
@@ -215,7 +223,7 @@ export class WorkflowService {
     name?: string;
     description?: string;
     steps: WorkflowStepInput[];
-  }) {
+  }, actor?: { id: string }) {
     const existing = await prisma.workflowTemplate.findUnique({
       where: { id: templateId },
     });
@@ -273,6 +281,14 @@ export class WorkflowService {
         },
       });
 
+      await tx.auditLog.create({
+        data: {
+          actorId: actor?.id,
+          action: 'WORKFLOW_VERSION_CREATED',
+          description: `New version v${newTemplate.version} created for workflow template "${newTemplate.name}" (${newTemplate.requestType}) with ${newTemplate.steps.length} steps.`,
+        },
+      });
+
       return newTemplate;
     });
   }
@@ -283,7 +299,7 @@ export class WorkflowService {
    * Outage safeguard: Prevents archiving/deactivating if it would leave the request type with zero valid templates.
    * If the currently active template is archived and other valid templates exist, atomically promotes the latest remaining version.
    */
-  static async archiveTemplate(templateId: string) {
+  static async archiveTemplate(templateId: string, actor?: { id: string }) {
     const template = await prisma.workflowTemplate.findUnique({
       where: { id: templateId },
       include: {
@@ -323,6 +339,14 @@ export class WorkflowService {
         },
       });
 
+      await tx.auditLog.create({
+        data: {
+          actorId: actor?.id,
+          action: 'WORKFLOW_ARCHIVED',
+          description: `Workflow template "${template.name}" (v${template.version}) for request type ${template.requestType} was archived.`,
+        },
+      });
+
       // If the archived template was active, ensure a fallback template is promoted so activeCount remains >= 1
       if (template.isActive) {
         const hasActiveRemaining = remainingTemplates.some((t) => t.isActive);
@@ -335,6 +359,7 @@ export class WorkflowService {
 
           await tx.auditLog.create({
             data: {
+              actorId: actor?.id,
               action: 'WORKFLOW_ACTIVATED',
               description: `Workflow template "${fallback.name}" (v${fallback.version}) restored as active for request type ${fallback.requestType} following archival of version ${template.version}.`,
             },
@@ -351,7 +376,7 @@ export class WorkflowService {
    * Atomically deactivates any existing active templates for this request type.
    * Validates workflow step configuration before activation to prevent corrupt workflows.
    */
-  static async activateTemplate(templateId: string) {
+  static async activateTemplate(templateId: string, actor?: { id: string }) {
     const template = await prisma.workflowTemplate.findUnique({
       where: { id: templateId },
       include: {
@@ -392,6 +417,7 @@ export class WorkflowService {
 
       await tx.auditLog.create({
         data: {
+          actorId: actor?.id,
           action: 'WORKFLOW_ACTIVATED',
           description: `Workflow template "${activated.name}" (v${activated.version}) activated for request type ${activated.requestType}.`,
         },
@@ -404,7 +430,7 @@ export class WorkflowService {
   /**
    * Deactivates a workflow template (alias to archiveTemplate to enforce active template outage protection).
    */
-  static async deactivateTemplate(templateId: string) {
-    return this.archiveTemplate(templateId);
+  static async deactivateTemplate(templateId: string, actor?: { id: string }) {
+    return this.archiveTemplate(templateId, actor);
   }
 }
