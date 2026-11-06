@@ -42,6 +42,16 @@ describe('Administrative Configuration Audit Logging', { timeout: 30000 }, () =>
       });
     }
 
+    // Restore canonical base General Operational Request template as active
+    await prisma.workflowTemplate.updateMany({
+      where: {
+        name: 'General Operational Request',
+        requestType: RequestType.GENERAL,
+        deletedAt: null,
+      },
+      data: { isActive: true },
+    });
+
     // 3. Clean up departments
     if (createdDeptIds.length > 0) {
       await prisma.department.deleteMany({
