@@ -1,6 +1,17 @@
 import 'dotenv/config';
-import app from './app';
+import { validateJwtConfig } from './config/jwt';
 import { logger } from './utils/logger';
+
+// Validate critical security configuration immediately at startup before listening
+try {
+  validateJwtConfig();
+} catch (err: any) {
+  logger.error('CRITICAL CONFIGURATION ERROR! Server startup aborted.');
+  logger.error(err.message);
+  process.exit(1);
+}
+
+import app from './app';
 
 const PORT = process.env.PORT || 5000;
 

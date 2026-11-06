@@ -24,7 +24,7 @@ export async function getRoleById(req: Request, res: Response, next: NextFunctio
 
 export async function updateRole(req: Request, res: Response, next: NextFunction) {
   try {
-    const role = await RoleService.updateRole(req.params.id as string, req.body);
+    const role = await RoleService.updateRole(req.params.id as string, req.body, req.user);
     return res.json({ success: true, message: 'Role updated successfully', data: role });
   } catch (err) {
     next(err);

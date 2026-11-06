@@ -4,12 +4,14 @@ import app from '../../src/app';
 import { prisma } from '../../src/db';
 import jwt from 'jsonwebtoken';
 import { describe, test, expect, beforeAll, afterAll } from 'vitest';
+import { getJwtSecret } from '../../src/config/jwt';
 
 // Helper to generate a JWT for a given user record
 async function generateToken(userId: string) {
   const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
   const payload = { userId: user.id, role: user.role } as any;
-  return jwt.sign(payload, process.env.JWT_SECRET || 'supersecretchangeinproduction', {
+  return jwt.sign(payload, getJwtSecret(), {
+    algorithm: 'HS256',
     expiresIn: '1h',
   });
 }
@@ -51,7 +53,7 @@ describe('Request API E2E Scenarios', () => {
       .send({
         title: 'Stationery Order',
         type: 'PURCHASE',
-        details: { estimatedCost: 2000 },
+        details: { itemDescription: 'Printer Paper and Pens', estimatedCost: 2000 },
         workflowTemplateId: (await prisma.workflowTemplate.findFirst({ where: { requestType: 'PURCHASE' } }))!.id,
       })
       .expect(201);
@@ -96,7 +98,7 @@ describe('Request API E2E Scenarios', () => {
       .send({
         title: 'Reject Test',
         type: 'PURCHASE',
-        details: { estimatedCost: 1500 },
+        details: { itemDescription: 'Cardiology Supplies', estimatedCost: 1500 },
         workflowTemplateId: (await prisma.workflowTemplate.findFirst({ where: { requestType: 'PURCHASE' } }))!.id,
       })
       .expect(201);
@@ -128,7 +130,7 @@ describe('Request API E2E Scenarios', () => {
       .send({
         title: 'Needs Correction',
         type: 'PURCHASE',
-        details: { estimatedCost: 1200 },
+        details: { itemDescription: 'Lab Reagents', estimatedCost: 1200 },
         workflowTemplateId: (await prisma.workflowTemplate.findFirst({ where: { requestType: 'PURCHASE' } }))!.id,
       })
       .expect(201);
@@ -187,7 +189,7 @@ describe('Request API E2E Scenarios', () => {
       .send({
         title: 'Cancel Test',
         type: 'PURCHASE',
-        details: { estimatedCost: 800 },
+        details: { itemDescription: 'Disposable Gloves', estimatedCost: 800 },
         workflowTemplateId: (await prisma.workflowTemplate.findFirst({ where: { requestType: 'PURCHASE' } }))!.id,
       })
       .expect(201);

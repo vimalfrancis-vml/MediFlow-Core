@@ -2,6 +2,7 @@ import { prisma } from '../db';
 import { Request, RequestStatus, ApprovalActionType, UserRole, RequestType } from '@prisma/client';
 import { StepResolver } from './StepResolver';
 import { AppError } from '../middleware/errorHandler';
+import { assertActiveRequest } from '../utils/requestFilter';
 
 export interface AuthUser {
   id: string;
@@ -31,10 +32,11 @@ export class WorkflowEngine {
     }
 
     // Fetch to validate current state
-    const existing = await prisma.request.findUniqueOrThrow({
+    const existing = await prisma.request.findUnique({
       where: { id: requestId },
       include: { generalDetail: true },
     });
+    assertActiveRequest(existing);
 
     if (
       existing.status !== RequestStatus.DRAFT &&
@@ -130,10 +132,11 @@ export class WorkflowEngine {
     actor: AuthUser,
     options?: { isOverride?: boolean; overrideReason?: string }
   ): Promise<Request> {
-    const request = await prisma.request.findUniqueOrThrow({
+    const request = await prisma.request.findUnique({
       where: { id: requestId },
       include: { currentStep: true },
     });
+    assertActiveRequest(request);
 
     if (request.status !== RequestStatus.IN_REVIEW || !request.currentStep) {
       throw new AppError('This request is not under review right now.', 400);
@@ -261,10 +264,11 @@ export class WorkflowEngine {
     actor: AuthUser,
     options?: { isOverride?: boolean; overrideReason?: string }
   ): Promise<Request> {
-    const request = await prisma.request.findUniqueOrThrow({
+    const request = await prisma.request.findUnique({
       where: { id: requestId },
       include: { currentStep: true },
     });
+    assertActiveRequest(request);
 
     if (request.status !== RequestStatus.IN_REVIEW || !request.currentStep) {
       throw new AppError('This request is not under review right now.', 400);
@@ -347,10 +351,11 @@ export class WorkflowEngine {
     comment: string | undefined,
     actor: AuthUser
   ): Promise<Request> {
-    const request = await prisma.request.findUniqueOrThrow({
+    const request = await prisma.request.findUnique({
       where: { id: requestId },
       include: { currentStep: true },
     });
+    assertActiveRequest(request);
 
     if (request.status !== RequestStatus.IN_REVIEW || !request.currentStep) {
       throw new AppError('This request is not currently under review.', 400);
@@ -411,9 +416,10 @@ export class WorkflowEngine {
    * Cancels the request (can be done by requester or admin).
    */
   public static async cancel(requestId: string, reason: string | undefined, actor: AuthUser): Promise<Request> {
-    const request = await prisma.request.findUniqueOrThrow({
+    const request = await prisma.request.findUnique({
       where: { id: requestId },
     });
+    assertActiveRequest(request);
 
     const cancellableStatuses: RequestStatus[] = [
       RequestStatus.DRAFT,
@@ -491,7 +497,7 @@ export class WorkflowEngine {
     comment: string | undefined,
     actor: AuthUser
   ): Promise<Request> {
-    const request = await prisma.request.findUniqueOrThrow({
+    const request = await prisma.request.findUnique({
       where: { id: requestId },
       include: {
         currentStep: {
@@ -507,6 +513,7 @@ export class WorkflowEngine {
         },
       },
     });
+    assertActiveRequest(request);
 
     if (request.status !== RequestStatus.IN_REVIEW || !request.currentStep) {
       throw new AppError('This request is not under review right now.', 400);
@@ -639,7 +646,7 @@ export class WorkflowEngine {
    * while strictly preserving Finance-first invariants for Finance steps and prohibiting self-approval.
    */
   public static async getEligibleRecipients(requestId: string, actor: AuthUser) {
-    const request = await prisma.request.findUniqueOrThrow({
+    const request = await prisma.request.findUnique({
       where: { id: requestId },
       include: {
         currentStep: {
@@ -647,6 +654,7 @@ export class WorkflowEngine {
         },
       },
     });
+    assertActiveRequest(request);
 
     if (request.status !== RequestStatus.IN_REVIEW || !request.currentStep) {
       return [];
@@ -724,7 +732,7 @@ export class WorkflowEngine {
       include: { currentStep: true, generalDetail: true },
     });
 
-    if (!request || request.status !== RequestStatus.IN_REVIEW || !request.currentStep) {
+    if (!request || request.deletedAt !== null || request.status !== RequestStatus.IN_REVIEW || !request.currentStep) {
       return false;
     }
 

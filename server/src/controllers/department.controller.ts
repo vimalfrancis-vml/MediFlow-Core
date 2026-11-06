@@ -24,7 +24,7 @@ export async function getDepartmentById(req: Request, res: Response, next: NextF
 
 export async function createDepartment(req: Request, res: Response, next: NextFunction) {
   try {
-    const department = await DepartmentService.createDepartment(req.body);
+    const department = await DepartmentService.createDepartment(req.body, req.user);
     return res.status(201).json({ success: true, message: 'Department created successfully', data: department });
   } catch (err) {
     next(err);
@@ -33,7 +33,7 @@ export async function createDepartment(req: Request, res: Response, next: NextFu
 
 export async function updateDepartment(req: Request, res: Response, next: NextFunction) {
   try {
-    const department = await DepartmentService.updateDepartment(req.params.id as string, req.body);
+    const department = await DepartmentService.updateDepartment(req.params.id as string, req.body, req.user);
     return res.json({ success: true, message: 'Department updated successfully', data: department });
   } catch (err) {
     next(err);
@@ -43,7 +43,7 @@ export async function updateDepartment(req: Request, res: Response, next: NextFu
 export async function updateDepartmentHod(req: Request, res: Response, next: NextFunction) {
   try {
     const { hodId } = req.body;
-    const department = await DepartmentService.updateDepartmentHod(req.params.id as string, hodId);
+    const department = await DepartmentService.updateDepartmentHod(req.params.id as string, hodId, req.user);
     return res.json({ success: true, message: 'Department HOD updated successfully', data: department });
   } catch (err) {
     next(err);
@@ -53,7 +53,7 @@ export async function updateDepartmentHod(req: Request, res: Response, next: Nex
 export async function setDepartmentStatus(req: Request, res: Response, next: NextFunction) {
   try {
     const { isActive } = req.body;
-    const department = await DepartmentService.setDepartmentStatus(req.params.id as string, Boolean(isActive));
+    const department = await DepartmentService.setDepartmentStatus(req.params.id as string, Boolean(isActive), req.user);
     return res.json({ success: true, message: `Department ${isActive ? 'activated' : 'deactivated'} successfully`, data: department });
   } catch (err) {
     next(err);

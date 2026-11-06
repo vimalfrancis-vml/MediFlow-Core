@@ -1,11 +1,13 @@
 // src/request/request.service.ts
 
 import { WorkflowEngine } from '../core/WorkflowEngine';
-import { resolveActiveWorkflowTemplate } from '../core/StepResolver';
+import { StepResolver, resolveActiveWorkflowTemplate } from '../core/StepResolver';
 import { prisma } from '../db';
 import { Request, RequestStatus, ApprovalActionType, UserRole, RequestType } from '@prisma/client';
 import { AuthUser } from '../core/WorkflowEngine'; // reuse interface
 import { AppError } from '../middleware/errorHandler';
+import { assertActiveRequest, ACTIVE_REQUEST_FILTER } from '../utils/requestFilter';
+import { generateReferenceNumber, isReferenceUniqueConstraintError } from '../utils/referenceNumber';
 
 /**
  * Service layer for request operations. All business logic is delegated to the
@@ -21,7 +23,6 @@ export class RequestService {
    * @returns Created Request record.
    */
 static async createRequest(data: any, actor: AuthUser): Promise<Request> {
-    const referenceNumber = `REQ-${Date.now()}`;
     const { requestedById, departmentId, workflowTemplateId, details, ...cleanData } = data;
     
     // Resolve workflowTemplateId: use provided or fallback to authoritative active template
@@ -32,17 +33,34 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         requestedBy: { connect: { id: actor.id } },
         department: { connect: { id: actor.departmentId } },
         workflowTemplate: { connect: { id: templateId } },
-        referenceNumber,
         status: RequestStatus.DRAFT,
     };
-    if (cleanData.type === 'PURCHASE' && details) {
+    if (cleanData.type === 'PURCHASE') {
+        if (!details) {
+            throw new AppError('Details are required for Purchase requests.', 400);
+        }
+        if (!details.itemDescription || typeof details.itemDescription !== 'string' || !details.itemDescription.trim()) {
+            throw new AppError('Item description is required.', 400);
+        }
+        if (details.estimatedCost === undefined || details.estimatedCost === null || details.estimatedCost === '') {
+            throw new AppError('Estimated cost is required.', 400);
+        }
+        const costNum = Number(details.estimatedCost);
+        if (isNaN(costNum) || !isFinite(costNum) || costNum <= 0) {
+            throw new AppError('Estimated cost must be greater than zero.', 400);
+        }
+        const quantityNum = details.quantity !== undefined ? Number(details.quantity) : 1;
+        if (isNaN(quantityNum) || !isFinite(quantityNum) || quantityNum < 1 || !Number.isInteger(quantityNum)) {
+            throw new AppError('Quantity must be at least 1.', 400);
+        }
+
         const purchaseDetailData = {
-            itemDescription: details.itemDescription || 'Default Item',
-            quantity: details.quantity || 1,
-            justification: details.justification || 'N/A',
-            vendorName: details.vendorName,
-            estimatedCost: details.estimatedCost,
-            budgetCode: details.budgetCode,
+            itemDescription: details.itemDescription.trim(),
+            quantity: quantityNum,
+            justification: details.justification && details.justification.trim() ? details.justification.trim() : 'N/A',
+            vendorName: details.vendorName && details.vendorName.trim() ? details.vendorName.trim() : null,
+            estimatedCost: costNum,
+            budgetCode: details.budgetCode && details.budgetCode.trim() ? details.budgetCode.trim() : null,
         };
         requestData.purchaseDetail = { create: purchaseDetailData };
     } else if (cleanData.type === 'MAINTENANCE') {
@@ -205,17 +223,42 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
             },
         };
     }
-    const newRequest = await prisma.request.create({ data: requestData });
+    const MAX_RETRIES = 3;
+    let lastError: any = null;
 
-    await prisma.auditLog.create({
-      data: {
-        actorId: actor.id,
-        requestId: newRequest.id,
-        action: 'CREATED',
-        description: `Request created by ${actor.firstName} ${actor.lastName}`,
-      },
-    });
-    return newRequest;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      requestData.referenceNumber = generateReferenceNumber();
+
+      try {
+        const newRequest = await prisma.$transaction(async (tx) => {
+          const created = await tx.request.create({ data: requestData });
+
+          await tx.auditLog.create({
+            data: {
+              actorId: actor.id,
+              requestId: created.id,
+              action: 'CREATED',
+              description: `Request created by ${actor.firstName} ${actor.lastName}`,
+            },
+          });
+
+          return created;
+        });
+
+        return newRequest;
+      } catch (err: any) {
+        if (isReferenceUniqueConstraintError(err) && attempt < MAX_RETRIES) {
+          lastError = err;
+          continue;
+        }
+        if (isReferenceUniqueConstraintError(err)) {
+          throw new AppError('Unable to generate a unique request reference. Please try again.', 500);
+        }
+        throw err;
+      }
+    }
+
+    throw lastError || new AppError('Unable to generate a unique request reference. Please try again.', 500);
   }
 
   /** Edit an existing draft request */
@@ -227,7 +270,8 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
    * @returns Updated Request record.
    */
   static async editRequest(id: string, data: any, actor: AuthUser): Promise<Request> {
-    const request = await prisma.request.findUniqueOrThrow({ where: { id } });
+    const request = await prisma.request.findUnique({ where: { id } });
+    assertActiveRequest(request);
     if (request.requestedById !== actor.id && actor.role !== UserRole.ADMIN) {
       throw new AppError('You are not allowed to edit this request.', 403);
     }
@@ -241,7 +285,32 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
 
     if (details) {
       if (request.type === 'PURCHASE') {
-        updateData.purchaseDetail = { update: details };
+        if (details.itemDescription !== undefined && (!details.itemDescription || typeof details.itemDescription !== 'string' || !details.itemDescription.trim())) {
+          throw new AppError('Item description cannot be empty.', 400);
+        }
+        if (details.estimatedCost !== undefined) {
+          const costNum = Number(details.estimatedCost);
+          if (isNaN(costNum) || !isFinite(costNum) || costNum <= 0) {
+            throw new AppError('Estimated cost must be greater than zero.', 400);
+          }
+        }
+        if (details.quantity !== undefined) {
+          const qtyNum = Number(details.quantity);
+          if (isNaN(qtyNum) || !isFinite(qtyNum) || qtyNum < 1 || !Number.isInteger(qtyNum)) {
+            throw new AppError('Quantity must be at least 1.', 400);
+          }
+        }
+
+        updateData.purchaseDetail = {
+          update: {
+            itemDescription: details.itemDescription !== undefined ? details.itemDescription.trim() : undefined,
+            quantity: details.quantity !== undefined ? Number(details.quantity) : undefined,
+            justification: details.justification !== undefined ? details.justification.trim() : undefined,
+            vendorName: details.vendorName !== undefined ? (details.vendorName ? details.vendorName.trim() : null) : undefined,
+            estimatedCost: details.estimatedCost !== undefined ? Number(details.estimatedCost) : undefined,
+            budgetCode: details.budgetCode !== undefined ? (details.budgetCode ? details.budgetCode.trim() : null) : undefined,
+          }
+        };
       } else if (request.type === 'MAINTENANCE') {
         if (details.equipmentName !== undefined && !details.equipmentName.trim()) {
           throw new AppError('Equipment name is required.', 400);
@@ -395,18 +464,24 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       }
     }
 
-    const updated = await prisma.request.update({
-      where: { id },
-      data: updateData,
+    const updated = await prisma.$transaction(async (tx) => {
+      const res = await tx.request.update({
+        where: { id },
+        data: updateData,
+      });
+
+      await tx.auditLog.create({
+        data: {
+          actorId: actor.id,
+          requestId: id,
+          action: 'UPDATED',
+          description: `Request edited by ${actor.firstName} ${actor.lastName}`,
+        },
+      });
+
+      return res;
     });
-    await prisma.auditLog.create({
-      data: {
-        actorId: actor.id,
-        requestId: id,
-        action: 'UPDATED',
-        description: `Request edited by ${actor.firstName} ${actor.lastName}`,
-      },
-    });
+
     return updated;
   }
 
@@ -545,7 +620,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
    * @returns Full Request record with related workflow data.
    */
   static async getRequestById(id: string, actor: AuthUser) {
-    const request = await prisma.request.findUniqueOrThrow({
+    const request = await prisma.request.findUnique({
       where: { id },
       include: { 
         workflowTemplate: {
@@ -603,6 +678,8 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       },
     });
 
+    assertActiveRequest(request);
+
     // Enrich audit logs & attachments with user information
     const userIds = [
       ...new Set([
@@ -626,14 +703,28 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       uploadedBy: att.uploadedById ? userMap[att.uploadedById] : null
     }));
 
+    // In-memory workflow preview for editable (draft/returned) requests without database persistence
+    let workflowTemplate = request.workflowTemplate;
+    if (
+      request.status === RequestStatus.DRAFT ||
+      request.status === RequestStatus.RETURNED
+    ) {
+      const previewSteps = await StepResolver.previewStepsForRequest(request);
+      workflowTemplate = {
+        ...request.workflowTemplate,
+        steps: previewSteps,
+      };
+    }
+
     const enrichedRequest = {
       ...request,
+      workflowTemplate,
       auditLogs: enrichedAuditLogs,
-      attachments: enrichedAttachments
+      attachments: enrichedAttachments,
     };
 
     // Authorization – requester, admins, current/past approvers, or anyone in the workflow steps can view
-    const isInWorkflow = request.workflowTemplate?.steps.some(
+    const isInWorkflow = workflowTemplate?.steps.some(
       (step: any) => step.approverRole === actor.role
     ) ?? false;
 
@@ -727,7 +818,10 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
     let rawRequests;
     
     if (actor.role === UserRole.ADMIN) {
-      rawRequests = await prisma.request.findMany({ include: requestInclude });
+      rawRequests = await prisma.request.findMany({
+        where: { ...ACTIVE_REQUEST_FILTER },
+        include: requestInclude,
+      });
     } else {
       // Fetch own requests, actionable requests, and previously-actioned requests:
       //   - own: requests the user submitted
@@ -736,13 +830,14 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       //   - participated: requests this user has already actioned (APPROVED, REJECTED, RETURNED, FORWARDED)
       const [own, assignedToMe, unassignedActionable, participated] = await Promise.all([
         prisma.request.findMany({
-          where: { requestedById: actor.id },
+          where: { requestedById: actor.id, ...ACTIVE_REQUEST_FILTER },
           include: requestInclude,
         }),
         prisma.request.findMany({
           where: {
             status: RequestStatus.IN_REVIEW,
             assignedToUserId: actor.id,
+            ...ACTIVE_REQUEST_FILTER,
           },
           include: requestInclude,
         }),
@@ -750,6 +845,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
           where: {
             status: RequestStatus.IN_REVIEW,
             assignedToUserId: null,
+            ...ACTIVE_REQUEST_FILTER,
             OR: [
               {
                 type: { not: RequestType.GENERAL },
@@ -778,6 +874,7 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
         // Fetch requests where this user has taken at least one approval action
         prisma.request.findMany({
           where: {
+            ...ACTIVE_REQUEST_FILTER,
             approvalActions: {
               some: {
                 actorId: actor.id,
@@ -804,8 +901,8 @@ static async createRequest(data: any, actor: AuthUser): Promise<Request> {
       rawRequests = Array.from(seen.values());
     }
 
-    // Apply in-memory filtering
-    let results = rawRequests;
+    // Apply in-memory filtering (including defensive active check)
+    let results = rawRequests.filter(r => r.deletedAt === null);
 
     if (filters) {
       if (filters.status) {

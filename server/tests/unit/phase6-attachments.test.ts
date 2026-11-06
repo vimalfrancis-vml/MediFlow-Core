@@ -8,8 +8,7 @@ import { UserRole, RequestType, RequestStatus } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { getUploadDir } from '../../src/middleware/upload';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'mediflow-dev-secret-key-change-in-production';
+import { getJwtSecret } from '../../src/config/jwt';
 
 describe('MediFlow Phase 6 — Attachment Storage, Camera & Security', () => {
   let adminToken: string;
@@ -107,13 +106,12 @@ describe('MediFlow Phase 6 — Attachment Storage, Camera & Security', () => {
       },
     });
 
-    const JWT_SECRET = process.env.JWT_SECRET || 'supersecretchangeinproduction';
     // Generate JWT tokens matching auth middleware
     const signToken = (user: any) =>
       jwt.sign(
         { userId: user.id, role: user.role },
-        JWT_SECRET,
-        { expiresIn: '1h' }
+        getJwtSecret(),
+        { algorithm: 'HS256', expiresIn: '1h' }
       );
 
     adminToken = signToken(adminUser);

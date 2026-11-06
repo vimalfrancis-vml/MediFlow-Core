@@ -103,7 +103,7 @@ export class DepartmentService {
     code: string;
     displayName?: string;
     hodId?: string;
-  }) {
+  }, actor?: { id: string }) {
     if (!data.name || !data.name.trim()) {
       throw new AppError('Department name is required', 400);
     }
@@ -117,20 +117,58 @@ export class DepartmentService {
       throw new AppError(`Department with code '${codeUpper}' already exists`, 400);
     }
 
+    let hodUser: { id: string; firstName: string; lastName: string; email: string } | null = null;
     if (data.hodId) {
-      const hodUser = await prisma.user.findUnique({ where: { id: data.hodId, isActive: true } });
+      hodUser = await prisma.user.findUnique({
+        where: { id: data.hodId, isActive: true },
+        select: { id: true, firstName: true, lastName: true, email: true },
+      });
       if (!hodUser) {
         throw new AppError('Specified HOD user not found or inactive', 400);
       }
     }
 
-    const department = await prisma.department.create({
-      data: {
-        name: data.name.trim(),
-        code: codeUpper,
-        displayName: data.displayName ? data.displayName.trim() : data.name.trim(),
-        hodId: data.hodId || null,
-      },
+    return prisma.$transaction(async (tx) => {
+      const department = await tx.department.create({
+        data: {
+          name: data.name.trim(),
+          code: codeUpper,
+          displayName: data.displayName ? data.displayName.trim() : data.name.trim(),
+          hodId: data.hodId || null,
+        },
+        include: {
+          hod: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      const hodDesc = hodUser ? ` Assigned HOD: ${hodUser.firstName} ${hodUser.lastName} (${hodUser.email}).` : '';
+      await tx.auditLog.create({
+        data: {
+          actorId: actor?.id,
+          action: 'DEPARTMENT_CREATED',
+          description: `Department "${department.name}" (${department.code}) was created.${hodDesc}`,
+        },
+      });
+
+      return department;
+    });
+  }
+
+  static async updateDepartment(id: string, data: {
+    name?: string;
+    displayName?: string;
+    hodId?: string | null;
+    isActive?: boolean;
+  }, actor?: { id: string }) {
+    const department = await prisma.department.findUnique({
+      where: { id },
       include: {
         hod: {
           select: {
@@ -142,17 +180,6 @@ export class DepartmentService {
         },
       },
     });
-
-    return department;
-  }
-
-  static async updateDepartment(id: string, data: {
-    name?: string;
-    displayName?: string;
-    hodId?: string | null;
-    isActive?: boolean;
-  }) {
-    const department = await prisma.department.findUnique({ where: { id } });
     if (!department) {
       throw new AppError('Department not found', 404);
     }
@@ -178,52 +205,84 @@ export class DepartmentService {
       }
     }
 
-    if (data.name !== undefined) updateData.name = data.name.trim();
-    if (data.displayName !== undefined) updateData.displayName = data.displayName ? data.displayName.trim() : null;
-    if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    const changes: string[] = [];
 
-    if (data.hodId !== undefined) {
+    if (data.name !== undefined && data.name.trim() && data.name.trim() !== department.name) {
+      changes.push(`Name changed from "${department.name}" to "${data.name.trim()}"`);
+      updateData.name = data.name.trim();
+    }
+    if (data.displayName !== undefined) {
+      const newDisplay = data.displayName ? data.displayName.trim() : null;
+      if (newDisplay !== department.displayName) {
+        changes.push(`Display name changed from "${department.displayName || '(none)'}" to "${newDisplay || '(none)'}"`);
+        updateData.displayName = newDisplay;
+      }
+    }
+    if (data.isActive !== undefined && data.isActive !== department.isActive) {
+      changes.push(`Status changed from ${department.isActive ? 'Active' : 'Inactive'} to ${data.isActive ? 'Active' : 'Inactive'}`);
+      updateData.isActive = data.isActive;
+    }
+
+    let targetHodUser: { id: string; firstName: string; lastName: string; email: string; role: string } | null = null;
+    if (data.hodId !== undefined && data.hodId !== department.hodId) {
       if (data.hodId) {
-        const user = await prisma.user.findUnique({ where: { id: data.hodId, isActive: true } });
-        if (!user) {
+        targetHodUser = await prisma.user.findUnique({
+          where: { id: data.hodId, isActive: true },
+          select: { id: true, firstName: true, lastName: true, email: true, role: true },
+        });
+        if (!targetHodUser) {
           throw new AppError('Selected HOD user not found or inactive', 404);
         }
         updateData.hodId = data.hodId;
-        // Optionally align user role to HOD if not already admin
-        if (user.role !== 'HOD' && user.role !== 'ADMIN') {
-          await prisma.user.update({
-            where: { id: data.hodId },
-            data: { role: 'HOD', departmentId: id }
-          });
-        }
+        changes.push(`HOD assigned to ${targetHodUser.firstName} ${targetHodUser.lastName} (${targetHodUser.email})`);
       } else {
         updateData.hodId = null;
+        changes.push('HOD removed');
       }
     }
 
-    const updated = await prisma.department.update({
-      where: { id },
-      data: updateData,
-      include: {
-        hod: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          }
-        }
+    return prisma.$transaction(async (tx) => {
+      if (targetHodUser && targetHodUser.role !== 'HOD' && targetHodUser.role !== 'ADMIN') {
+        await tx.user.update({
+          where: { id: targetHodUser.id },
+          data: { role: 'HOD', departmentId: id },
+        });
       }
+
+      const updated = await tx.department.update({
+        where: { id },
+        data: updateData,
+        include: {
+          hod: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              email: true,
+            },
+          },
+        },
+      });
+
+      if (changes.length > 0) {
+        await tx.auditLog.create({
+          data: {
+            actorId: actor?.id,
+            action: 'DEPARTMENT_UPDATED',
+            description: `Department "${updated.name}" (${updated.code}) updated: ${changes.join(', ')}.`,
+          },
+        });
+      }
+
+      return updated;
     });
-
-    return updated;
   }
 
-  static async updateDepartmentHod(departmentId: string, hodId: string | null) {
-    return this.updateDepartment(departmentId, { hodId });
+  static async updateDepartmentHod(departmentId: string, hodId: string | null, actor?: { id: string }) {
+    return this.updateDepartment(departmentId, { hodId }, actor);
   }
 
-  static async setDepartmentStatus(departmentId: string, isActive: boolean) {
-    return this.updateDepartment(departmentId, { isActive });
+  static async setDepartmentStatus(departmentId: string, isActive: boolean, actor?: { id: string }) {
+    return this.updateDepartment(departmentId, { isActive }, actor);
   }
 }
