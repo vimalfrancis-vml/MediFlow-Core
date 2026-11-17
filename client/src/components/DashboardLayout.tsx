@@ -1,18 +1,25 @@
-import React from 'react';
-import { DashboardHeader } from './DashboardHeader';
+import type { FC, ReactNode } from 'react';
+import { AppShell } from './AppShell';
 
-interface DashboardLayoutProps {
+export interface DashboardLayoutProps {
+  role?: string;
   title?: string;
   brandPrefix?: string;
-  nav?: React.ReactNode;
-  actionBar?: React.ReactNode;
+  nav?: ReactNode;
+  actionBar?: ReactNode;
   isStickyHeader?: boolean;
   contentClassName?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
-  title = "MediFlow",
+/**
+ * Single shared application layout container.
+ * Delegates directly to AppShell to ensure consistent E-Office branding,
+ * role-based theming, dynamic active role detection, and single layout architecture.
+ */
+export const DashboardLayout: FC<DashboardLayoutProps> = ({
+  role,
+  title = 'E-Office',
   brandPrefix,
   nav,
   actionBar,
@@ -21,22 +28,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className="dashboard-layout min-h-screen bg-slate-50 flex flex-col">
-      <DashboardHeader title={title} brandPrefix={brandPrefix} isSticky={isStickyHeader} />
-
-      {actionBar}
-
-      {nav && (
-        <div className="dashboard-subnav bg-white border-b border-slate-200 sticky top-[57px] z-30 shadow-2xs">
-          <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10">
-            {nav}
-          </div>
-        </div>
-      )}
-
-      <main className={contentClassName || "dashboard-main flex-1 max-w-[1280px] mx-auto w-full px-4 sm:px-6 lg:px-10 py-6 sm:py-8"}>
-        {children}
-      </main>
-    </div>
+    <AppShell
+      role={role}
+      title={title}
+      brandPrefix={brandPrefix}
+      nav={nav}
+      actionBar={actionBar}
+      isStickyHeader={isStickyHeader}
+      contentClassName={contentClassName}
+    >
+      {children}
+    </AppShell>
   );
 };

@@ -9,7 +9,7 @@ interface DashboardHeaderProps {
   isSticky?: boolean;
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title = "MediFlow", isSticky = true }) => {
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title = "E-Office", isSticky = true }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -54,7 +54,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ title = "MediF
           className="logout-button text-xs font-semibold text-slate-600 hover:text-slate-900 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 hover:border-slate-300 transition-all duration-150 flex-shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#2457A7]" 
           id="logout-button" 
           onClick={handleLogout}
-          aria-label="Sign out of MediFlow"
+          aria-label="Sign out of E-Office"
         >
           Sign out
         </button>

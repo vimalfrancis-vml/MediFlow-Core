@@ -2,6 +2,11 @@ import { prisma } from '../db';
 import { AppError } from '../middleware/errorHandler';
 import bcrypt from 'bcrypt';
 import { UserRole } from '@prisma/client';
+import {
+  generateSecureTemporaryPassword,
+  validatePasswordStrength,
+} from '../utils/passwordPolicy';
+import { clearUserSessionCache } from '../middleware/auth';
 
 export class UserService {
   static async getUsers(filter?: { departmentId?: string; role?: string; isActive?: boolean }) {
@@ -21,6 +26,10 @@ export class UserService {
         role: true,
         roleId: true,
         isActive: true,
+        mustChangePassword: true,
+        phone: true,
+        notificationPreferences: true,
+        languagePreference: true,
         createdAt: true,
         roleRef: {
           select: {
@@ -61,6 +70,10 @@ export class UserService {
         role: true,
         roleId: true,
         isActive: true,
+        mustChangePassword: true,
+        phone: true,
+        notificationPreferences: true,
+        languagePreference: true,
         createdAt: true,
         updatedAt: true,
         roleRef: {
@@ -102,6 +115,8 @@ export class UserService {
     roleId?: string;
     departmentId: string;
     isActive?: boolean;
+    phone?: string;
+    languagePreference?: string;
   }) {
     if (!data.email || !data.email.trim()) {
       throw new AppError('Email is required', 400);
@@ -154,8 +169,23 @@ export class UserService {
       throw new AppError(`Specified role '${targetRoleIdentifier}' does not exist or is inactive`, 400);
     }
 
-    const plainPassword = data.password && data.password.trim() ? data.password.trim() : 'password123';
+    // Secure temporary password handling
+    let plainPassword = data.password && data.password.trim() ? data.password.trim() : '';
+    if (plainPassword) {
+      const validation = validatePasswordStrength(plainPassword, {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: emailTrimmed,
+      });
+      if (!validation.valid) {
+        throw new AppError(validation.errors[0] || 'Password does not meet complexity requirements', 400);
+      }
+    } else {
+      plainPassword = generateSecureTemporaryPassword();
+    }
+
     const passwordHash = await bcrypt.hash(plainPassword, 10);
+    const temporaryPasswordExpiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
 
     const newUser = await prisma.user.create({
       data: {
@@ -168,6 +198,11 @@ export class UserService {
         departmentId: department.id,
         passwordHash,
         isActive: data.isActive !== undefined ? data.isActive : true,
+        mustChangePassword: true,
+        temporaryPasswordExpiresAt,
+        tokenVersion: 0,
+        phone: data.phone?.trim() || null,
+        languagePreference: data.languagePreference || 'en',
       },
       select: {
         id: true,
@@ -178,6 +213,10 @@ export class UserService {
         role: true,
         roleId: true,
         isActive: true,
+        mustChangePassword: true,
+        temporaryPasswordExpiresAt: true,
+        phone: true,
+        languagePreference: true,
         createdAt: true,
         roleRef: {
           select: {
@@ -207,7 +246,17 @@ export class UserService {
       });
     }
 
-    return newUser;
+    await prisma.auditLog.create({
+      data: {
+        action: 'USER_CREATED',
+        description: `User account created for ${newUser.firstName} ${newUser.lastName} (${newUser.email}) with temporary password expiring in 72 hours.`,
+      },
+    });
+
+    return {
+      ...newUser,
+      temporaryPassword: plainPassword,
+    };
   }
 
   static async updateUser(id: string, data: {
@@ -218,7 +267,8 @@ export class UserService {
     roleId?: string;
     departmentId?: string;
     isActive?: boolean;
-    password?: string;
+    phone?: string;
+    languagePreference?: string;
   }) {
     const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
@@ -228,6 +278,9 @@ export class UserService {
     const updateData: any = {};
     if (data.firstName !== undefined) updateData.firstName = data.firstName.trim();
     if (data.lastName !== undefined) updateData.lastName = data.lastName.trim();
+    if (data.phone !== undefined) updateData.phone = data.phone ? data.phone.trim().slice(0, 30) : null;
+    if (data.languagePreference !== undefined) updateData.languagePreference = data.languagePreference.trim().slice(0, 10);
+
     if (data.email !== undefined) {
       const emailTrimmed = data.email.trim().toLowerCase();
       if (emailTrimmed !== user.email) {
@@ -290,9 +343,6 @@ export class UserService {
     }
 
     if (data.isActive !== undefined) updateData.isActive = data.isActive;
-    if (data.password && data.password.trim()) {
-      updateData.passwordHash = await bcrypt.hash(data.password.trim(), 10);
-    }
 
     const updatedUser = await prisma.$transaction(async (tx) => {
       const updated = await tx.user.update({
@@ -307,6 +357,9 @@ export class UserService {
           role: true,
           roleId: true,
           isActive: true,
+          mustChangePassword: true,
+          phone: true,
+          languagePreference: true,
           roleRef: {
             select: {
               id: true,
@@ -339,8 +392,12 @@ export class UserService {
           });
         }
       }
-      if (data.departmentId !== undefined && updated.department?.id !== user.departmentId) changes.push(`Department changed to ${updated.department?.name || updated.department?.code}`);
-      if (data.isActive !== undefined && updated.isActive !== user.isActive) changes.push(`Account ${updated.isActive ? 'activated' : 'deactivated'}`);
+      if (data.departmentId !== undefined && updated.department?.id !== user.departmentId) {
+        changes.push(`Department changed to ${updated.department?.name || updated.department?.code}`);
+      }
+      if (data.isActive !== undefined && updated.isActive !== user.isActive) {
+        changes.push(`Account ${updated.isActive ? 'activated' : 'deactivated'}`);
+      }
 
       if (changes.length > 0) {
         await tx.auditLog.create({
@@ -354,7 +411,107 @@ export class UserService {
       return updated;
     });
 
+    clearUserSessionCache(id);
     return updatedUser;
+  }
+
+  static async resetUserPassword(adminUserId: string, targetUserId: string, adminPassword?: string) {
+    const targetUser = await prisma.user.findUnique({
+      where: { id: targetUserId },
+    });
+
+    if (!targetUser || targetUser.deletedAt !== null) {
+      throw new AppError('User not found', 404);
+    }
+
+    // Privileged account protection: ADMIN, HOD, DIRECTOR require admin re-authentication
+    const privilegedRoles: UserRole[] = [UserRole.ADMIN, UserRole.HOD, UserRole.DIRECTOR];
+    if (privilegedRoles.includes(targetUser.role)) {
+      if (!adminPassword) {
+        throw new AppError('Admin re-authentication password is required to reset a privileged account.', 403);
+      }
+      const adminUser = await prisma.user.findUnique({
+        where: { id: adminUserId },
+      });
+      if (!adminUser || !(await bcrypt.compare(adminPassword, adminUser.passwordHash))) {
+        throw new AppError('Invalid admin credentials provided for re-authentication.', 403);
+      }
+    }
+
+    const temporaryPassword = generateSecureTemporaryPassword();
+    const newPasswordHash = await bcrypt.hash(temporaryPassword, 10);
+    const expiresAt = new Date(Date.now() + 72 * 60 * 60 * 1000); // 72 hours
+
+    await prisma.user.update({
+      where: { id: targetUserId },
+      data: {
+        passwordHash: newPasswordHash,
+        mustChangePassword: true,
+        temporaryPasswordExpiresAt: expiresAt,
+        tokenVersion: { increment: 1 },
+      },
+    });
+
+    // Invalidate session cache for the affected user
+    clearUserSessionCache(targetUserId);
+
+    // Audit log
+    await prisma.auditLog.create({
+      data: {
+        actorId: adminUserId,
+        action: 'USER_PASSWORD_RESET',
+        description: `Administrator reset password for ${targetUser.email}. Temporary password expires in 72 hours.`,
+      },
+    });
+
+    return {
+      temporaryPassword,
+      expiresAt,
+    };
+  }
+
+  static async updateUserProfile(userId: string, data: {
+    phone?: string;
+    notificationPreferences?: any;
+    languagePreference?: string;
+  }) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user || !user.isActive || user.deletedAt !== null) {
+      throw new AppError('User not found', 404);
+    }
+
+    const updateData: any = {};
+    if (data.phone !== undefined) {
+      updateData.phone = data.phone ? String(data.phone).trim().slice(0, 30) : null;
+    }
+    if (data.notificationPreferences !== undefined) {
+      updateData.notificationPreferences = data.notificationPreferences;
+    }
+    if (data.languagePreference !== undefined) {
+      updateData.languagePreference = String(data.languagePreference).trim().slice(0, 10) || 'en';
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        employeeId: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        departmentId: true,
+        phone: true,
+        notificationPreferences: true,
+        languagePreference: true,
+        mustChangePassword: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return updated;
   }
 
   static async setUserStatus(id: string, isActive: boolean) {

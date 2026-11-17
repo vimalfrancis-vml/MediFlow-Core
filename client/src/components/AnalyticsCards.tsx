@@ -1,11 +1,17 @@
 import type { AnalyticsData } from '../services/api';
+import { useAuth } from '../context/AuthContext';
+import { getRoleTheme } from '../constants/theme';
 
 interface AnalyticsCardsProps {
   data: AnalyticsData['kpis'] | null;
   isLoading: boolean;
+  role?: string;
 }
 
-export function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps) {
+export function AnalyticsCards({ data, isLoading, role }: AnalyticsCardsProps) {
+  const { user } = useAuth();
+  const theme = getRoleTheme(role || user?.role);
+
   if (isLoading || !data) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
@@ -28,40 +34,40 @@ export function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps) {
       value: data.total, 
       color: 'text-slate-900', 
       dotColor: 'bg-slate-400',
-      badgeBg: 'bg-slate-50 border-slate-200/80 text-slate-600',
-      description: 'All submitted requests'
+      description: 'All submitted requests',
+      isAwaitingAction: false,
     },
     { 
       label: 'Pending Review', 
       value: data.pending, 
-      color: 'text-[#2457A7]', 
-      dotColor: 'bg-[#2457A7]',
-      badgeBg: 'bg-blue-50/80 border-blue-200/70 text-[#2457A7]',
-      description: 'Awaiting departmental action'
+      color: 'text-slate-900', 
+      dotColor: 'bg-amber-500',
+      description: 'Awaiting departmental action',
+      isAwaitingAction: true,
     },
     { 
       label: 'Approved', 
       value: data.approved, 
       color: 'text-emerald-700', 
       dotColor: 'bg-emerald-500',
-      badgeBg: 'bg-emerald-50/80 border-emerald-200/70 text-emerald-700',
-      description: 'Successfully authorized'
+      description: 'Successfully authorized',
+      isAwaitingAction: false,
     },
     { 
       label: 'Rejected', 
       value: data.rejected, 
       color: 'text-rose-700', 
       dotColor: 'bg-rose-500',
-      badgeBg: 'bg-rose-50/80 border-rose-200/70 text-rose-700',
-      description: 'Declined requisitions'
+      description: 'Declined requisitions',
+      isAwaitingAction: false,
     },
     { 
       label: 'Returned', 
       value: data.returned, 
       color: 'text-amber-700', 
       dotColor: 'bg-amber-500',
-      badgeBg: 'bg-amber-50/80 border-amber-200/70 text-amber-800',
-      description: 'Returned for revision'
+      description: 'Returned for revision',
+      isAwaitingAction: false,
     },
   ];
 
@@ -70,7 +76,9 @@ export function AnalyticsCards({ data, isLoading }: AnalyticsCardsProps) {
       {cards.map((card) => (
         <div 
           key={card.label} 
-          className="bg-white p-4 sm:p-5 rounded-xl shadow-2xs border border-slate-200/90 hover:border-slate-300 transition-all duration-150 flex flex-col justify-between min-h-[96px] group"
+          className={`bg-white p-4 sm:p-5 rounded-xl shadow-2xs border border-slate-200/90 hover:border-slate-300 transition-all duration-150 flex flex-col justify-between min-h-[96px] group ${
+            card.isAwaitingAction ? `border-l-4 ${theme.kpiBorder}` : ''
+          }`}
         >
           <div className="flex items-center justify-between gap-1.5">
             <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider leading-none">

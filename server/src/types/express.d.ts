@@ -11,6 +11,8 @@ declare global {
         departmentCode: string;
         firstName: string;
         lastName: string;
+        mustChangePassword?: boolean;
+        tokenVersion?: number;
       };
     }
   }

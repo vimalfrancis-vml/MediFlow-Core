@@ -7,6 +7,7 @@ import { DataFilterBar } from '../components/DataFilterBar';
 import { RequestTable } from '../components/RequestTable';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { LoadingState } from '../components/LoadingState';
+import { ApproverNav } from '../components/ApproverNav';
 import type { AnalyticsData } from '../services/api';
 import './DashboardPage.css';
 
@@ -44,7 +45,7 @@ export default function ApproverDashboardPage() {
   }, [filters, page, viewMode]);
 
   return (
-    <DashboardLayout title="E-Office" brandPrefix="Approver">
+    <DashboardLayout title="E-Office" brandPrefix="Approver" nav={<ApproverNav />}>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Approver Dashboard</h1>
@@ -58,7 +59,7 @@ export default function ApproverDashboardPage() {
               aria-selected={viewMode === 'pending'}
               className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 viewMode === 'pending'
-                  ? 'bg-white text-indigo-700 shadow-xs'
+                  ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
               onClick={() => { setViewMode('pending'); setPage(1); }}
@@ -70,7 +71,7 @@ export default function ApproverDashboardPage() {
               aria-selected={viewMode === 'history'}
               className={`flex-1 sm:flex-none px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 viewMode === 'history'
-                  ? 'bg-white text-indigo-700 shadow-xs'
+                  ? 'bg-white text-slate-900 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
               onClick={() => { setViewMode('history'); setPage(1); }}

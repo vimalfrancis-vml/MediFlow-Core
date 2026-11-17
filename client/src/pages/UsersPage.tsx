@@ -4,6 +4,7 @@ import { api, type UserItem, type DepartmentItem } from '../services/api';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { LoadingState } from '../components/LoadingState';
 import { AdminNav } from '../components/AdminNav';
+import { TemporaryPasswordModal } from '../components/TemporaryPasswordModal';
 import './UsersPage.css';
 
 const ROLES = [
@@ -34,7 +35,36 @@ export default function UsersPage() {
   const [lastName, setLastName] = useState('');
   const [role, setRole] = useState('EMPLOYEE');
   const [departmentId, setDepartmentId] = useState('');
-  const [password, setPassword] = useState('password123');
+  const [password, setPassword] = useState('');
+
+  // Temporary password modal state
+  const [tempPasswordModal, setTempPasswordModal] = useState<{
+    isOpen: boolean;
+    email: string;
+    tempPass: string;
+    expiresAt?: string;
+  }>({
+    isOpen: false,
+    email: '',
+    tempPass: '',
+  });
+
+  // Admin password re-auth prompt for reset
+  const [adminPasswordPrompt, setAdminPasswordPrompt] = useState<{
+    isOpen: boolean;
+    targetUserId: string;
+    targetUserEmail: string;
+    isPrivileged: boolean;
+    adminPassword: string;
+    error?: string;
+  }>({
+    isOpen: false,
+    targetUserId: '',
+    targetUserEmail: '',
+    isPrivileged: false,
+    adminPassword: '',
+  });
+  const [isResetting, setIsResetting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -78,14 +108,14 @@ export default function UsersPage() {
     setModalError(null);
     setIsSubmitting(true);
     try {
-      await api.createUser({
+      const res = await api.createUser({
         employeeId,
         email,
         firstName,
         lastName,
         role,
         departmentId,
-        password,
+        password: password.trim() ? password.trim() : undefined,
       });
       setShowModal(false);
       // Reset form
@@ -94,12 +124,68 @@ export default function UsersPage() {
       setFirstName('');
       setLastName('');
       setRole('EMPLOYEE');
-      setPassword('password123');
+      setPassword('');
       await fetchUsersAndDepts();
+
+      // Show temporary password modal
+      if (res.data?.temporaryPassword) {
+        setTempPasswordModal({
+          isOpen: true,
+          email: res.data.email,
+          tempPass: res.data.temporaryPassword,
+        });
+      }
     } catch (err: any) {
       setModalError(err.message || 'Failed to create user');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleInitiateReset = (u: UserItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const privilegedRoles = ['ADMIN', 'HOD', 'DIRECTOR'];
+    const isPrivileged = privilegedRoles.includes(u.role);
+    setAdminPasswordPrompt({
+      isOpen: true,
+      targetUserId: u.id,
+      targetUserEmail: u.email,
+      isPrivileged,
+      adminPassword: '',
+    });
+  };
+
+  const handleConfirmReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminPasswordPrompt.targetUserId) return;
+    setIsResetting(true);
+    try {
+      const res = await api.resetPassword(
+        adminPasswordPrompt.targetUserId,
+        adminPasswordPrompt.isPrivileged ? adminPasswordPrompt.adminPassword : undefined
+      );
+      const email = adminPasswordPrompt.targetUserEmail;
+      setAdminPasswordPrompt({
+        isOpen: false,
+        targetUserId: '',
+        targetUserEmail: '',
+        isPrivileged: false,
+        adminPassword: '',
+      });
+      setTempPasswordModal({
+        isOpen: true,
+        email,
+        tempPass: res.data.temporaryPassword,
+        expiresAt: res.data.expiresAt,
+      });
+      await fetchUsersAndDepts();
+    } catch (err: any) {
+      setAdminPasswordPrompt((prev) => ({
+        ...prev,
+        error: err?.message || 'Failed to reset password.',
+      }));
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -128,6 +214,99 @@ export default function UsersPage() {
       brandPrefix="Admin"
       nav={<AdminNav />}
     >
+      <TemporaryPasswordModal
+        isOpen={tempPasswordModal.isOpen}
+        userEmail={tempPasswordModal.email}
+        temporaryPassword={tempPasswordModal.tempPass}
+        expiresAt={tempPasswordModal.expiresAt}
+        onClose={() =>
+          setTempPasswordModal({
+            isOpen: false,
+            email: '',
+            tempPass: '',
+          })
+        }
+      />
+
+      {/* Admin Re-authentication Modal for Privileged Password Reset */}
+      {adminPasswordPrompt.isOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+          onClick={() => {
+            if (!isResetting) {
+              setAdminPasswordPrompt({ isOpen: false, targetUserId: '', targetUserEmail: '', isPrivileged: false, adminPassword: '' });
+            }
+          }}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-left relative border border-slate-200"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <h3 className="text-base font-bold text-slate-900 mb-2">Reset User Password</h3>
+            <p className="text-xs text-slate-600 mb-4">
+              Generate a temporary password for{' '}
+              <strong className="text-slate-900">{adminPasswordPrompt.targetUserEmail}</strong>.
+              {adminPasswordPrompt.isPrivileged && (
+                <span className="block mt-2 text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                  ⚠ This user holds a privileged role. Re-enter your Administrator password to confirm.
+                </span>
+              )}
+            </p>
+
+            {adminPasswordPrompt.error && (
+              <div className="mb-3 p-2.5 bg-rose-50 text-rose-700 text-xs rounded border border-rose-200">
+                {adminPasswordPrompt.error}
+              </div>
+            )}
+
+            <form onSubmit={handleConfirmReset} className="space-y-4">
+              {adminPasswordPrompt.isPrivileged && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Your Administrator Password
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={adminPasswordPrompt.adminPassword}
+                    onChange={(e) =>
+                      setAdminPasswordPrompt((prev) => ({
+                        ...prev,
+                        adminPassword: e.target.value,
+                      }))
+                    }
+                    placeholder="Enter your admin password"
+                    className="w-full px-3 py-2 text-xs border border-slate-300 rounded-md focus:outline-none focus:border-blue-600"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  disabled={isResetting}
+                  onClick={() =>
+                    setAdminPasswordPrompt({ isOpen: false, targetUserId: '', targetUserEmail: '', isPrivileged: false, adminPassword: '' })
+                  }
+                  className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isResetting}
+                  className="px-4 py-1.5 text-xs font-semibold bg-blue-700 text-white hover:bg-blue-800 rounded-md shadow-xs disabled:opacity-50"
+                >
+                  {isResetting ? 'Resetting...' : 'Generate Temporary Password'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       <div className="users-page-container">
         <div className="users-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
@@ -136,9 +315,9 @@ export default function UsersPage() {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="w-full sm:w-auto px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-md shadow-sm text-sm transition-colors whitespace-nowrap"
+            className="w-full sm:w-auto h-10 px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-semibold rounded-md shadow-2xs text-sm transition-colors whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-700"
           >
-            + Create New User
+            Create user
           </button>
         </div>
 
@@ -214,27 +393,44 @@ export default function UsersPage() {
                   <th>Role</th>
                   <th>Department</th>
                   <th>Status</th>
+                  <th className="text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} onClick={() => navigate(`/admin/users/${user.id}`)}>
+                {filteredUsers.map((u) => (
+                  <tr key={u.id} onClick={() => navigate(`/admin/users/${u.id}`)} className="cursor-pointer hover:bg-slate-50/80">
                     <td>
                       <div className="user-name font-semibold text-slate-900">
-                        {user.firstName} {user.lastName}
+                        {u.firstName} {u.lastName}
                       </div>
-                      <div className="user-email text-xs text-slate-500">{user.email} • {user.employeeId}</div>
+                      <div className="user-email text-xs text-slate-500">{u.email} • {u.employeeId}</div>
                     </td>
                     <td>
                       <span className="role-badge font-medium text-xs">
-                        {user.roleRef?.displayName || user.role.replace(/_/g, ' ')}
+                        {u.roleRef?.displayName || u.role.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td>{user.department?.displayName || user.department?.name || '—'}</td>
+                    <td>{u.department?.displayName || u.department?.name || '—'}</td>
                     <td>
-                      <span className={`status-badge ${user.isActive ? 'status-active' : 'status-inactive'}`}>
-                        {user.isActive ? 'Active' : 'Inactive'}
-                      </span>
+                      <div className="flex flex-col gap-1 items-start">
+                        <span className={`status-badge ${u.isActive ? 'status-active' : 'status-inactive'}`}>
+                          {u.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                        {u.mustChangePassword && (
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded">
+                            Must Change Password
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="text-right" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        onClick={(e) => handleInitiateReset(u, e)}
+                        className="px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors"
+                      >
+                        Reset Password
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -357,14 +553,19 @@ export default function UsersPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-600 mb-1">Initial Password</label>
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
+                    Initial Password (Optional)
+                  </label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Default: password123"
+                    placeholder="Leave blank to auto-generate a secure temporary password"
                     className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500"
                   />
+                  <span className="text-[11px] text-slate-500 mt-1 block">
+                    If left blank, a cryptographically secure 16-character password will be generated.
+                  </span>
                 </div>
 
                 <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
@@ -378,7 +579,7 @@ export default function UsersPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-4 py-2 text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-700 rounded-md shadow-sm disabled:opacity-50"
+                    className="px-4 py-2 text-sm font-semibold bg-blue-700 text-white hover:bg-blue-800 rounded-md shadow-sm disabled:opacity-50"
                   >
                     {isSubmitting ? 'Creating...' : 'Create User'}
                   </button>

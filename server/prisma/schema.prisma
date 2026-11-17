@@ -28,8 +28,14 @@ model User {
   role             UserRole
   roleId           String?
   departmentId     String
-  isActive         Boolean      @default(true)
-  createdAt        DateTime     @default(now())
+  isActive                   Boolean         @default(true)
+  mustChangePassword         Boolean         @default(false)
+  tokenVersion               Int             @default(0)
+  temporaryPasswordExpiresAt DateTime?
+  phone                      String?
+  notificationPreferences    Json?
+  languagePreference         String?         @default("en")
+  createdAt                  DateTime        @default(now())
   updatedAt        DateTime     @updatedAt
   deletedAt        DateTime?
   departmentHods          Department[]    @relation("HodDepartment")
@@ -38,6 +44,7 @@ model User {
   generalRequestsTargeted GeneralDetail[] @relation("GeneralRequestTargetUser")
   department              Department      @relation(fields: [departmentId], references: [id])
   roleRef                 Role?           @relation(fields: [roleId], references: [id])
+  positionAssignments     EmployeePosition[]
 }
 
 model Department {
@@ -53,6 +60,7 @@ model Department {
   hod               User?          @relation("HodDepartment", fields: [hodId], references: [id])
   requests                Request[]
   users                   User[]
+  positions               Position[]
   stepApproverSteps       WorkflowStep[]  @relation("StepApproverDepartment")
   generalRequestsTargeted GeneralDetail[] @relation("GeneralRequestTargetDepartment")
 }
@@ -291,4 +299,52 @@ enum ApprovalActionType {
   CANCELLED
   COMMENTED
   FORWARDED
+}
+
+enum PositionAssignmentType {
+  PRIMARY
+  ACTING
+  ADDITIONAL
+}
+
+model Position {
+  id              String             @id @default(uuid())
+  departmentId    String
+  name            String
+  normalizedName  String
+  description     String?
+  isActive        Boolean            @default(true)
+  version         Int                @default(1)
+  createdById     String?
+  updatedById     String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  deletedAt       DateTime?
+
+  department      Department         @relation(fields: [departmentId], references: [id])
+  assignments     EmployeePosition[]
+
+  @@unique([departmentId, normalizedName])
+  @@index([departmentId, isActive])
+}
+
+model EmployeePosition {
+  id                 String                 @id @default(uuid())
+  userId             String
+  positionId         String
+  assignmentType     PositionAssignmentType @default(PRIMARY)
+  startDate          DateTime               @default(now())
+  endDate            DateTime?
+  reason             String?
+  positionNameAtTime String
+  createdById        String?
+  endedById          String?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+
+  user               User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  position           Position               @relation(fields: [positionId], references: [id])
+
+  @@index([userId, assignmentType])
+  @@index([positionId])
 }
