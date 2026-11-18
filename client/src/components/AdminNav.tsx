@@ -11,6 +11,7 @@ interface AdminNavItem {
 
 const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { name: 'Overview', path: '/admin', end: true },
+  { name: 'Approval Intelligence', path: '/admin/approval-intelligence' },
   { name: 'Users', path: '/admin/users' },
   { name: 'Departments', path: '/admin/departments' },
   { name: 'Positions', path: '/admin/positions' },
