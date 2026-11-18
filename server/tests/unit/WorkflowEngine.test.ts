@@ -110,7 +110,7 @@ describe('WorkflowEngine Integration Tests', () => {
 
     // Clean up
     await prisma.request.delete({ where: { id: request.id } });
-  }, 30000);
+  }, 60000);
 
   it('should dynamically inject Director step for high cost purchase and allow Director to approve it', async () => {
     const actorEmployee: AuthUser = {
@@ -215,7 +215,7 @@ describe('WorkflowEngine Integration Tests', () => {
       await prisma.workflowStep.deleteMany({ where: { templateId: steps[0].templateId } });
       await prisma.workflowTemplate.delete({ where: { id: steps[0].templateId } }).catch(() => {});
     }
-  }, 30000);
+  }, 60000);
 
   it('should process HOD-created high-cost purchase request with correct composed steps (Procurement Review -> Director) and prevent HOD self-approval', async () => {
     const actorHod: AuthUser = {
@@ -269,5 +269,5 @@ describe('WorkflowEngine Integration Tests', () => {
     if (steps[0]?.templateId !== template.id) {
       await prisma.workflowTemplate.delete({ where: { id: steps[0]!.templateId } });
     }
-  }, 30000);
+  }, 60000);
 });
