@@ -9,6 +9,11 @@ if (typeof net.setDefaultAutoSelectFamily === 'function') {
 if (typeof dns.setDefaultResultOrder === 'function') {
   dns.setDefaultResultOrder('ipv4first');
 }
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch {
+  // Ignore if restricted
+}
 
 import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';

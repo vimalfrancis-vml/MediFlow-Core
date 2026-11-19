@@ -17,6 +17,11 @@ import RolesPage from './pages/RolesPage';
 import TerminologyPage from './pages/TerminologyPage';
 import WorkflowsPage from './pages/WorkflowsPage';
 import AuditLogsPage from './pages/AuditLogsPage';
+import ProfilePage from './pages/ProfilePage';
+import HodDepartmentPage from './pages/HodDepartmentPage';
+import AdminPositionsPage from './pages/AdminPositionsPage';
+import ApprovalIntelligencePage from './pages/ApprovalIntelligencePage';
+import { ThemePreview } from './components/ThemePreview';
 
 const ADMIN_ROLES = ['ADMIN'];
 const APPROVER_ROLES = ['HOD', 'DIRECTOR', 'MEDICAL_SUPERINTENDENT', 'HR', 'PURCHASE_OFFICER', 'MAINTENANCE_OFFICER', 'FINANCE_OFFICER'];
@@ -104,6 +109,7 @@ function App() {
             <Route path="/new-request" element={<NewRequestPage />} />
             <Route path="/edit-request/:id" element={<NewRequestPage />} />
             <Route path="/request/:id" element={<RequestDetailsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
 
             {/* Admin-only routes */}
             <Route
@@ -111,6 +117,14 @@ function App() {
               element={
                 <RoleRoute roles={ADMIN_ROLES}>
                   <AdminDashboardPage />
+                </RoleRoute>
+              }
+            />
+            <Route
+              path="/admin/approval-intelligence"
+              element={
+                <RoleRoute roles={ADMIN_ROLES}>
+                  <ApprovalIntelligencePage />
                 </RoleRoute>
               }
             />
@@ -155,6 +169,14 @@ function App() {
               }
             />
             <Route
+              path="/admin/positions"
+              element={
+                <RoleRoute roles={ADMIN_ROLES}>
+                  <AdminPositionsPage />
+                </RoleRoute>
+              }
+            />
+            <Route
               path="/admin/workflows"
               element={
                 <RoleRoute roles={ADMIN_ROLES}>
@@ -189,6 +211,14 @@ function App() {
               }
             />
             <Route
+              path="/approver/department"
+              element={
+                <RoleRoute roles={['HOD', 'ADMIN']}>
+                  <HodDepartmentPage />
+                </RoleRoute>
+              }
+            />
+            <Route
               path="/approver/request/:id"
               element={
                 <RoleRoute roles={APPROVER_ROLES}>
@@ -197,6 +227,11 @@ function App() {
               }
             />
           </Route>
+
+          {/* Development-only ThemePreview route — strictly gated by import.meta.env.DEV */}
+          {import.meta.env.DEV && (
+            <Route path="/theme-preview" element={<ThemePreview />} />
+          )}
 
           {/* Default redirect */}
           <Route path="*" element={<Navigate to="/login" replace />} />

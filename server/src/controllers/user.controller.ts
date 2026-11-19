@@ -71,3 +71,42 @@ export async function assignDepartment(req: Request, res: Response, next: NextFu
     next(err);
   }
 }
+
+export async function resetPassword(req: Request, res: Response, next: NextFunction) {
+  try {
+    const adminUserId = req.user!.id;
+    const targetUserId = req.params.id as string;
+    const { adminPassword } = req.body;
+
+    const result = await UserService.resetUserPassword(adminUserId, targetUserId, adminPassword);
+    return res.json({
+      success: true,
+      message: 'Temporary password generated successfully.',
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getMyProfile(req: Request, res: Response, next: NextFunction) {
+  try {
+    const user = await UserService.getUserById(req.user!.id);
+    return res.json({ success: true, data: user });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateMyProfile(req: Request, res: Response, next: NextFunction) {
+  try {
+    const updated = await UserService.updateUserProfile(req.user!.id, req.body);
+    return res.json({
+      success: true,
+      message: 'Profile updated successfully.',
+      data: updated,
+    });
+  } catch (err) {
+    next(err);
+  }
+}

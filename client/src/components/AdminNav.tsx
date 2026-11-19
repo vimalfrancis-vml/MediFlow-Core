@@ -1,48 +1,51 @@
-import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import type { FC } from 'react';
+import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { getRoleTheme } from '../constants/theme';
 
-interface NavItem {
+interface AdminNavItem {
   name: string;
   path: string;
+  end?: boolean;
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { name: 'Overview', path: '/admin' },
+const ADMIN_NAV_ITEMS: AdminNavItem[] = [
+  { name: 'Overview', path: '/admin', end: true },
+  { name: 'Approval Intelligence', path: '/admin/approval-intelligence' },
   { name: 'Users', path: '/admin/users' },
   { name: 'Departments', path: '/admin/departments' },
+  { name: 'Positions', path: '/admin/positions' },
   { name: 'Roles', path: '/admin/roles' },
   { name: 'Workflows', path: '/admin/workflows' },
   { name: 'Terminology', path: '/admin/terminology' },
-  { name: 'Audit Logs', path: '/admin/audit-logs' },
+  { name: 'Audit logs', path: '/admin/audit-logs' },
 ];
 
-export const AdminNav: React.FC = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+export const AdminNav: FC = () => {
+  const { user } = useAuth();
+  const theme = getRoleTheme(user?.role || 'ADMIN');
 
   return (
-    <nav className="admin-nav flex items-center gap-1 sm:gap-2 overflow-x-auto py-2 scrollbar-none" aria-label="Admin Navigation">
-      {NAV_ITEMS.map((item) => {
-        const isActive =
-          item.path === '/admin'
-            ? location.pathname === '/admin'
-            : location.pathname.startsWith(item.path);
-
-        return (
-          <button
-            key={item.path}
-            onClick={() => navigate(item.path)}
-            aria-current={isActive ? 'page' : undefined}
-            className={`px-3 py-1.5 rounded-md text-xs sm:text-sm font-semibold transition-all whitespace-nowrap focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-600 ${
+    <nav
+      className="flex items-center gap-1 sm:gap-2 overflow-x-auto scrollbar-none py-0 -mb-px"
+      aria-label="Admin navigation tabs"
+    >
+      {ADMIN_NAV_ITEMS.map((item) => (
+        <NavLink
+          key={item.path}
+          to={item.path}
+          end={item.end}
+          className={({ isActive }) =>
+            `px-3 py-3 text-sm whitespace-nowrap transition-colors inline-flex items-center border-b-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-700 ${
               isActive
-                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200/70 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/80 border border-transparent'
-            }`}
-          >
-            {item.name}
-          </button>
-        );
-      })}
+                ? `${theme.navActive} font-semibold`
+                : 'border-transparent text-slate-600 hover:text-slate-900 font-medium hover:border-slate-300'
+            }`
+          }
+        >
+          {item.name}
+        </NavLink>
+      ))}
     </nav>
   );
 };

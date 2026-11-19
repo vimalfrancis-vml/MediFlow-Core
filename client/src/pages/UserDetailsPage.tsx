@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { api, type UserItem } from '../services/api';
+import { api, type UserItem, type EmployeePositionHistoryItem } from '../services/api';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { LoadingState } from '../components/LoadingState';
 import './UserDetailsPage.css';
 import './UsersPage.css';
 
 import { AdminNav } from '../components/AdminNav';
+import { TemporaryPasswordModal } from '../components/TemporaryPasswordModal';
 
 export default function UserDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -14,11 +15,36 @@ export default function UserDetailsPage() {
   const [user, setUser] = useState<UserItem | null>(null);
   const [departments, setDepartments] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
+  const [positionHistory, setPositionHistory] = useState<EmployeePositionHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+
+  // Temporary Password & Admin Re-auth Modal State
+  const [tempPasswordModal, setTempPasswordModal] = useState<{
+    isOpen: boolean;
+    email: string;
+    tempPass: string;
+    expiresAt?: string;
+  }>({
+    isOpen: false,
+    email: '',
+    tempPass: '',
+  });
+
+  const [adminPasswordPrompt, setAdminPasswordPrompt] = useState<{
+    isOpen: boolean;
+    isPrivileged: boolean;
+    adminPassword: string;
+    error?: string;
+  }>({
+    isOpen: false,
+    isPrivileged: false,
+    adminPassword: '',
+  });
+  const [isResetting, setIsResetting] = useState(false);
 
   // Edit fields
   const [isEditing, setIsEditing] = useState(false);
@@ -43,6 +69,12 @@ export default function UserDetailsPage() {
       setSelectedDeptId(uRes.data.department?.id || '');
       setDepartments(dRes.data || []);
       setRoles(rRes.data || []);
+      try {
+        const histRes = await api.getEmployeePositionHistory(id);
+        setPositionHistory(histRes.data.history || []);
+      } catch {
+        // Tolerated if no positions
+      }
       setError(null);
     } catch (err: any) {
       setError(err.message || 'Failed to load user details');
@@ -107,6 +139,45 @@ export default function UserDetailsPage() {
     }
   };
 
+  const handleInitiateReset = () => {
+    if (!user) return;
+    const privilegedRoles = ['ADMIN', 'HOD', 'DIRECTOR'];
+    const isPrivileged = privilegedRoles.includes(user.role);
+    setAdminPasswordPrompt({
+      isOpen: true,
+      isPrivileged,
+      adminPassword: '',
+    });
+  };
+
+  const handleConfirmReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !id) return;
+    setIsResetting(true);
+    try {
+      const res = await api.resetPassword(
+        id,
+        adminPasswordPrompt.isPrivileged ? adminPasswordPrompt.adminPassword : undefined
+      );
+      const email = user.email;
+      setAdminPasswordPrompt({ isOpen: false, isPrivileged: false, adminPassword: '' });
+      setTempPasswordModal({
+        isOpen: true,
+        email,
+        tempPass: res.data.temporaryPassword,
+        expiresAt: res.data.expiresAt,
+      });
+      await fetchUserData();
+    } catch (err: any) {
+      setAdminPasswordPrompt((prev) => ({
+        ...prev,
+        error: err?.message || 'Failed to reset password.',
+      }));
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   return (
     <DashboardLayout
       title="E-Office"
@@ -156,6 +227,14 @@ export default function UserDetailsPage() {
                   className="px-3 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-md transition-colors"
                 >
                   {isEditing ? 'Cancel Editing' : '✎ Edit Profile'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleInitiateReset}
+                  disabled={isUpdating || isResetting}
+                  className="px-3 py-1.5 border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded-md transition-colors"
+                >
+                  Reset Password
                 </button>
                 <button
                   onClick={() => setShowConfirmModal(true)}
@@ -271,6 +350,165 @@ export default function UserDetailsPage() {
           </div>
         )}
 
+        {/* Hospital Positions & History Card */}
+        {user && (
+          <div className="card mt-6 p-6 bg-white border border-slate-200 rounded-xl shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                  Hospital Positions & Placement History
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Job titles held by this employee within their assigned department.
+                </p>
+              </div>
+            </div>
+
+            {positionHistory.length === 0 ? (
+              <p className="text-xs text-slate-400 italic py-4 text-center">
+                No hospital positions currently assigned or recorded for this employee.
+              </p>
+            ) : (
+              <div className="overflow-x-auto border border-slate-200 rounded-lg">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[10px]">
+                    <tr>
+                      <th className="py-2.5 px-3">Position Title</th>
+                      <th className="py-2.5 px-3">Type</th>
+                      <th className="py-2.5 px-3">Duration</th>
+                      <th className="py-2.5 px-3">Status</th>
+                      <th className="py-2.5 px-3">Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {positionHistory.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50/70">
+                        <td className="py-2.5 px-3 font-semibold text-slate-900">{item.positionName}</td>
+                        <td className="py-2.5 px-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            item.assignmentType === 'PRIMARY'
+                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              : item.assignmentType === 'ACTING'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}>
+                            {item.assignmentType}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
+                          {new Date(item.startDate).toLocaleDateString()} - {item.endDate ? new Date(item.endDate).toLocaleDateString() : 'Present'}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          {item.isActive ? (
+                            <span className="text-[11px] font-semibold text-emerald-700">Active</span>
+                          ) : (
+                            <span className="text-[11px] font-medium text-slate-400">Ended</span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-500 italic">{item.reason || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Temporary Password Display Modal */}
+        <TemporaryPasswordModal
+          isOpen={tempPasswordModal.isOpen}
+          userEmail={tempPasswordModal.email}
+          temporaryPassword={tempPasswordModal.tempPass}
+          expiresAt={tempPasswordModal.expiresAt}
+          onClose={() =>
+            setTempPasswordModal({
+              isOpen: false,
+              email: '',
+              tempPass: '',
+            })
+          }
+        />
+
+        {/* Admin Re-authentication Prompt for Privileged Password Reset */}
+        {adminPasswordPrompt.isOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+            onClick={() => {
+              if (!isResetting) {
+                setAdminPasswordPrompt({ isOpen: false, isPrivileged: false, adminPassword: '' });
+              }
+            }}
+          >
+            <div
+              className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-left relative border border-slate-200"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+            >
+              <h3 className="text-base font-bold text-slate-900 mb-2">Reset User Password</h3>
+              <p className="text-xs text-slate-600 mb-4">
+                Generate a temporary password for{' '}
+                <strong className="text-slate-900">{user?.email}</strong>.
+                {adminPasswordPrompt.isPrivileged && (
+                  <span className="block mt-2 text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                    ⚠ This user holds a privileged role. Re-enter your Administrator password to confirm.
+                  </span>
+                )}
+              </p>
+
+              {adminPasswordPrompt.error && (
+                <div className="mb-3 p-2.5 bg-rose-50 text-rose-700 text-xs rounded border border-rose-200">
+                  {adminPasswordPrompt.error}
+                </div>
+              )}
+
+              <form onSubmit={handleConfirmReset} className="space-y-4">
+                {adminPasswordPrompt.isPrivileged && (
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      Your Administrator Password
+                    </label>
+                    <input
+                      type="password"
+                      required
+                      value={adminPasswordPrompt.adminPassword}
+                      onChange={(e) =>
+                        setAdminPasswordPrompt((prev) => ({
+                          ...prev,
+                          adminPassword: e.target.value,
+                        }))
+                      }
+                      placeholder="Enter your admin password"
+                      className="w-full px-3 py-2 text-xs border border-slate-300 rounded-md focus:outline-none focus:border-blue-600"
+                    />
+                  </div>
+                )}
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    disabled={isResetting}
+                    onClick={() =>
+                      setAdminPasswordPrompt({ isOpen: false, isPrivileged: false, adminPassword: '' })
+                    }
+                    className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isResetting}
+                    className="px-4 py-1.5 text-xs font-semibold bg-blue-700 text-white hover:bg-blue-800 rounded-md shadow-xs disabled:opacity-50"
+                  >
+                    {isResetting ? 'Resetting...' : 'Generate Temporary Password'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
         {/* Confirmation Modal */}
         {showConfirmModal && (
           <div 
@@ -312,6 +550,71 @@ export default function UserDetailsPage() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Hospital Positions & History Card */}
+        {user && (
+          <div className="card mt-6 p-6 bg-white border border-slate-200 rounded-xl shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                  Hospital Positions & Placement History
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Job titles held by this employee within their assigned department.
+                </p>
+              </div>
+            </div>
+
+            {positionHistory.length === 0 ? (
+              <p className="text-xs text-slate-400 italic py-4 text-center">
+                No hospital positions currently assigned or recorded for this employee.
+              </p>
+            ) : (
+              <div className="overflow-x-auto border border-slate-200 rounded-lg">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold uppercase text-[10px]">
+                    <tr>
+                      <th className="py-2.5 px-3">Position Title</th>
+                      <th className="py-2.5 px-3">Type</th>
+                      <th className="py-2.5 px-3">Duration</th>
+                      <th className="py-2.5 px-3">Status</th>
+                      <th className="py-2.5 px-3">Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {positionHistory.map((item) => (
+                      <tr key={item.id} className="hover:bg-slate-50/70">
+                        <td className="py-2.5 px-3 font-semibold text-slate-900">{item.positionName}</td>
+                        <td className="py-2.5 px-3">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                            item.assignmentType === 'PRIMARY'
+                              ? 'bg-blue-50 text-blue-700 border-blue-200'
+                              : item.assignmentType === 'ACTING'
+                              ? 'bg-amber-50 text-amber-700 border-amber-200'
+                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          }`}>
+                            {item.assignmentType}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-600 whitespace-nowrap">
+                          {new Date(item.startDate).toLocaleDateString()} - {item.endDate ? new Date(item.endDate).toLocaleDateString() : 'Present'}
+                        </td>
+                        <td className="py-2.5 px-3">
+                          {item.isActive ? (
+                            <span className="text-[11px] font-semibold text-emerald-700">Active</span>
+                          ) : (
+                            <span className="text-[11px] font-medium text-slate-400">Ended</span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-3 text-slate-500 italic">{item.reason || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>

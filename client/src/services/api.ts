@@ -14,6 +14,11 @@ export interface UserItem {
   roleId?: string;
   isActive: boolean;
   departmentId?: string;
+  mustChangePassword?: boolean;
+  phone?: string | null;
+  notificationPreferences?: any;
+  languagePreference?: string | null;
+  temporaryPassword?: string;
   roleRef?: {
     id: string;
     code: string;
@@ -145,6 +150,241 @@ export interface AuditLogListItem {
     };
   } | null;
 }
+export interface DepartmentEmployeeItem {
+  id: string;
+  employeeId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone?: string | null;
+  role: string;
+  roleDisplayName: string;
+  isActive: boolean;
+  mustChangePassword: boolean;
+  status: 'ACTIVE' | 'INACTIVE' | 'INVITED';
+  createdAt: string;
+  updatedAt: string;
+  primaryPosition: {
+    id: string;
+    name: string;
+    assignedAt: string;
+  } | null;
+  actingPositions: {
+    id: string;
+    name: string;
+    startDate: string;
+    endDate?: string | null;
+  }[];
+  additionalPositions: {
+    id: string;
+    name: string;
+    startDate: string;
+  }[];
+}
+
+export interface DepartmentEmployeesResponse {
+  department: {
+    id: string;
+    name: string;
+    code: string;
+    displayName?: string;
+    hodId?: string | null;
+  };
+  stats: {
+    totalEmployees: number;
+    activeEmployees: number;
+    inactiveEmployees: number;
+    invitedEmployees: number;
+  };
+  employees: DepartmentEmployeeItem[];
+}
+
+export interface DepartmentPositionItem {
+  id: string;
+  departmentId: string;
+  name: string;
+  description?: string | null;
+  isActive: boolean;
+  version: number;
+  activeEmployeeCount: number;
+  activePrimaryCount: number;
+  activeActingCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DepartmentPositionsResponse {
+  department: {
+    id: string;
+    name: string;
+    code: string;
+    displayName?: string;
+  };
+  positions: DepartmentPositionItem[];
+}
+
+export interface EmployeePositionHistoryItem {
+  id: string;
+  positionId: string;
+  positionName: string;
+  assignmentType: 'PRIMARY' | 'ACTING' | 'ADDITIONAL';
+  startDate: string;
+  endDate?: string | null;
+  isActive: boolean;
+  reason?: string | null;
+  createdAt: string;
+}
+
+export interface EmployeePositionHistoryResponse {
+  employee: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    employeeId: string;
+  };
+  history: EmployeePositionHistoryItem[];
+}
+
+export interface DeactivationImpactResponse {
+  canDeactivate: boolean;
+  pendingAssignedCount: number;
+  openSubmittedCount: number;
+  activePositionsCount: number;
+  activePositions: {
+    id: string;
+    name: string;
+    type: string;
+  }[];
+  warnings: string[];
+}
+
+export interface AdminDepartmentOverviewItem {
+  id: string;
+  code: string;
+  name: string;
+  displayName?: string;
+  isActive: boolean;
+  hod?: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    employeeId: string;
+  } | null;
+  totalEmployees: number;
+  activeEmployees: number;
+  inactiveEmployees: number;
+  activePositionsCount: number;
+}
+
+export interface AdminPositionItem {
+  id: string;
+  name: string;
+  description?: string | null;
+  departmentId: string;
+  departmentName: string;
+  departmentCode: string;
+  isActive: boolean;
+  activeEmployeeCount: number;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IntelligenceOverviewData {
+  requestsReceivedToday: number;
+  totalPendingRequests: number;
+  criticalAttentionRequests: number;
+  overdueApprovals: number;
+  potentiallyStuckRequests: number;
+  asOf: string;
+}
+
+export interface AttentionRequestItem {
+  id: string;
+  referenceNumber: string;
+  title: string;
+  category: string;
+  departmentName: string;
+  departmentCode: string;
+  submittedAt: string | null;
+  createdAt: string;
+  currentStageName: string;
+  currentStageOrder: number;
+  currentApproverRole: string;
+  currentApproverDisplay: string;
+  timeAtCurrentStageMinutes: number;
+  timeAtCurrentStageFormatted: string;
+  slaStatus: 'OVERDUE' | 'DUE_SOON' | 'ON_TRACK' | 'UNCONFIGURED';
+  slaDetails: string;
+  attentionLevel: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'NORMAL';
+  attentionReason: string;
+  isStuck: boolean;
+  stuckReason?: string;
+  priority: string;
+  estimatedCost?: number;
+  urgencyLevel?: string;
+  requiredDate?: string;
+  leaveStartDate?: string;
+  leaveDays?: number;
+}
+
+export interface BottlenecksData {
+  byDepartment: Array<{ departmentId: string; departmentName: string; departmentCode: string; pendingCount: number }>;
+  byCategory: Array<{ category: string; pendingCount: number }>;
+  byStage: Array<{ stageName: string; approverRole: string; pendingCount: number; avgWaitHours: number }>;
+  stuckRequests: AttentionRequestItem[];
+  slaNotice: string;
+}
+
+export interface DailyBriefingData {
+  title: string;
+  summary: string;
+  totalPending: number;
+  overdueCount: number;
+  criticalCount: number;
+  highestWorkloadDepartment: { name: string; count: number } | null;
+  mostDelayedStage: { name: string; avgHours: number } | null;
+  stuckCount: number;
+  asOf: string;
+}
+
+export interface RequestSummaryResult {
+  requestId: string;
+  referenceNumber: string;
+  title: string;
+  category: string;
+  departmentName: string;
+  currentStage: string;
+  priority: string;
+  factualOverview: {
+    submittedAt: string | null;
+    waitDuration: string;
+    assignedApprover: string;
+    financialAmount?: number;
+    keyDates?: string;
+  };
+  aiInterpretation: {
+    summaryText: string;
+    missingInformation?: string[];
+    suggestedAttentionNote?: string;
+    isAiGenerated: boolean;
+    disclaimer: string;
+  };
+}
+
+export interface ChatQueryResponse {
+  intent: string;
+  textAnswer: string;
+  verifiedData: {
+    count?: number;
+    metrics?: Record<string, any>;
+    requests?: AttentionRequestItem[];
+  };
+  disclaimer: string;
+  suggestedFollowUps?: string[];
+}
+
 export interface LoginResponse {
   status: string;
   data: {
@@ -158,6 +398,10 @@ export interface LoginResponse {
       role: string;
       departmentId: string;
       departmentCode: string;
+      mustChangePassword?: boolean;
+      phone?: string | null;
+      notificationPreferences?: any;
+      languagePreference?: string | null;
     };
   };
 }
@@ -165,6 +409,8 @@ export interface LoginResponse {
 export interface ApiError {
   status: number;
   message: string;
+  code?: string;
+  errors?: string[];
 }
 
 export interface AuditLogItem {
@@ -268,6 +514,8 @@ export interface RequestItem {
   priority: string;
   status: string;
   createdAt: string;
+  updatedAt?: string;
+  submittedAt?: string | null;
   department: { name: string; code: string; displayName?: string };
   workflowTemplate: { 
     id?: string;
@@ -380,9 +628,16 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
         window.location.replace('/login');
       }
     }
+    if (response.status === 403 && data?.code === 'PASSWORD_CHANGE_REQUIRED') {
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('mediflow:password-change-required'));
+      }
+    }
     throw {
       status: response.status,
       message: data.message || 'An unexpected error occurred.',
+      code: data.code,
+      errors: data.errors,
     } as ApiError;
   }
 
@@ -564,6 +819,52 @@ export const api = {
     return request<{ success: boolean; data: UserItem }>(`/users/${id}`);
   },
 
+  changePassword(data: { currentPassword: string; newPassword: string; confirmPassword: string }) {
+    return request<{
+      success: boolean;
+      message: string;
+      data: {
+        token: string;
+        user: {
+          id: string;
+          email: string;
+          mustChangePassword: boolean;
+        };
+      };
+    }>('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  logoutUser() {
+    return request<{ success: boolean; message: string }>('/auth/logout', {
+      method: 'POST',
+    });
+  },
+
+  getProfile() {
+    return request<{ success: boolean; data: UserItem }>('/users/profile/me');
+  },
+
+  updateProfile(data: { phone?: string; notificationPreferences?: any; languagePreference?: string }) {
+    return request<{ success: boolean; message: string; data: UserItem }>('/users/profile/me', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    });
+  },
+
+  resetPassword(userId: string, adminPassword?: string) {
+    return request<{
+      success: boolean;
+      message: string;
+      data: { temporaryPassword: string; expiresAt: string };
+    }>(`/users/${userId}/reset-password`, {
+      method: 'POST',
+      body: JSON.stringify({ adminPassword }),
+    });
+  },
+
   createUser(data: {
     email: string;
     employeeId: string;
@@ -572,6 +873,8 @@ export const api = {
     password?: string;
     role: string;
     departmentId: string;
+    phone?: string;
+    languagePreference?: string;
   }) {
     return request<{ success: boolean; message: string; data: UserItem }>('/users', {
       method: 'POST',
@@ -734,5 +1037,206 @@ export const api = {
 
   markAllNotificationsRead() {
     return request<{ success: boolean }>('/notifications/read-all', { method: 'PUT' });
+  },
+
+  // --- Department Management & Position API ---
+  getDepartmentEmployees(params?: { departmentId?: string; search?: string; positionId?: string; status?: string }) {
+    let url = '/department-management/employees';
+    if (params) {
+      const qs = new URLSearchParams();
+      if (params.departmentId) qs.append('departmentId', params.departmentId);
+      if (params.search) qs.append('search', params.search);
+      if (params.positionId) qs.append('positionId', params.positionId);
+      if (params.status) qs.append('status', params.status);
+      const str = qs.toString();
+      if (str) url += `?${str}`;
+    }
+    return request<{ success: boolean; data: DepartmentEmployeesResponse }>(url);
+  },
+
+  createDepartmentEmployee(data: {
+    employeeId: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    phone?: string;
+    positionId?: string;
+    departmentId?: string;
+  }) {
+    return request<{
+      success: boolean;
+      message: string;
+      data: {
+        user: any;
+        assignedPosition?: any;
+        temporaryPassword?: string;
+        expiresAt?: string;
+      };
+    }>('/department-management/employees', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updateDepartmentEmployee(
+    id: string,
+    data: { firstName?: string; lastName?: string; phone?: string }
+  ) {
+    return request<{ success: boolean; message: string; data: any }>(
+      `/department-management/employees/${id}`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }
+    );
+  },
+
+  checkDeactivationImpact(id: string) {
+    return request<{ success: boolean; data: DeactivationImpactResponse }>(
+      `/department-management/employees/${id}/deactivation-impact`
+    );
+  },
+
+  deactivateDepartmentEmployee(
+    id: string,
+    options?: { isOverride?: boolean; overrideReason?: string }
+  ) {
+    return request<{ success: boolean; message: string; data: any }>(
+      `/department-management/employees/${id}/deactivate`,
+      {
+        method: 'POST',
+        body: JSON.stringify(options || {}),
+      }
+    );
+  },
+
+  assignEmployeePosition(
+    id: string,
+    data: {
+      positionId: string;
+      assignmentType?: 'PRIMARY' | 'ACTING' | 'ADDITIONAL';
+      startDate?: string;
+      endDate?: string;
+      reason?: string;
+    }
+  ) {
+    return request<{ success: boolean; message: string; data: any }>(
+      `/department-management/employees/${id}/position`,
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+  },
+
+  getEmployeePositionHistory(id: string) {
+    return request<{ success: boolean; data: EmployeePositionHistoryResponse }>(
+      `/department-management/employees/${id}/position-history`
+    );
+  },
+
+  getDepartmentPositions(params?: { departmentId?: string; search?: string; isActive?: boolean }) {
+    let url = '/department-management/positions';
+    if (params) {
+      const qs = new URLSearchParams();
+      if (params.departmentId) qs.append('departmentId', params.departmentId);
+      if (params.search) qs.append('search', params.search);
+      if (params.isActive !== undefined) qs.append('isActive', params.isActive.toString());
+      const str = qs.toString();
+      if (str) url += `?${str}`;
+    }
+    return request<{ success: boolean; data: DepartmentPositionsResponse }>(url);
+  },
+
+  createDepartmentPosition(data: { name: string; description?: string; departmentId?: string }) {
+    return request<{ success: boolean; message: string; data: DepartmentPositionItem; warning?: string | null }>(
+      '/department-management/positions',
+      {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }
+    );
+  },
+
+  updateDepartmentPosition(
+    id: string,
+    data: { name?: string; description?: string; version?: number }
+  ) {
+    return request<{ success: boolean; message: string; data: DepartmentPositionItem }>(
+      `/department-management/positions/${id}`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      }
+    );
+  },
+
+  deactivateDepartmentPosition(
+    id: string,
+    options?: { isOverride?: boolean; overrideReason?: string }
+  ) {
+    return request<{ success: boolean; message: string; data: any }>(
+      `/department-management/positions/${id}`,
+      {
+        method: 'DELETE',
+        body: JSON.stringify(options || {}),
+      }
+    );
+  },
+
+  getAdminDepartmentOverview() {
+    return request<{ success: boolean; data: AdminDepartmentOverviewItem[] }>(
+      '/department-management/admin/overview'
+    );
+  },
+
+  getAllPositions(params?: { search?: string; departmentId?: string; isActive?: boolean }) {
+    let url = '/department-management/admin/all-positions';
+    if (params) {
+      const qs = new URLSearchParams();
+      if (params.departmentId) qs.append('departmentId', params.departmentId);
+      if (params.search) qs.append('search', params.search);
+      if (params.isActive !== undefined) qs.append('isActive', params.isActive.toString());
+      const str = qs.toString();
+      if (str) url += `?${str}`;
+    }
+    return request<{ success: boolean; data: AdminPositionItem[] }>(url);
+  },
+
+  // --- Approval Intelligence API ---
+  getIntelligenceOverview() {
+    return request<{ success: boolean; data: IntelligenceOverviewData }>('/approval-intelligence/overview');
+  },
+
+  getIntelligenceAttentionList(params?: { category?: string; level?: string; limit?: number }) {
+    let url = '/approval-intelligence/attention-list';
+    if (params) {
+      const qs = new URLSearchParams();
+      if (params.category) qs.append('category', params.category);
+      if (params.level) qs.append('level', params.level);
+      if (params.limit) qs.append('limit', params.limit.toString());
+      const str = qs.toString();
+      if (str) url += `?${str}`;
+    }
+    return request<{ success: boolean; data: AttentionRequestItem[] }>(url);
+  },
+
+  getIntelligenceBottlenecks() {
+    return request<{ success: boolean; data: BottlenecksData }>('/approval-intelligence/bottlenecks');
+  },
+
+  getIntelligenceDailyBriefing() {
+    return request<{ success: boolean; data: DailyBriefingData }>('/approval-intelligence/daily-briefing');
+  },
+
+  getRequestIntelligenceSummary(id: string) {
+    return request<{ success: boolean; data: RequestSummaryResult }>(`/approval-intelligence/requests/${id}/summary`);
+  },
+
+  postIntelligenceChat(query: string, requestId?: string) {
+    return request<{ success: boolean; data: ChatQueryResponse }>('/approval-intelligence/chat', {
+      method: 'POST',
+      body: JSON.stringify({ query, requestId }),
+    });
   }
 };

@@ -14,6 +14,8 @@ import roleRouter from './routes/role.routes';
 import terminologyRouter from './routes/terminology.routes';
 import workflowRouter from './routes/workflow.routes';
 import auditRouter from './routes/audit.routes';
+import departmentManagementRouter from './routes/department-management.routes';
+import approvalIntelligenceRouter from './routes/approval-intelligence.routes';
 
 import rateLimit from 'express-rate-limit';
 
@@ -179,6 +181,8 @@ app.use('/api/v1/terminology', terminologyRouter);
 app.use('/api/v1/workflows', workflowRouter);
 app.use('/api/v1/audit-logs', auditRouter);
 app.use('/api/v1/notifications', notificationRouter);
+app.use('/api/v1/department-management', departmentManagementRouter);
+app.use('/api/v1/approval-intelligence', approvalIntelligenceRouter);
 
 
 // Health Check Endpoint
