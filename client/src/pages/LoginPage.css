@@ -267,67 +267,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* --- Demo Account Access Section --- */
-.demo-accounts-panel {
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-.demo-accounts-title {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.75rem;
-  text-align: center;
-}
-
-.demo-pills-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.5rem;
-}
-
-.demo-pill-btn {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  padding: 0.5rem 0.625rem;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  box-sizing: border-box;
-}
-
-.demo-pill-btn:hover {
-  background-color: #f1f5f9;
-  border-color: #cbd5e1;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-}
-
-.demo-pill-btn:focus-visible {
-  outline: 2px solid #2563eb;
-  outline-offset: 2px;
-  border-color: #2563eb;
-}
-
-.demo-pill-name {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.demo-pill-role {
-  font-size: 0.6875rem;
-  color: #64748b;
-  line-height: 1.2;
-}
-
 /* --- Hospital & Version Footer --- */
 .login-footer {
   text-align: center;
@@ -347,10 +286,6 @@
   .login-card {
     padding: 1.75rem 1.25rem 1.5rem;
     border-radius: 12px;
-  }
-
-  .demo-pills-grid {
-    grid-template-columns: 1fr;
   }
 }
 

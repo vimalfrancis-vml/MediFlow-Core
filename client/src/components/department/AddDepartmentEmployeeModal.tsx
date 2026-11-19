@@ -179,7 +179,7 @@ export const AddDepartmentEmployeeModal: FC<AddDepartmentEmployeeModalProps> = (
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="e.g. rahul.sharma@hospital.org"
+              placeholder="e.g. rahul.sharma@eoffice.com"
               className="w-full text-xs px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
           </div>

@@ -95,7 +95,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@mediflow.com"
+                placeholder="you@eoffice.com"
                 autoComplete="email"
                 disabled={isSubmitting}
                 aria-describedby={error ? 'login-error' : undefined}
@@ -170,48 +170,6 @@ export default function LoginPage() {
             )}
           </button>
         </form>
-
-        <div className="demo-accounts-panel">
-          <div className="demo-accounts-title">Demo account access</div>
-          <div className="demo-pills-grid" role="group" aria-label="Quick demo credentials">
-            <button
-              type="button"
-              className="demo-pill-btn"
-              onClick={() => { setEmail('dr.employee@mediflow.com'); setPassword('password123'); }}
-              aria-label="Demo login as Staff Doctor, Requester in Cardiology"
-            >
-              <span className="demo-pill-name">Staff Doctor</span>
-              <span className="demo-pill-role">Requester · Cardio</span>
-            </button>
-            <button
-              type="button"
-              className="demo-pill-btn"
-              onClick={() => { setEmail('hod.cardio@mediflow.com'); setPassword('password123'); }}
-              aria-label="Demo login as Dr. Cardio Head, HOD Approver"
-            >
-              <span className="demo-pill-name">Dr. Cardio Head</span>
-              <span className="demo-pill-role">HOD Approver</span>
-            </button>
-            <button
-              type="button"
-              className="demo-pill-btn"
-              onClick={() => { setEmail('finance@mediflow.com'); setPassword('password123'); }}
-              aria-label="Demo login as Finance Officer, Finance Approver"
-            >
-              <span className="demo-pill-name">Finance Officer</span>
-              <span className="demo-pill-role">Finance Approver</span>
-            </button>
-            <button
-              type="button"
-              className="demo-pill-btn"
-              onClick={() => { setEmail('admin@mediflow.com'); setPassword('password123'); }}
-              aria-label="Demo login as System Admin, Administrator"
-            >
-              <span className="demo-pill-name">System Admin</span>
-              <span className="demo-pill-role">Administrator</span>
-            </button>
-          </div>
-        </div>
 
         <div className="login-footer">
           <p>Jubilee Mission Medical College &middot; E-Office v1.0</p>
