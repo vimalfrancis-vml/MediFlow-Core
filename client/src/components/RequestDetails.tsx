@@ -205,7 +205,7 @@ export const RequestDetails: React.FC<RequestDetailsProps> = ({ mode, id: propId
     ? new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(estimatedCostValue)
     : null;  return (
     <DashboardLayout
-      title="MediFlow"
+      title="E-Office"
       isStickyHeader={false}
       actionBar={
         mode === 'approver' && isApproverActionable ? (
