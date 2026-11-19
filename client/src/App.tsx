@@ -20,7 +20,6 @@ import AuditLogsPage from './pages/AuditLogsPage';
 import ProfilePage from './pages/ProfilePage';
 import HodDepartmentPage from './pages/HodDepartmentPage';
 import AdminPositionsPage from './pages/AdminPositionsPage';
-import ApprovalIntelligencePage from './pages/ApprovalIntelligencePage';
 import { ThemePreview } from './components/ThemePreview';
 
 const ADMIN_ROLES = ['ADMIN'];
@@ -117,14 +116,6 @@ function App() {
               element={
                 <RoleRoute roles={ADMIN_ROLES}>
                   <AdminDashboardPage />
-                </RoleRoute>
-              }
-            />
-            <Route
-              path="/admin/approval-intelligence"
-              element={
-                <RoleRoute roles={ADMIN_ROLES}>
-                  <ApprovalIntelligencePage />
                 </RoleRoute>
               }
             />
