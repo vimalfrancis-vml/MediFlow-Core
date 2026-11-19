@@ -6,7 +6,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { UserRole } from '@prisma/client';
 
 describe('Workflow API Admin Permissions Tests', () => {
-  const jwtSecret = process.env.JWT_SECRET || 'supersecretchangeinproduction';
+  const jwtSecret = process.env.JWT_SECRET || 'supersecretchangeinproduction_jwt_key_at_least_32_chars';
   let employeeToken: string;
   let hodToken: string;
   let purchaseOfficerToken: string;
