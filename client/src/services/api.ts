@@ -889,6 +889,13 @@ export const api = {
     });
   },
 
+  deleteUser(id: string) {
+    return request<{ success: boolean; message: string; data: { id: string; email: string; fullName: string } }>(
+      `/users/${id}`,
+      { method: 'DELETE' }
+    );
+  },
+
   getDepartments() {
     return request<{ success: boolean; data: DepartmentItem[] }>('/departments');
   },

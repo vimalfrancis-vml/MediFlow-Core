@@ -110,3 +110,18 @@ export async function updateMyProfile(req: Request, res: Response, next: NextFun
     next(err);
   }
 }
+
+export async function deleteUser(req: Request, res: Response, next: NextFunction) {
+  try {
+    const targetUserId = req.params.id as string;
+    const actorId = req.user!.id;
+    const result = await UserService.deleteUser(targetUserId, actorId);
+    return res.json({
+      success: true,
+      message: `User account for ${result.fullName} (${result.email}) has been permanently deleted.`,
+      data: result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
