@@ -898,6 +898,10 @@ export const api = {
     });
   },
 
+  deleteWorkflow(id: string) {
+    return this.archiveWorkflow(id);
+  },
+
   // --- Dynamic Forwarding API ---
   getRecipientDirectory() {
     return request<{ success: boolean; data: RecipientDirectory }>('/requests/recipients/directory');
