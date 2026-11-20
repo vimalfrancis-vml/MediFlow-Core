@@ -20,15 +20,24 @@ const ROLES = [
 ];
 
 export default function UsersPage() {
+  const navigate = useNavigate();
+
+  // ── Data ──────────────────────────────────────────────────────────────────
   const [users, setUsers] = useState<UserItem[]>([]);
   const [departments, setDepartments] = useState<DepartmentItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // ── Filter bar ────────────────────────────────────────────────────────────
+  const [searchTerm, setSearchTerm] = useState('');
+  const [roleFilter, setRoleFilter] = useState('');
+  const [deptFilter, setDeptFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+
+  // ── Create user modal ─────────────────────────────────────────────────────
   const [showModal, setShowModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
-
-  // Form State
   const [employeeId, setEmployeeId] = useState('');
   const [email, setEmail] = useState('');
   const [firstName, setFirstName] = useState('');
@@ -37,19 +46,15 @@ export default function UsersPage() {
   const [departmentId, setDepartmentId] = useState('');
   const [password, setPassword] = useState('');
 
-  // Temporary password modal state
+  // ── Temporary password modal ──────────────────────────────────────────────
   const [tempPasswordModal, setTempPasswordModal] = useState<{
     isOpen: boolean;
     email: string;
     tempPass: string;
     expiresAt?: string;
-  }>({
-    isOpen: false,
-    email: '',
-    tempPass: '',
-  });
+  }>({ isOpen: false, email: '', tempPass: '' });
 
-  // Admin password re-auth prompt for reset
+  // ── Admin re-auth modal (password reset) ──────────────────────────────────
   const [adminPasswordPrompt, setAdminPasswordPrompt] = useState<{
     isOpen: boolean;
     targetUserId: string;
@@ -66,8 +71,15 @@ export default function UsersPage() {
   });
   const [isResetting, setIsResetting] = useState(false);
 
-  const navigate = useNavigate();
+  // ── Delete confirmation dialog ────────────────────────────────────────────
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    user: UserItem | null;
+    isDeleting: boolean;
+    error: string | null;
+  }>({ isOpen: false, user: null, isDeleting: false, error: null });
 
+  // ── Data fetching ─────────────────────────────────────────────────────────
   const fetchUsersAndDepts = async () => {
     try {
       setIsLoading(true);
@@ -103,6 +115,21 @@ export default function UsersPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showModal, isSubmitting]);
 
+  // ── Filtered list ─────────────────────────────────────────────────────────
+  const filteredUsers = users.filter((u) => {
+    const matchesSearch =
+      !searchTerm ||
+      `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRole = !roleFilter || u.role === roleFilter;
+    const matchesDept = !deptFilter || u.department?.id === deptFilter;
+    const matchesStatus =
+      !statusFilter || (statusFilter === 'active' ? u.isActive : !u.isActive);
+    return matchesSearch && matchesRole && matchesDept && matchesStatus;
+  });
+
+  // ── Handlers: create user ─────────────────────────────────────────────────
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     setModalError(null);
@@ -118,7 +145,6 @@ export default function UsersPage() {
         password: password.trim() ? password.trim() : undefined,
       });
       setShowModal(false);
-      // Reset form
       setEmployeeId('');
       setEmail('');
       setFirstName('');
@@ -126,8 +152,6 @@ export default function UsersPage() {
       setRole('EMPLOYEE');
       setPassword('');
       await fetchUsersAndDepts();
-
-      // Show temporary password modal
       if (res.data?.temporaryPassword) {
         setTempPasswordModal({
           isOpen: true,
@@ -142,6 +166,7 @@ export default function UsersPage() {
     }
   };
 
+  // ── Handlers: password reset ──────────────────────────────────────────────
   const handleInitiateReset = (u: UserItem, e: React.MouseEvent) => {
     e.stopPropagation();
     const privilegedRoles = ['ADMIN', 'HOD', 'DIRECTOR'];
@@ -164,7 +189,7 @@ export default function UsersPage() {
         adminPasswordPrompt.targetUserId,
         adminPasswordPrompt.isPrivileged ? adminPasswordPrompt.adminPassword : undefined
       );
-      const email = adminPasswordPrompt.targetUserEmail;
+      const targetEmail = adminPasswordPrompt.targetUserEmail;
       setAdminPasswordPrompt({
         isOpen: false,
         targetUserId: '',
@@ -174,7 +199,7 @@ export default function UsersPage() {
       });
       setTempPasswordModal({
         isOpen: true,
-        email,
+        email: targetEmail,
         tempPass: res.data.temporaryPassword,
         expiresAt: res.data.expiresAt,
       });
@@ -189,52 +214,64 @@ export default function UsersPage() {
     }
   };
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-  const [deptFilter, setDeptFilter] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
+  // ── Handlers: delete user ─────────────────────────────────────────────────
+  const handleInitiateDelete = (u: UserItem, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDeleteConfirm({ isOpen: true, user: u, isDeleting: false, error: null });
+  };
 
-  const filteredUsers = users.filter((u) => {
-    const matchesSearch =
-      !searchTerm ||
-      `${u.firstName} ${u.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesRole = !roleFilter || u.role === roleFilter;
-    const matchesDept = !deptFilter || u.department?.id === deptFilter;
-    const matchesStatus =
-      !statusFilter || (statusFilter === 'active' ? u.isActive : !u.isActive);
+  const handleCancelDelete = () => {
+    if (deleteConfirm.isDeleting) return;
+    setDeleteConfirm({ isOpen: false, user: null, isDeleting: false, error: null });
+  };
 
-    return matchesSearch && matchesRole && matchesDept && matchesStatus;
-  });
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirm.user || deleteConfirm.isDeleting) return;
+    setDeleteConfirm((prev) => ({ ...prev, isDeleting: true, error: null }));
+    try {
+      await api.deleteUser(deleteConfirm.user.id);
+      setDeleteConfirm({ isOpen: false, user: null, isDeleting: false, error: null });
+      await fetchUsersAndDepts();
+    } catch (err: any) {
+      setDeleteConfirm((prev) => ({
+        ...prev,
+        isDeleting: false,
+        error: err?.message || 'Failed to delete user. Please try again.',
+      }));
+    }
+  };
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <DashboardLayout
       title="E-Office"
       brandPrefix="Admin"
       nav={<AdminNav />}
     >
+      {/* Temporary Password Modal */}
       <TemporaryPasswordModal
         isOpen={tempPasswordModal.isOpen}
         userEmail={tempPasswordModal.email}
         temporaryPassword={tempPasswordModal.tempPass}
         expiresAt={tempPasswordModal.expiresAt}
         onClose={() =>
-          setTempPasswordModal({
-            isOpen: false,
-            email: '',
-            tempPass: '',
-          })
+          setTempPasswordModal({ isOpen: false, email: '', tempPass: '' })
         }
       />
 
-      {/* Admin Re-authentication Modal for Privileged Password Reset */}
+      {/* Admin Re-authentication Modal (Password Reset) */}
       {adminPasswordPrompt.isOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
           onClick={() => {
             if (!isResetting) {
-              setAdminPasswordPrompt({ isOpen: false, targetUserId: '', targetUserEmail: '', isPrivileged: false, adminPassword: '' });
+              setAdminPasswordPrompt({
+                isOpen: false,
+                targetUserId: '',
+                targetUserEmail: '',
+                isPrivileged: false,
+                adminPassword: '',
+              });
             }
           }}
         >
@@ -288,7 +325,13 @@ export default function UsersPage() {
                   type="button"
                   disabled={isResetting}
                   onClick={() =>
-                    setAdminPasswordPrompt({ isOpen: false, targetUserId: '', targetUserEmail: '', isPrivileged: false, adminPassword: '' })
+                    setAdminPasswordPrompt({
+                      isOpen: false,
+                      targetUserId: '',
+                      targetUserEmail: '',
+                      isPrivileged: false,
+                      adminPassword: '',
+                    })
                   }
                   className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md"
                 >
@@ -307,6 +350,88 @@ export default function UsersPage() {
         </div>
       )}
 
+      {/* Delete User Confirmation Dialog */}
+      {deleteConfirm.isOpen && deleteConfirm.user && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
+          onClick={handleCancelDelete}
+        >
+          <div
+            className="bg-white rounded-xl shadow-2xl max-w-sm w-full p-6 text-left relative border border-slate-200"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-user-dialog-title"
+          >
+            {/* Warning icon + title */}
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-shrink-0 w-9 h-9 rounded-full bg-rose-100 flex items-center justify-center">
+                <svg className="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                </svg>
+              </div>
+              <div>
+                <h3 id="delete-user-dialog-title" className="text-base font-bold text-slate-900">
+                  Permanently Delete Account
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">This action cannot be undone.</p>
+              </div>
+            </div>
+
+            {/* User identity card */}
+            <div className="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 mb-4 text-xs space-y-1">
+              <div className="font-semibold text-slate-900 text-sm">
+                {deleteConfirm.user.firstName} {deleteConfirm.user.lastName}
+              </div>
+              <div className="text-slate-600">
+                <span className="font-medium text-slate-700">Employee ID:</span>{' '}
+                {deleteConfirm.user.employeeId}
+              </div>
+              <div className="text-slate-600">
+                <span className="font-medium text-slate-700">Email:</span>{' '}
+                {deleteConfirm.user.email}
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 mb-5">
+              The account for{' '}
+              <strong className="text-slate-900">
+                {deleteConfirm.user.firstName} {deleteConfirm.user.lastName}
+              </strong>{' '}
+              will be <strong className="text-rose-700">permanently deleted</strong> and cannot be
+              recovered.
+            </p>
+
+            {/* Error from backend */}
+            {deleteConfirm.error && (
+              <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-xs rounded-md border border-rose-200 leading-relaxed">
+                {deleteConfirm.error}
+              </div>
+            )}
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                disabled={deleteConfirm.isDeleting}
+                onClick={handleCancelDelete}
+                className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={deleteConfirm.isDeleting}
+                onClick={handleConfirmDelete}
+                className="px-4 py-1.5 text-xs font-semibold bg-rose-600 text-white hover:bg-rose-700 rounded-md shadow-xs disabled:opacity-50 transition-colors"
+              >
+                {deleteConfirm.isDeleting ? 'Deleting...' : 'Permanently Delete'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Main page content ─────────────────────────────────────────────── */}
       <div className="users-page-container">
         <div className="users-header flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
@@ -373,6 +498,7 @@ export default function UsersPage() {
           </div>
         </div>
 
+        {/* Table / States */}
         {isLoading ? (
           <LoadingState message="Loading users..." />
         ) : error ? (
@@ -398,12 +524,18 @@ export default function UsersPage() {
               </thead>
               <tbody>
                 {filteredUsers.map((u) => (
-                  <tr key={u.id} onClick={() => navigate(`/admin/users/${u.id}`)} className="cursor-pointer hover:bg-slate-50/80">
+                  <tr
+                    key={u.id}
+                    onClick={() => navigate(`/admin/users/${u.id}`)}
+                    className="cursor-pointer hover:bg-slate-50/80"
+                  >
                     <td>
                       <div className="user-name font-semibold text-slate-900">
                         {u.firstName} {u.lastName}
                       </div>
-                      <div className="user-email text-xs text-slate-500">{u.email} • {u.employeeId}</div>
+                      <div className="user-email text-xs text-slate-500">
+                        {u.email} • {u.employeeId}
+                      </div>
                     </td>
                     <td>
                       <span className="role-badge font-medium text-xs">
@@ -424,13 +556,23 @@ export default function UsersPage() {
                       </div>
                     </td>
                     <td className="text-right" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        type="button"
-                        onClick={(e) => handleInitiateReset(u, e)}
-                        className="px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors"
-                      >
-                        Reset Password
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={(e) => handleInitiateReset(u, e)}
+                          className="px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors"
+                        >
+                          Reset Password
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleInitiateDelete(u, e)}
+                          className="px-2.5 py-1 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded border border-rose-200 transition-colors"
+                          title="Permanently delete this user"
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -441,11 +583,11 @@ export default function UsersPage() {
 
         {/* CREATE USER MODAL */}
         {showModal && (
-          <div 
+          <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4"
             onClick={() => { if (!isSubmitting) setShowModal(false); }}
           >
-            <div 
+            <div
               className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 text-left relative border border-slate-200"
               onClick={(e) => e.stopPropagation()}
               role="dialog"
@@ -530,9 +672,7 @@ export default function UsersPage() {
                     className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 bg-white"
                   >
                     {ROLES.map((r) => (
-                      <option key={r.value} value={r.value}>
-                        {r.label}
-                      </option>
+                      <option key={r.value} value={r.value}>{r.label}</option>
                     ))}
                   </select>
                 </div>
@@ -545,9 +685,7 @@ export default function UsersPage() {
                     className="w-full px-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:border-indigo-500 bg-white"
                   >
                     {departments.map((d) => (
-                      <option key={d.id} value={d.id}>
-                        {d.name} ({d.code})
-                      </option>
+                      <option key={d.id} value={d.id}>{d.name} ({d.code})</option>
                     ))}
                   </select>
                 </div>

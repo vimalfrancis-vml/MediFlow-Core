@@ -525,4 +525,130 @@ export class UserService {
   static async assignDepartment(id: string, departmentId: string) {
     return this.updateUser(id, { departmentId });
   }
+
+  /**
+   * Permanently deletes a user account from the database.
+   *
+   * Before deletion the method checks every hard foreign-key dependency that
+   * would block the DELETE or silently corrupt historical data:
+   *   - Request.requestedById  (non-nullable FK → cannot be nulled)
+   *   - Department.hodId       (nullable FK → safe to null before delete)
+   *   - Request.assignedToUserId (nullable FK → safe to null before delete)
+   *   - GeneralDetail.targetUserId (nullable FK → safe to null before delete)
+   *
+   * Fields stored as plain strings (no DB-level FK) are left untouched so that
+   * historical audit / approval / comment / notification records remain intact:
+   *   ApprovalAction.actorId, Comment.authorId, Attachment.uploadedById,
+   *   Notification.recipientId, AuditLog.actorId
+   *
+   * EmployeePosition rows are removed by cascade (onDelete: Cascade in schema).
+   *
+   * @param targetId   UUID of the user to delete
+   * @param actorId    UUID of the administrator performing the deletion
+   */
+  static async deleteUser(targetId: string, actorId: string) {
+    // 1. Load the target user
+    const user = await prisma.user.findUnique({
+      where: { id: targetId },
+      select: {
+        id: true,
+        employeeId: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        isActive: true,
+        deletedAt: true,
+      },
+    });
+
+    if (!user || user.deletedAt !== null) {
+      throw new AppError('User not found', 404);
+    }
+
+    // 2. Prevent self-deletion
+    if (targetId === actorId) {
+      throw new AppError('You cannot delete your own account.', 400);
+    }
+
+    // 3. Prevent deleting the last active ADMIN
+    if (user.role === UserRole.ADMIN) {
+      const otherActiveAdmins = await prisma.user.count({
+        where: {
+          role: UserRole.ADMIN,
+          isActive: true,
+          deletedAt: null,
+          id: { not: targetId },
+        },
+      });
+      if (otherActiveAdmins === 0) {
+        throw new AppError(
+          'Cannot delete the last active Administrator account. At least one active Administrator must remain.',
+          400
+        );
+      }
+    }
+
+    // 4. Hard dependency check: requests submitted BY this user (non-nullable FK)
+    const ownedRequestCount = await prisma.request.count({
+      where: { requestedById: targetId },
+    });
+
+    if (ownedRequestCount > 0) {
+      throw new AppError(
+        `Cannot permanently delete this account. The user has ${ownedRequestCount} request${ownedRequestCount !== 1 ? 's' : ''} on record that reference them as the requester. ` +
+          'Deleting this account would violate database integrity and destroy historical request records. ' +
+          'If you no longer need this user to log in, deactivate the account instead.',
+        409
+      );
+    }
+
+    // 5. All remaining hard constraints are nullable — resolve them inside a transaction
+    const fullName = `${user.firstName} ${user.lastName}`;
+
+    await prisma.$transaction(async (tx) => {
+      // 5a. Remove HOD assignment from any department this user heads
+      await tx.department.updateMany({
+        where: { hodId: targetId },
+        data: { hodId: null },
+      });
+
+      // 5b. Null out nullable Request.assignedToUserId references
+      await tx.request.updateMany({
+        where: { assignedToUserId: targetId },
+        data: { assignedToUserId: null },
+      });
+
+      // 5c. Null out nullable GeneralDetail.targetUserId references
+      await tx.generalDetail.updateMany({
+        where: { targetUserId: targetId },
+        data: { targetUserId: null },
+      });
+
+      // 5d. Write audit log BEFORE deleting the user so actorId is resolvable
+      await tx.auditLog.create({
+        data: {
+          actorId,
+          action: 'USER_PERMANENTLY_DELETED',
+          description:
+            `Administrator permanently deleted user account: ${fullName} ` +
+            `(${user.email}, Employee ID: ${user.employeeId}, Role: ${user.role}). ` +
+            `This action is irreversible.`,
+        },
+      });
+
+      // 5e. Delete the user record (EmployeePosition rows cascade automatically)
+      await tx.user.delete({ where: { id: targetId } });
+    });
+
+    // 6. Clear any in-memory session cache for the deleted user
+    clearUserSessionCache(targetId);
+
+    return {
+      id: targetId,
+      employeeId: user.employeeId,
+      email: user.email,
+      fullName,
+    };
+  }
 }

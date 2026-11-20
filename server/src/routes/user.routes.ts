@@ -11,6 +11,7 @@ import {
   resetPassword,
   getMyProfile,
   updateMyProfile,
+  deleteUser,
 } from '../controllers/user.controller';
 
 const router = Router();
@@ -31,5 +32,6 @@ router.put('/:id', updateUser);
 router.patch('/:id/status', setUserStatus);
 router.patch('/:id/role', assignRole);
 router.patch('/:id/department', assignDepartment);
+router.delete('/:id', deleteUser);
 
 export default router;
